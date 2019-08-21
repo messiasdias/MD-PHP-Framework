@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> MD PHP Framework </title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<META NAME="DESCRIPTION" CONTENT="Meu Framework PHP">
+<META NAME="ABSTRACT" CONTENT="Meu Framework PHP">
+<META NAME="KEYWORDS" CONTENT="HTML,CSS,Bootstrap,PHP,Twig,Framework,JavaScript,JQuery,Mysql,Apache2">
+<META NAME="ROBOT" CONTENT="All">
+<META NAME="RATING" CONTENT="general">
+<META NAME="DISTRIBUTION" CONTENT="global">
+<META NAME="LANGUAGE" CONTENT="PT">
+<link rel="icon" href="{{assets}}/img/default/favicon.ico" type="image/x-icon"/>
+
+<!-- Folha de Estilo CSS -->
+<link rel="stylesheet" type="text/css" href="{{assets}}css/style.css">
+
+<!--Scripts Jquery-->
+<script type="text/javascript" src="{{assets}}js/jquery.min.js"></script> 
+
+<!--Scripts JavaScript e Jquery-->
+    <script type="text/javascript" src="{{assets}}js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="{{assets}}js/fontawesome.min.js"></script>
+    <script type="text/javascript" src="{{assets}}js/aos.js"></script>
+    <script type="text/javascript" src="{{assets}}js/typed.min.js"></script>
+    <script type="text/javascript" src="{{assets}}js/script2.js"></script>
+
+
+</head>
+<body id="top"  >
+
+  <div id="site" class="site" >
+
+        {{ include('layout/modal_delete.html') }}
+        {{ include('layout/menu.html') }} 
+        <a onclick="toggle_menu()" style="display: none;" class="menu-toggle-fixed" id="menu-toggle-fixed" ><i class="fas fa-bars"></i></a> 
+        {{ include('layout/log_msg.html',  { msg:log.msg , class:log.class } ) }} 
+
+        {% if log.msg and log.class %}
+          <script>toggle("#log-msg");</script>
+        {% endif %}    
+
+        <!---- home -->
+        {% block home %}{% endblock %}
+        <!-- page -->
+        {% block page %}{% endblock %}
+        
+
+
+      <!-- Site end-->
+  </div> 
+
+  <!-- Footer --> 
+        <div class="footer row-center">
+                <p>By &copy; {{ "now"|date("Y") }}  MD PHP Framework </p>
+        </div>
+    
+    <script> redirect('{{url}}');  </script>	
+    
+</body>
+</html>

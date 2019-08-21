@@ -1,0 +1,24 @@
+
+/**
+ * {{name}}Seeder Class
+ */
+ 
+namespace App\Database\Migrations\Seeds;
+use App\Database\Seeds\Seeder;
+
+class {{name}}Seeder extends Seeder
+{
+	
+	public function __construct(){
+
+				/*
+				
+					{ -->> code here <<-- }
+
+				*/
+
+				//DB resposnse $rs 
+				//$rs == (object) ['valid'=> [true|false], 'errors' => [] ];
+				$this->set_response( $rs , 'User '.$user->name);
+
+	}

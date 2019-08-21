@@ -1,0 +1,19 @@
+{% extends "layout/page_layout.html" %}
+{% set icon, title = 'fas fa-exclamation-triangle', '500' %}
+{% block content %}
+
+    {% include 'layout/log_template.html' with
+                  
+    { 
+        'template_class' : '',
+        'img': 'assets/img/default/erro.png',
+        'h2':'Server Error!',
+        'p': msg,
+        'btn_text': 'Back To Home',
+        'btn_link': '/' 
+      } only 
+      
+      %}
+
+
+  {% endblock %}

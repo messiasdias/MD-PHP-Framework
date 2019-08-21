@@ -1,0 +1,21 @@
+
+{% extends "layout/page_layout.html" %}
+{% set icon, title = 'fas fa-exclamation-triangle', '404' %}
+{% block content %}
+
+    {% include 'layout/log_template.html' with
+                  
+    { 
+        'template_class' : '',
+        'img': 'assets/img/default/erro.png',
+        'h2':'The Page Does Not Exist or Is Not Working Right Now!',
+        'p': 'Return to Home Clicking the Down Button',
+        'btn_text': 'Back To Home',
+        'btn_link': '/' 
+      } only 
+      
+      %}
+
+
+  {% endblock %}
+

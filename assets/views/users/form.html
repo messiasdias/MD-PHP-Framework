@@ -1,0 +1,193 @@
+
+{% extends "layout/page_layout.html" %}
+{% block content %}
+
+<!--Users form add/edit -->
+<div class="content col-12 center ">
+
+      {% if type  %}
+
+      <form  class="form-custom col-12" method="{{ method }}" action="{{ action }}">
+
+            <input type="hidden" name="type_form" value="{{type}}"> 
+            <input type="hidden" name="token" id="token" value="{{token}}">
+
+            {% if type  != 'create' %}
+                  <input type="hidden" name="id" id="id" value="{{input.id}}">
+            {% endif %}
+
+
+                               {% if type in ['add'] %}
+                                {% if input.status %} 
+                                 <input type="hidden" name="status" id="status" value="{{input.status}}">
+                                {% else %}
+                                 <input type="hidden" name="status" id="status" value="1">
+                                {% endif %}
+                               {% endif %}
+
+                              {% if type in ['add','name'] %}
+                                    <div class="input-group {{ errors.first_name ?  'input-error' : '' }}">
+                                          <span class="input-group-item  input-group-first">
+                                                <i class="fas fa-signature"></i>
+                                          </span>
+                                    <input title="First Name"   class="form-control  input-group-last" type="text" id="first_name"  name="first_name" placeholder="First Name" value="{{ input.first_name ? input.first_name : ''  }}" autofocus="" required />
+                                     </div>
+
+                                 {% if errors.first_name %}
+                                    <p class="tx-error"> {{ errors.first_name}} </p> 
+                                  {% endif %}
+
+
+                                     <div class="input-group {{ errors.last_name ?  'input-error' : '' }}">
+                                          <span class="input-group-item  input-group-first">
+                                                <i class="fas fa-signature"></i>
+                                          </span>
+                                    <input title="Last Name"   class="form-control  input-group-last" type="text" id="last_name"  name="last_name" placeholder="Last Name" value="{{ input.last_name ? input.last_name : ''  }}" autofocus="" required />
+                                     </div>
+
+                                 {% if errors.last_name %}
+                                    <p class="tx-error"> {{ errors.last_name}} </p> 
+                                    {% endif %}
+
+
+                                    {% if type in ['create'] %}
+                                          <input title="Username"    class="form-control  input-group-last" type="hidden" id="username"  name="username" placeholder="@username" value="{{ input.username ? input.username : ''  }}" autofocus="" required />                                        
+                                     {% endif %}
+
+                                     {% if type in ['add'] %}
+                                          <div class="input-group {{ errors.username ?  'input-error' : '' }}">
+                                                <span class="input-group-item  input-group-first"><i class="fa fa-user"></i></span>
+                                          <input title="Username"    class="form-control  input-group-last" type="text" id="username"  name="username" placeholder="@username" value="{{ input.username ? input.username : ''  }}" autofocus="" required />
+                                          </div>
+
+                                          {% if errors.username %}
+                                          <p class="tx-error"> {{ errors.username}} </p> 
+                                          {% endif %}      
+
+                                     {% endif %}
+
+                                
+
+                              {% endif %} 
+
+                              {% if type in ['email','add'] %}
+
+                                    <div class="input-group {{ errors.email ? 'input-error' : ''  }}">
+                                          <span class="input-group-item  input-group-first">
+                                                <i class="fas fa-at"></i>
+                                          </span>
+                                    <input title="Email"   class="form-control  input-group-last" type="text" id="email"  name="email" placeholder="email@example.com" value="{{ input.email ? input.email : ''  }}" autofocus="" required />
+                                     </div>
+
+                                 {% if errors.email %}
+                                    <p class="tx-error"> {{ errors.email}} </p> 
+                                  {% endif %}
+
+
+                                   {% if type in ['email'] %}
+
+                                    <div class="input-group {{ errors.confirm_email ?  'input-error' : ''  }}">
+                                      <span class="input-group-item  input-group-first"> <i class="fas fa-check-double"></i></span>
+                                      
+                                    <input title="Email"   class="form-control  input-group-last " type="text" id="confirm_email"  name="confirm_email" placeholder="Confirm Email" value="{{ input.confirm_email ? input.confirm_email : ''  }}" autofocus="" required />
+                                     </div>
+
+                                    {% if errors.confirm_email %}
+                                          <p class="tx-error"> {{ errors.confirm_email}} </p> 
+                                    {% endif %}
+
+                                   {% endif %}
+
+
+                              {% endif %}
+
+
+
+
+                        {% if type in ['add','pass'] %}   
+                               <div class="input-group {{ errors.pass ?  'input-error' : '' }}">
+
+                                  <span class="input-group-first input-group-item "><i class="fa fa-key "></i> </span>
+                                  <input title="Password"  class=" form-control input-group-item input-group-last " type="password" id="pass" name="pass" placeholder="Password" value="" required/>
+
+                                </div>
+
+                              {% if errors.pass %}    
+                              <p class="tx tx-error"> {{errors.pass}} </p>
+                              {% endif %}
+
+
+
+                               <div class="input-group {{ errors.confirm_pass ?  'input-error' : '' }}">
+
+                                  <span class="input-group-first input-group-item ">
+                                        <i class="fas fa-check-double"></i>
+                                  </span>
+                                  <input title="Confirm Password" class=" form-control input-group-item input-group-last " type="password" id="confirm_pass" name="confirm_pass" placeholder="Confirm password" value="" required/>
+
+                                </div>
+
+                              {% if errors.confirm_pass %}    
+                              <p class="tx tx-error"> {{errors.confirm_pass}} </p>
+                              {% endif %}
+
+                        {% endif %} 
+
+
+
+                        {% if  type in ['add','type']  %}
+
+                                    {% if  type == 'type'  %}
+                                     <h3>User Permission: {{ input.rol == 1 ? 'Admin' : 'Manager' }}</h3>
+                                    {% endif %}
+
+
+                                  <div class="input-group {{ errors.rol ? 'input-error' : ''  }}">
+
+                                        <span class="input-group-first input-group-item ">
+                                              <i class="far fa-check-square"></i>
+                                        </span>
+
+                                       
+                                        <select title="User Type"  class=" form-control input-group-item input-group-last " name="rol" required >
+                                              <option value="">Select User type</option>
+                                              <option value="1">Admin</option>
+                                              <option value="2">Manager</option>
+                                             
+                                        </select>
+
+                                    </div>
+
+                                  {% if errors.type %}    
+                                  <p class="tx tx-error"> {{errors.type}} </p>
+                                  {% endif %}
+
+                        {% endif %}
+
+
+                              <div  class="btn-group">
+
+                                    <button type="button" class="btn-circle-default" title="Back" onclick="window.history.back()" >
+                                    <i class="fas fa-reply"></i></button>
+
+                                   <button title="Clear" class="btn-circle-warning " type="reset" >
+                                    <i class="fas fa-broom"></i> </button>
+
+                                   <button title="Submit" class="btn-circle-success" type="submit">
+                                   <i class="fas fa-check"></i></button>
+
+                              </div>
+
+
+                         </form>
+
+                         {% else %}
+
+                              <p class="tx1 tx-md cor4"> <i class="fa fa-times-circle"></i>  Deny Access!</p>
+
+                         {% endif %}
+
+</div>
+
+
+{% endblock %}

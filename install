@@ -1,0 +1,25 @@
+#!/bin/bash
+path=$(pwd)
+
+
+#Criando Link Simbólico public/assets
+if [ -e $path/public/assets ] ; then
+    echo --> Link Simbólico public/assets já existe!
+else
+    cd $path/public/
+    ln -s ../assets/public/ assets
+    echo --> Link Simbólico public/assets criado!
+fi
+
+#Voltar ao inicio
+cd $path
+
+
+#Criando Link Simbólico api/assets
+if [ -e $path/api/assets ] ; then
+    echo --> Link Simbólico api/assets já existe!
+else
+    cd $path/api/
+    ln -s ../assets/public/ assets
+    echo --> Link Simbólico api/assets criado!
+fi

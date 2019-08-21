@@ -1,0 +1,18 @@
+{% extends "layout/page_layout.html" %}
+{% set icon, title = 'fas fa-exclamation-triangle', '401' %}
+{% block content %}
+
+     {% include 'layout/log_template.html' with
+                   
+     { 
+       'template_class' : 'info',
+       'img': 'assets/img/default/erro.png',
+       'h2':'Denied Access!',
+       'p': 'Go To Login Page Clicking the Down Button',
+       'btn_text': 'Login',
+       'btn_link': '/login' 
+     } only 
+     
+   %}
+ 
+{% endblock %}

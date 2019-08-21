@@ -1,0 +1,82 @@
+
+{% extends "layout/page_layout.html" %}
+{% set icon, title = icon ? icon : 'fa fa-list', title ? title : 'Users' %}
+{% block content %}
+
+<div class="content center form-custom" >
+
+
+		<div  class="btn-group buttons ">
+				<!-- Users Search  -->
+				<form method="post" action="/users/search" >
+
+					<div class="btn-group">
+						<input style="width: 50px;"  type="text" name="search" id="search" placeholder="Search" />
+						<button title="Submit" class="btn-circle-primary" type="submit">
+                                   <i class="fas fa-search"></i></button>
+					</div>	
+
+				 </form>	
+
+				<button title="User Add" class="btn-circle-success" onclick="window.location.href='/users/add'"> <i class="fa fa-user-plus"></i> </button>
+		</div>
+
+
+	{% if users %}
+
+	<div  class="table-responsive">	
+      {{ include('layout/pagination.html') }} 
+
+        <table>
+            		
+            		<thead>
+										<tr>
+											<th> <i class="fa fa-user"></i> </th>
+										
+											<th>Name</th>
+										
+											<th>Username</th>
+										
+											<th>Email</th>
+										
+											<th>Role</th>
+											
+											<th>Actions</th>
+										
+										</tr>
+
+
+									</thead>
+									<tbody >
+
+										{% for user_item in users %}
+										{{ include('users/list_tbody.html') }} 
+										{% endfor %}	
+										
+										{% if users | length == 1 %}
+											{% set user_item = users %}
+											{{ include('users/list_tbody.html') }} 
+										{% endif %}
+
+									</tbody>
+							</table>
+							
+ 	</div>
+
+    {% else %}
+
+        <p class="tx1 tx-md text-center"> No Results Returned! </p>
+
+    {% endif %}
+				 
+					 
+</div>
+
+{% endblock %}
+
+
+
+
+
+         	
+

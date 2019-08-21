@@ -1,0 +1,42 @@
+<div  class="btn-group ">
+
+        <button title="Edit Name" class="btn-circle-default" onclick="window.location.href='/users/edit/name/{{user_item.id}}'"> <i class="fa fa-edit"></i> </button>
+    
+     {% if (user_item.id != user.id )  and ( user.rol == 1) %}
+        <button title="Edit Email" class="btn-circle-default" onclick="window.location.href='/users/edit/email/{{user_item.id}}'"> <i class="fa fa-at "></i> </button>
+     {% endif %}
+
+
+        <button title="Edit Password" class="btn-circle-default" onclick="window.location.href='/users/edit/pass/{{user_item.id}}'"> <i class="fa fa-key "></i> </button>
+
+   {% if (user_item.id != user.id )  and ( user.rol == 1) %}
+
+        <button title="Edit User Type" class="btn-circle-default" onclick="window.location.href='/users/edit/type/{{user_item.id}}'"> <i class="fa fa-users-cog branco"></i> </button>
+
+      
+        <form action="/users/edit" method="post" accept-charset="utf-8">
+
+            <input type="hidden" name="redirect" id="redirect" value="{{url}}">
+            <input type="hidden" name="type_form" value="status"> 
+            <input type="hidden" name="token" id="token" value="{{token}}">
+
+
+
+            <input type="hidden" name="id" id="id" value="{{user_item.id}}">
+
+            <input type="hidden" name="status" id="status" value="{{ (user_item.status == 1 )? -1 : 1 }}">
+
+            <button title="Status" class="btn-circle-warning" type="submit"> <i class="far fa-{{ (user_item.status == 1)? 'check-square' : 'square' }} branco"></i> </button>
+
+        </form> 
+
+
+        <button onclick="delete_modal('#mymodal','{{user_item.id}}','/users/del','POST','Do you want to delete the {{user_item.first_name}} user?')" type="button" class="btn-circle-error"><i class="fa fa-trash"></i></button>
+       
+            
+                     
+      {% endif %}
+     
+
+
+    </div>

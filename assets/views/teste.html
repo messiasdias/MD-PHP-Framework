@@ -1,0 +1,11 @@
+  {% extends "layout/page_layout.html" %}
+  {% set icon, title = 'fas fa-vial', 'Teste' %}
+  {% block content %}
+   <div class="content center ">
+        {%if name %}
+            <p class="tx tx-md tx-success"><i class="fa fa-home"></i> Meu nome é: {{name}}</p>
+        {% endif %}
+
+        <a class="btn-primary" href="/"><i class="fa fa-home"></i> Back To Home</a>
+   </div>
+  {% endblock %}

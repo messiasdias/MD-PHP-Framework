@@ -1,0 +1,19 @@
+{% extends "layout/layout.html" %}
+{% block page %}
+
+<!-- Content -->
+
+<div id="{{url}}" class="page">
+
+        <div class="title">
+            <h1><i class="{{ icon ? icon : 'fas fa-vial' }}"></i> {{ title ? title  : 'Test'  }}</h1>
+            <a onclick="toggle_menu()" class="menu-toggle" id="menu-toggle" ><i class="fas fa-bars"></i></a>
+        </div>
+    
+    <!----<div class="content center"> -->
+        {% block content %}{% endblock %}
+    <!----</div> -->
+
+</div>
+
+{% endblock %}

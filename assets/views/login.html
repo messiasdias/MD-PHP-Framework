@@ -1,0 +1,53 @@
+{% extends "layout/page_layout.html" %}
+{% set icon, title = 'fa fa-sign-in-alt', 'Login' %}
+{% block content %}
+
+<div class="content center">
+  	<form  class="form-custom" method="POST" action="/login">
+
+      			<div class="input-group">
+               <span class=""><i class="fa fa-user"></i></span>
+      				<input class=" {{ errors.username ? '' : 'input-error'  }}" type="text" id="username"  name="username" placeholder="@username" value="{{ input.username ? input.username : ''  }}" autofocus="" required />
+      			</div>
+
+              <div class="input-group">
+
+                <span class=" "><i class="fa fa-key "></i> </span>
+                <input  class="{{ errors.pass ? '' : 'input-error'  }}" type="password" id="pass" name="pass" placeholder="********" value="{{ input.pass ? input.pass : ''  }}" required/>
+
+              </div>
+
+
+              <div style="padding: 20px;" class="input-group">
+                    <input type="checkbox"  id="remember" name="remember"   /> 
+                    <button class=" checkmark" > <i class="fas fa-check"></i> </button> 
+                    <label class="" for="remember" >Remember you?</label>
+             </div>
+
+              <div  class="input-group">
+
+                <button  class="btn btn-default" type="reset" title="Reset">
+                  <i class="fas fa-broom"></i> Reset</button>
+
+                <button class="btn btn-primary" type="submit" title="OK">
+                <i class="fas fa-check"></i> OK
+                </button>
+
+              </div>
+
+     
+
+              {% if log %} 
+                    <br> 
+                    <p class="tx-{{log.class}}"> {{log.msg}} </p>    
+              {% endif %}
+
+
+    </form>
+    
+  </div> 
+
+
+
+
+  {% endblock %}

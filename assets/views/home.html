@@ -1,0 +1,30 @@
+{% extends "layout/layout.html" %}
+{% block home %}
+        
+  <div  class="home-left">
+    <div class="bg-img"></div>
+    <a onclick="toggle_menu()" class="menu-toggle-fixed" ><i class="fa fa-bars"></i></a> 
+    <p id="typed-slogan" >...</p> 
+  </div>
+
+  <div id="content" class="home-right column-center"> 
+      <h2 class="destak" > MD  <i class="fab fa-php" > </i> Framework</h2> 
+      <p class="">
+      My custom framework PHP derivated of a worked development of my-self portfolio.
+      </p>
+
+      <p class="">  
+      Meu Framework PHP derivado do trabalho de desenvolvimento do meu próprio portifólio.
+      </p>
+       
+       <p class="colunm-center">
+
+          <a class="btn-default" href="#" ><i class="fab fa-github"></i>&nbsp;Git</a>
+          <a class="btn-primary" href="https://messiasdias.ml" target="_blank"> <i class="fab fa-github"> </i>&nbsp;Portfolio</a>
+       
+        </p>
+
+
+  </div>
+  
+  {% endblock %}
