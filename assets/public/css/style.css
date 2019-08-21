@@ -12,7 +12,7 @@
   src: url("fonts/Roboto-Regular.ttf");
 }
 /* Flex-Grid start */
-.flex, .center, .modal-box, .table-responsive, .form-custom, .page > .content, .row-reverse-end, .row-reverse-start, .row-reverse-between, .row-reverse-evenly, .row-reverse-around, .row-reverse-center, .row-reverse, .row-rev, .row-end, .modal .btn-group, .pagination, .home-right > .social, .row-start, .row-between, .log, .log-info, .log-success, .log-error, .log-warning, .title, .row-evenly, .row-around, .row-center, .btn-group, .input-group span, .input-group, .menu-item, .page > .warning a, .page > .error a, .page > .info a, .row, .column-reverse-end, .column-reverse-start, .column-reverse-between, .column-reverse-evenly, .column-reverse-around, .column-reverse-center, .column-reverse, .col-rev, .column-end, .column-start, .column-between, .column-evenly, .column-around, .column-center, .footer, .page-item, .home-right > .page, .column, .menu, .col {
+.flex, .center, .modal-box, .table-responsive, .form-custom, .page > .content, .row-reverse-end, .row-reverse-start, .row-reverse-between, .row-reverse-evenly, .row-reverse-around, .row-reverse-center, .row-reverse, .row-rev, .row-end, .modal .btn-group, .pagination, .home-right > .social, .row-start, .row-between, .log, .log-info, .log-success, .log-error, .log-warning, .title, .row-evenly, .row-around, .row-center, .btn-group, .input-group span, .input-group, .destak2 div, .menu-item, .page > .warning a, .page > .error a, .page > .info a, .home-left .getstarted, .row, .column-reverse-end, .column-reverse-start, .column-reverse-between, .column-reverse-evenly, .column-reverse-around, .column-reverse-center, .column-reverse, .col-rev, .column-end, .column-start, .column-between, .column-evenly, .column-around, .column-center, .footer, .destak2, .page-item, .home-right > .page, .column, .menu, .col {
   display: flex;
   align-items: center;
 }
@@ -21,7 +21,7 @@
   flex-direction: column;
 }
 
-.column-center, .footer, .form-custom, .page-item, .page > .content, .home-right > .page {
+.column-center, .footer, .form-custom, .destak2, .page-item, .page > .content, .home-right > .page {
   justify-content: center;
   flex-direction: column;
 }
@@ -91,7 +91,7 @@
   flex-direction: row;
 }
 
-.row-center, .btn-group, .input-group span, .input-group, .menu-item, .page > .warning a, .page > .error a, .page > .info a {
+.row-center, .btn-group, .input-group span, .input-group, .destak2 div, .menu-item, .page > .warning a, .page > .error a, .page > .info a, .home-left .getstarted {
   justify-content: center;
   flex-direction: row;
 }
@@ -809,7 +809,7 @@ body {
   justify-content: center;
   box-sizing: border-box !important;
 }
-.home-left p {
+.home-left .slogan {
   position: relative;
   width: 80% !important;
   max-width: 90%;
@@ -823,14 +823,23 @@ body {
   box-sizing: border-box !important;
 }
 @media screen and (max-width: 800px) {
-  .home-left p {
+  .home-left .slogan {
     font-size: 3em !important;
   }
 }
-
+.home-left .getstarted {
+  margin-bottom: 180px !important;
+  margin-top: 20px !important;
+}
+@media screen and (max-width: 800px) {
+  .home-left .getstarted {
+    margin-bottom: 80px !important;
+    margin-top: 20px !important;
+  }
+}
 .home-right {
   min-height: 100vh !important;
-  padding: 10% !important;
+  padding: 5% !important;
 }
 .home-right > .page {
   z-index: 2;
@@ -867,20 +876,24 @@ body {
   opacity: 10;
   font-family: "Roboto-Regular";
 }
-.home-right h1 {
-  font-size: 3em !important;
+.home-right h1, .home-right h2, .home-right h3, .home-right i {
+  font-size: 3em;
   color: #609CE1;
+  text-align: center;
   text-shadow: -1px 1px 0.5px rgba(0, 0, 0, 0.5);
 }
 .home-right h2 {
-  font-size: 2em;
+  font-size: 1.7em !important;
 }
 .home-right h3, .home-right i {
-  font-size: 1em;
+  font-size: 1.3em !important;
 }
 .home-right p {
   font-size: 1em;
   color: rgba(0, 0, 0, 0.5);
+}
+.home-right > .destak {
+  color: #FFFFFF !important;
 }
 .home-right i {
   font-size: 1.4em;
@@ -1213,12 +1226,70 @@ body {
   font-weight: 900;
   letter-spacing: 7px;
   text-shadow: none !important;
-  font-family: "Roboto-Regular" !important;
+  font-family: "Huntkey_Thin" !important;
   padding: 10px !important;
   margin: 0px !important;
-  font-size: 0.8em;
   text-align: center;
   align-self: center;
+}
+
+.destak2 {
+  text-align: center;
+  letter-spacing: 0px !important;
+  padding: 20px;
+  border-radius: 7px;
+  box-shadow: -1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+@media screen and (max-width: 800px) {
+  .destak2 {
+    box-shadow: none !important;
+  }
+}
+.destak2 h1, .destak2 h2, .destak2 h2 {
+  color: #FFFFFF;
+}
+.destak2 > h1 {
+  position: relative;
+  top: -12vh;
+  max-width: 80vw !important;
+  border-radius: 7px;
+  border: solid 1px #236AB9;
+  transform: rotate(-3deg);
+  margin: 0;
+  margin-bottom: -60px !important;
+  box-shadow: -4px 3px 5px rgba(0, 0, 0, 0.5);
+  transition: all 2s ease-in-out;
+}
+@media screen and (max-height: 360px) {
+  .destak2 > h1 {
+    font-size: 1.6em !important;
+    top: -10vh;
+    margin-bottom: -40px !important;
+    margin-top: 20px;
+  }
+}
+.destak2 > h1:hover {
+  transform: rotate(5deg);
+  box-shadow: 4px -7px 5px rgba(0, 0, 0, 0.5);
+  transition: all 2s ease-in-out;
+}
+.destak2 div {
+  min-width: 100%;
+}
+@media screen and (max-width: 800px) {
+  .destak2 div {
+    flex-direction: column !important;
+  }
+}
+.destak2 p {
+  font-size: 1.5em !important;
+  padding: 20px;
+  max-width: 80%;
+}
+@media screen and (max-width: 800px) {
+  .destak2 p {
+    font-size: 1.5em !important;
+  }
 }
 
 .title {
@@ -1568,6 +1639,10 @@ select:-webkit-autofill:focus {
 .btn-circle-warning {
   font-size: 0.9em !important;
 }
+.btn-lg, .home-left .getstarted .btn-primary, .home-left .getstarted .menu-item:hover, .destak2 div .btn-primary, .destak2 div .menu-item:hover, .destak2 div .btn-default, .destak2 div .btn-circle-default, .home-left .getstarted .btn-circle-primary, .destak2 div .btn-circle-primary {
+  font-size: 1em;
+  padding: 2.5vh 5vw !important;
+}
 
 .form-custom {
   position: relative !important;
@@ -1711,6 +1786,9 @@ select:-webkit-autofill:focus {
   max-width: 100vw !important;
   box-sizing: border-box;
   padding: 20px;
+}
+.footer a {
+  color: rgba(0, 0, 0, 0.5);
 }
 .footer p {
   color: rgba(0, 0, 0, 0.5);

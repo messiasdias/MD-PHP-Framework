@@ -135,20 +135,13 @@ class Router
 
 		$routers = is_null($routers) ? $this->routers : $routers;
 		$i=0; $return=[];
-		
-		if( count($routers) > 1 ) {
 
-			foreach ($routers as $route) 
-			{	
-				if( $route->method === $this->method ){
-					$return[$i] = $route;
-				}
-				$i++;
+		foreach ($routers as $route) 
+		{	
+			if( $route->method === $this->method ){
+				$return[$i] = $route;
 			}
-
-		}elseif( count($routers) == 1 ){
-			unset($return);
-			$return[0] = $routers[0];
+			$i++;
 		}
 
 		return $return;

@@ -7,15 +7,11 @@
             <!---between, around -->
             <div class="column-around">
             <a alt="Home" class="menu-item" href="/"><i class="fas fa-home"></i> <b>Home</b> </a>
-            
+
             {% if user.rol %}
             <a alt="Dashboard Panel" class="menu-item"    href="/admin"><i class="fas fa-cogs"></i> <b>Dashboard</b></a> 
             {% endif %} 
-            
-            <a alt="link1" class="menu-item" href="/link1"><i class="fas fa-briefcase"></i> <b>Link 1</b>  </a>
-            <a alt="link2" class="menu-item" href="/link2"><i class="fas fa-briefcase"></i> <b>Link 2</b>  </a>
-            <a alt="link3" class="menu-item" href="/link3"><i class="fas fa-briefcase"></i> <b>Link 3</b>  </a>
-            
+          
             {% if user.rol in [1] %}
                   <a alt="Users List" class="menu-item"    href="/users"><i class="fas fa-users"></i> <b>Users</b></a> 
             {% endif %} 
