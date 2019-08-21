@@ -1,6 +1,7 @@
-# Portfólio
+# MD PHP Framework
 
-MD PHP Framework - SiteApp e Api RestFull
+Mini-Framework/Toolkit SiteApp e Api
+PHP com JS, HTML, CSS e SASS
 
 
 ### Primeiros Passos
