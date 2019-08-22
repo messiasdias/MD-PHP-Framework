@@ -3,6 +3,7 @@
 //include App
 require_once "../vendor/autoload.php";
 use App\App;
+use App\Tools\File;
 
 /* 
 Start App using the argument 'app' for site, 
@@ -14,4 +15,13 @@ Para API, o argumento 'api'.
 
 //Start App
 $app = new App([ 'mode' => 'app', 'debug' => true]);
-$app->run();
+//$app->run();
+
+$file = new File( [
+    'name' => 'nomedoarquivo.txt', 
+    'new_name' => 'novonome.txt',
+    'path' => 'private/img/test/'
+]);
+
+var_dump($file); 
+exit;

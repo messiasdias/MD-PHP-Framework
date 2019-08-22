@@ -11,20 +11,23 @@ class File
 	function __construct($file, array $args=null)
 	{
 
-		if ( is_array($file) && !is_null($file)){
-			
-			foreach ($file as $key => $value) {
+		if ( !is_null($file) ) {
 
-				if ( array_key_exists( $key, $file) && property_exists(get_called_class() , $key) ){
+			if ( is_array($file)){
+				
+				foreach ($file as $key => $value) {
 
+					if ( array_key_exists( $key, $file) && property_exists(get_called_class() , $key) ){
 					$this->$key = $file[$key];
-				}	
+					}	
 
+				}
+
+			}	
+			elseif( is_string($file) && App::validate($file, 'string|min:5') ){
+				$this->name = $file;
 			}
-
-		}	
-		elseif( is_string($file) && App::regex($file, 'string|min:5') ){
-			$this->name = $file;
+		
 		}else{
 			return false;
 		}
