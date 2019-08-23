@@ -15,13 +15,4 @@ Para API, o argumento 'api'.
 
 //Start App
 $app = new App([ 'mode' => 'app', 'debug' => true]);
-//$app->run();
-
-$file = new File( [
-    'name' => 'nomedoarquivo.txt', 
-    'new_name' => 'novonome.txt',
-    'path' => 'private/img/test/'
-]);
-
-var_dump($file); 
-exit;
+$app->run();

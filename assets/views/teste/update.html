@@ -1,0 +1,23 @@
+  {% extends "layout/page_layout.html" %}
+  {% set icon, title = 'fas fa-vial', 'Teste Update File' %}
+  {% block content %}
+   <div class="content center ">
+        {%if name %}
+            <p class="tx tx-md tx-success"><i class="fa fa-home"></i> Meu nome é: {{name}}</p>
+        {% endif %}
+
+
+        <div class=" form-custom" >
+
+          <form class="column-center" action="/upload" method="POST" enctype="multipart/form-data">
+            <label for="fileToUpload" > Select image to upload: <label><br>
+            <input type="file" name="fileToUpload" id="fileToUpload"/>
+            <input class="btn-primary" type="submit" name="submit"/>
+          </form>
+
+        </div>
+
+
+        <a class="btn-primary" href="/"><i class="fa fa-home"></i> Back To Home</a>
+   </div>
+  {% endblock %}

@@ -235,12 +235,12 @@ class App
 		//load routers app or api
 		switch ( strtolower($app->mode) ) {
 			case 'api':
-				$mode = '../src/Routers/api/*.php';
+				$mode = '../routers/api/*.php';
 			break;
 
 			case 'app':
 			default:
-				$mode = '../src/Routers/*.php';
+				$mode = '../routers/*.php';
 			break;
 		}
 

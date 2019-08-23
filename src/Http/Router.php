@@ -152,12 +152,18 @@ class Router
 
 	private function find_by_count($url=null,$routers=null){
 		
+		
+
 		$url = preg_replace('/^\/\s*/', '',  is_null($url) ? $this->url : $url );
+
+		var_dump( array_filter(explode('/', $url))   );
+		echo "<br><br><br>";
+
 		$routers = is_null($routers) ? $this->routers : $routers;
 		$i=0; $return=false;
 
 		foreach ($routers as $route) 
-		{	
+		{	echo array_filter(explode('/', $route->name))[0] ."<br><br>";
 			if( ( count( array_filter(explode('/', $route->name)) ) === count( array_filter(explode('/',$url )) )) ){
 				$return[$i] = $route;
 			}

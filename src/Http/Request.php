@@ -9,6 +9,8 @@ class Request
 	
 	function __construct()
 	{
+		//var_dump( explode( '/', $_SERVER['REQUEST_URI'])[0] );
+
 		$this->url = strtolower($_SERVER['REQUEST_URI']);
 		$this->protocol = $_SERVER['SERVER_PROTOCOL'];
 		$this->method =  $_SERVER['REQUEST_METHOD'];
