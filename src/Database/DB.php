@@ -46,7 +46,7 @@ class DB {
 
 
 
-	public function paginate($table, $page = null , $per_page = null){
+	public function paginate($table, $page = null , $per_page = null, $search=null){
 		
 		$start = 0; $end = 12;
 		$total = $this->count($table);	
@@ -69,7 +69,8 @@ class DB {
 
 		if ( isset($table) ) {
 
-			$sql = 'SELECT * FROM '.$table.' LIMIT '.$start.','. $end;
+			$data = $search; $data['start'] = $start; $data['end'] = $end;
+			$sql = $this->sql_generator('paginate_and_search',$table, $data);
 			$result = $this->conection()->query($sql);
 
 			return ['page'=> $page,
@@ -78,12 +79,15 @@ class DB {
 					'data' => $this->return_select($result, $table) 
 					];  
 
-
 		} 
 
 		return false;
 	}
 
+
+	public function search($table,$search){
+		return $this->paginate($table, 1, 100, $search);
+	}
 
 
 
@@ -265,8 +269,10 @@ class DB {
 				break;
 
 
-				case 'update':
-				//UPDATE teste SET key1 = ?, key2 = ?, key3 = ?, key4 = ? WHERE id = ?
+
+
+			case 'update':
+			//UPDATE teste SET key1 = ?, key2 = ?, key3 = ?, key4 = ? WHERE id = ?
 					foreach ($data as $key => $value) {
 						if ($key != 'id') {
 							array_push($values, $key." = '".$value);
@@ -278,9 +284,41 @@ class DB {
 				break;
 
 
-				case 'delete':
-				//DELETE FROM table WHERE id = ?
+
+
+			case 'delete':
+			//DELETE FROM table WHERE id = ?
 					$sql = "DELETE FROM ".$table."  WHERE id='".$data['id']."'";
+				break;
+
+
+
+
+			case 'paginate_and_search':
+			//"SELECT * FROM table WHERE `colunm1` LIKE '%1%' or `colunm2` LIMIT 0,10;"
+		
+				$sql = "SELECT * FROM ".$table." WHERE  ";
+				$start = $data['start']; unset($data['start']); 
+				$end= $data['end']; unset($data['end']);
+
+				if( !is_null($data) ){
+					$find = '';
+					if( is_array($data) && ( count($data) >= 2 ) ){
+						$find = $data[count($data)-1];
+						unset( $data[count($data)-1]);
+						$sql .= "`".implode( "` LIKE '%$find%' or `" ,$data)."` LIKE '%$find%' ";
+					}else{
+						$find = is_array($data) ? implode('', $data) : (string) $data ;
+						$sql .= "`id` LIKE '%$find%' ";
+					}
+	
+				}
+				else{
+					$sql .= ' 1 ';
+				}
+	
+				$sql .= " LIMIT ".$start.",". $end.";";
+
 				break;
 
 		}

@@ -17,11 +17,11 @@ class UsersController extends Controller
 	}
 
 
-	public function list(App $app,$args=null){
+	public function list(App $app,$args=null, $search=null){
 
 		$response = $app->db()->paginate('users',
 			isset($args->page)? $args->page : 1 , 
-			isset($args->ppage) ? $args->ppage : 10);
+			isset($args->ppage) ? $args->ppage : 10, $search);
 
 
 		if ($response){
@@ -39,6 +39,11 @@ class UsersController extends Controller
 
 		return $app->view('users/list', $data);
 
+	}
+
+	public function search(App $app,$args=null){
+		$search = ['first_name','last_name','username','id', 'email',strtolower($app->request->data['search']) ];
+		return $this->list($app, $args, $search); 
 	}
 
 
@@ -62,7 +67,13 @@ class UsersController extends Controller
 		$user = new User($app->request->data);
 		$response = $user->create();
 		$response->user = User::find('username',$app->request->data['username']);		
-		return $response;
+		
+		if($response->status){
+			return $app->redirect("/users/".$response->user->id );
+		}else{
+			return $app->redirect("/users/add", "GET", ['input' => $response->data, 'errors' => $response->errors ]);
+		}
+		
 	}
 
 
@@ -82,10 +93,16 @@ class UsersController extends Controller
 		}
 
 		$response = $user->update();
-		$app->response->set_log($response->msg,($response->status) ? 'success' : 'error');
+		$app->response->set_log($response);
 		$response->user = User::find('id', $app->request->data['id']) ;
 
-		return $response;
+		if($response->status){
+			return $app->redirect( ($app->user()->rol == 1)  ? "/users" : "/users/".$response->user->id , 'GET', $args);
+		}else{
+			return $app->redirect("/users/edit/".$app->request->data["type_form"]."/".$app->request->data["id"] , 'GET', 
+			['input' => $response->data, 'errors' => $response->errors ] );
+		}
+
 
 	}
 
@@ -106,19 +123,14 @@ class UsersController extends Controller
 		}else{
 			return $this->list($app,$args);
 		}
-
-
 	}
 
 
 
 	public function delete(App $app,$args=null){
-		$response = null; $user = User::find('id', $app->request->data['id']);
-			if($user){
-				$response = $user->delete();
-			}
-
-		return $response;	
+		$user = User::find('id', $app->request->data['id']);
+		$app->response->set_log($user->delete());
+		return $app->redirect("/users");	
 	}
 
 

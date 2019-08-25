@@ -7,7 +7,7 @@ use App\Http\Request;
 class Response extends Request 
 {	
 	protected $headers=[], $http_code, $http_msg, $http_codes;
-	public $view, $log;
+	public $view, $log=[];
 	
 	function __construct(Request $request)
 	{
@@ -154,8 +154,6 @@ class Response extends Request
 		$this->set_http_code($code);
 		$this->set_http_msg( !is_null($msg) ? $msg :  $this->get_msg($code) );
 		$data->token = isset($this->token) ? $this->token : false ;
-
-		//var_dump($data['token']); exit;
 		$this->view = json_encode($data);
 	}
 
@@ -175,23 +173,34 @@ class Response extends Request
 	}
 
 
-	public function set_log($msg,$class='warning'){
+	public function set_log( object $response, $class=null ){
 
-		if( is_string($msg) ) {
-			$this->log = [
-				'msg'=> (string) $msg , 
-				'class' => $class
-				];
-		}elseif (is_array($msg)) {
-			
-			foreach ($msg as $key => $value) {
-				$this->log[$key] = $value;
+			if( $response->status ){
+				$class = 'success';
+			}else{
+				$class = is_null($class) ? 'warning' : $class ;
 			}
+	
+	
+			if( is_string($response->msg) ) {
 
-			$this->log['class'] = $class;
-		}		
+				if( isset($this->log['msg']) ){
+					$this->log['msg'][ count($this->log['msg']) ] = $response->msg;
+				}else{
+					$this->log['msg'][0] = $response->msg;
+				}
 
-		return !is_null($this->log);
+			}elseif (is_array($response->msg)) {
+				
+				foreach ($response->$msg as $key => $value) {
+					$this->log['msg'] .= "<br/>".$value;
+				}
+
+			}		
+		
+		$this->log['class'] = $class;
+		return $this->log;
+		
 	}
 
 

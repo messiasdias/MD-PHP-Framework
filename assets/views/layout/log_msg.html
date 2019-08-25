@@ -1,10 +1,14 @@
 
+<div style="display:none;" id="log-msg" class=" {{log.class ? 'log-'~ log.class : '' }}">
 
-<div style="display:none;" id="log-msg" class="{{class ? 'log-'~ class : '' }}">
-   
-	 <p class="log-msg">{{msg ? msg : ''}}</p>
 
+    <div class="col">
+      {% for msg in log.msg %}
+        <h4 class="log-msg">{{msg}}</h4>
+      {% endfor %}
+    </div> 
+    
       <button class="log-close" onclick="toggle('#log-msg')"> <i class="fa fa-times"></i></button>
-
+     
 
 </div>

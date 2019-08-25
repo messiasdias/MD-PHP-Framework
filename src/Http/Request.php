@@ -28,8 +28,21 @@ class Request
    			$this->token = $_SESSION['token'];
    		}
 
-   		if ( isset($_FILES) ){
-   			$this->files =  $_FILES;
+   		if ( isset($_FILES['file'] )  ){
+
+			if(  is_array( $_FILES['file']['name'] ) ){
+				//multi-files
+				foreach( $_FILES['file'] as $key1 => $value1 ){
+					foreach( $value1 as $key2 => $value2 ){
+						$this->files[$key2][$key1] = $value2;
+					}
+				}
+			}else{
+				//sigle file	
+				$this->files = $_FILES;
+			}
+	
+
    		}
 
 		foreach (apache_request_headers() as $key => $value) {

@@ -30,6 +30,10 @@ $app->get('/users/{page}int/{ppage}int', function($app, $args){
 	return $app->controller('users@list', $args);
 } , 'admin');
 
+//search
+$app->post('/users/search', function($app, $args){
+	return $app->controller('users@search', $args);
+} , 'admin', 200);
 
 
 
@@ -42,15 +46,7 @@ $app->get('/users/add', function($app, $args){
 
 //create
 $app->post('/users', function($app, $args){
-
-	$response = $app->controller('users@create', $args);
-
-	if($response->status){
-		return $app->redirect("/users/".$response->user->id );
-	}else{
-		return $app->redirect("/users/add", "GET", ['input' => $response->data, 'errors' => $response->errors ]);
-	}
-
+	return $app->controller('users@create', $args);
 } , 'admin');
 
 
@@ -66,17 +62,8 @@ $app->get('/users/edit/{attr}str|minlen:4/{id}int|mincount:1', function($app, $a
 
 //update
 $app->post('/users/edit', function($app, $args){
-
-	$response = $app->controller('users@update', $args);
-	if($response->status){
-		return $app->redirect( ($app->user()->rol == 1)  ? "/users" : "/users/".$response->user->id , 'GET', $args);
-	}else{
-		return $app->redirect("/users/edit/".$app->request->data["type_form"]."/".$app->request->data["id"] , 'GET', 
-		['input' => $response->data, 'errors' => $response->errors ] );
-	}
-
+	return $app->controller('users@update', $args);
 } , 'auth,admin');
-
 
 
 
@@ -94,18 +81,7 @@ $app->get('/users/{id}int', function($app, $args){
 
 //delete
 $app->post('/users/del', function($app, $args){
-
-	$response = $app->controller('users@delete', $args);
-	$app->response->set_log($response->msg, isset($response->status) ? 'success' : 'error');
-	return $app->redirect("/users");
-	
+	return $app->controller('users@delete', $args);
 },'admin' );
 
 
-//search
-
-$app->post('/users/search', function($app, $args){
-	
-	var_dump( $app->request->data ); exit;
-
-} , 'admin', 200);

@@ -16,6 +16,7 @@ use App\Auth\Auth;
 use App\Tools\Validator;
 use App\Tools\View;
 use App\Tools\File;
+use App\Tools\File2;
 use App\Database\DB;
 
 
@@ -463,6 +464,38 @@ class App
 			$response->getBody().'<br><br>';
 
 	}
+
+
+
+	public function upload(string $filename=null){
+
+		$i=0;
+		foreach ( $this->request->files as $key => $data ){
+			
+			if( !is_null($filename) && (count($this->request->files) == 1) ){
+				$data['name'] = pathinfo($filename)['basename'] ;
+				$data['path'] = pathinfo($filename)['dirname'].'/';
+			}
+
+			$file = new File2($data);
+			$response = $file->upload() ;
+			$this->response->set_log($response);
+			$i++;
+		}
+
+		return $this;
+	}
+
+
+	public function download(string $filename ){
+		$data = ['name' => pathinfo($filename)['basename'], 'path' =>  pathinfo($filename)['dirname'].'/' ];	
+		$file = new File2($data);
+		$response = $file->download();
+		$this->response->set_log($response);
+		return $this;
+	}
+
+
 	
 
 

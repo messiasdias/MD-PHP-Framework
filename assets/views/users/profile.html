@@ -7,7 +7,7 @@
         {% if user_item %}
 
                 <div  class="buttons btn-group">
-                         <button type="button" class="btn-circle-default" title="Back" onclick="window.history.back()" >
+                         <button type="button" class="btn-circle-default" title="Back" onclick="window.location.href='{{user.rol == 1 ? '/users' : '/admin'}}'" >
                         <i class="fas fa-reply"></i></button>
                         {{ include('users/buttons.html') }} 
                 </div>

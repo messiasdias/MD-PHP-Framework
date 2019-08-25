@@ -11,13 +11,20 @@ $app->get('/teste/{name}str', function($app,$args) {
 
 
 
- $app->get('/update', function($app,$args) {  
-	return  $app->view('teste/update', ['title' => 'teste update']);
+ $app->get('/upload', function($app,$args) {  
+	return  $app->view('teste/upload', ['title' => 'teste update']);
  } );
 
- $app->post('/update', function($app,$args) {  
-	//return  $app->controller('teste@index',  ['name' => 'Messias Dias'] );
-	echo "Uploaded File: <br>";
-	var_dump($_FILES ); exit;
+ $app->post('/upload', function($app,$args) {  
+	return  $app->controller('teste@upload', (array) $args);
+ } );
 
+
+ $app->get('/download', function($app,$args) {  
+	return  $app->view('teste/download');
+ } );
+
+
+ $app->post('/download', function($app,$args) {  
+	return  $app->controller('teste@download', (array) $args);
  } );

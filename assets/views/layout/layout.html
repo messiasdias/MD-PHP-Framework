@@ -35,8 +35,8 @@
         {{ include('layout/modal_delete.html') }}
         {{ include('layout/menu.html') }} 
         <a onclick="toggle_menu()" style="display: none;" class="menu-toggle-fixed" id="menu-toggle-fixed" ><i class="fas fa-bars"></i></a> 
-        {{ include('layout/log_msg.html',  { msg:log.msg , class:log.class } ) }} 
-
+        {{ include('layout/log_msg.html',  { log:log} ) }} 
+       
         {% if log.msg and log.class %}
           <script>toggle("#log-msg");</script>
         {% endif %}    

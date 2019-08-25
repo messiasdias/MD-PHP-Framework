@@ -15,20 +15,11 @@ class AuthController extends Controller
 
 
 	public function login(App $app, $args=null){
-		$result = null;
 
-		if($app->request->data) {
-			$result = $app->auth()->login($app->request->data);
-		}
-	
-		if ( $result->status ){
-			$app->response->set_log($result->msg,'success');
-			return $app->redirect_header('/admin');
-		}else{
-			$app->response->set_log($result->msg,'error');
-			return $app->redirect('/admin');
-		}
+		//var_dump($app->auth()->login($app->request->data)); exit;
 
+		$app->response->set_log($app->auth()->login($app->request->data));
+		return $app->redirect_header('/admin');
 	}
 
 

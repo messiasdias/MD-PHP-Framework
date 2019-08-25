@@ -3,7 +3,7 @@
 {% set icon, title = icon ? icon : 'fa fa-list', title ? title : 'Users' %}
 {% block content %}
 
-<div class="content center form-custom" >
+<div class="content" >
 
 
 		<div  class="btn-group buttons ">
@@ -11,7 +11,7 @@
 				<form method="post" action="/users/search" >
 
 					<div class="btn-group">
-						<input style="width: 50px;"  type="text" name="search" id="search" placeholder="Search" />
+						<input style="width: 50px;"  type="text" name="search" id="search" value="{{ input.search ? input.search : ''  }}"  placeholder="Search" />
 						<button title="Submit" class="btn-circle-primary" type="submit">
                                    <i class="fas fa-search"></i></button>
 					</div>	

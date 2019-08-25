@@ -761,7 +761,6 @@ html a {
 }
 
 body {
-  user-select: none !important;
   margin: 0 !important;
   padding: 0 !important;
   letter-spacing: 2px !important;
@@ -1806,14 +1805,17 @@ select:-webkit-autofill:focus {
   box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
 }
 .log-msg {
-  color: rgba(0, 0, 0, 0.5);
+  color: #FFFFFF !important;
 }
 .log-close {
   border: none;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.5) !important;
   background-color: transparent !important;
   cursor: pointer;
   font-size: 1.2em;
+  position: absolute;
+  top: 25px;
+  right: 25px;
 }
 .log-close:focus {
   background: transparent !important;
