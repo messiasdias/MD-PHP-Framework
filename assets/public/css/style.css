@@ -1418,16 +1418,19 @@ input:visited {
 input::placeholder {
   color: #ccc !important;
 }
-input[type=text], input[type=password] {
+input[type=text], input[type=password], input[type=file] {
   text-align: left;
   letter-spacing: 2px;
   width: 30vw;
   max-width: 90vw;
 }
 @media screen and (max-width: 800px) {
-  input[type=text], input[type=password] {
+  input[type=text], input[type=password], input[type=file] {
     width: 60vw;
   }
+}
+input[type=file] button {
+  color: #609CE1;
 }
 input[type=checkbox] {
   cursor: pointer;

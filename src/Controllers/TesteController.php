@@ -24,7 +24,8 @@ class TesteController extends Controller
 
 
 	public function download($app, $args=null){
-		return $app->download( $app->request->data['path'].'/'.$app->request->data['name'] );
+		$app = $app->download( $app->request->data['path'].'/'.$app->request->data['name'] );
+		return $app->redirect('/download');
 	}
 
 

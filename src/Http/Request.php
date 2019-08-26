@@ -17,8 +17,9 @@ class Request
 		$this->content_type = isset($_SERVER["CONTENT_TYPE"])? $_SERVER["CONTENT_TYPE"]: 'text/html';
 
 		//Get All Form data posts
-   		parse_str(file_get_contents('php://input'), $this->data );
-   		
+		   parse_str(file_get_contents('php://input'), $this->data );
+			$this->data = $_POST;
+		
    		//Get User Auth Token 
    		if(isset( $this->data['token'] )) {
    			$this->token =  $this->data['token'];

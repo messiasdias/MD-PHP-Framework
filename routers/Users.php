@@ -85,3 +85,7 @@ $app->post('/users/del', function($app, $args){
 },'admin' );
 
 
+//Img upload
+$app->post('/users/img', function($app, $args){
+	return $app->controller('users@img_upload', $args);
+},'admin, manager' );

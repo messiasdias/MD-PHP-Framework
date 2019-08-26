@@ -13,6 +13,22 @@
                 </div>
                
                 <img style="width: 20vw;"  class="avatar" src="{{assets}}/{{ user_item.img  ? user_item.img : '/img/default/avatar.png'}}">
+                
+                {% if user_item.id == user.id %}
+                <div  style="width: 20vw;" class=" form-group" >
+        
+                        <form class="row-center" action="/users/img" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="token" value="{{token}}" />
+                                <input type="hidden" name="id" value="{{user_item.id}}" />
+
+                                 <input type="file" id="file" name="file"  required/> 
+                                <button class="btn-primary" type="submit" name="submit"> <i class="fas fa-upload"></i> Upload </button>
+                        </form>
+              
+                </div>
+                {% endif %}
+
+
                 <h1>{{user_item.first_name}} {{user_item.last_name}}</h1>
                  <h3>
                         {% if  user_item.rol == 1 %}

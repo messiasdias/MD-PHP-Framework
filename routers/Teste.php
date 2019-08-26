@@ -26,5 +26,5 @@ $app->get('/teste/{name}str', function($app,$args) {
 
 
  $app->post('/download', function($app,$args) {  
-	return  $app->controller('teste@download', (array) $args);
+	return  $app->controller('teste@download',  $args);
  } );

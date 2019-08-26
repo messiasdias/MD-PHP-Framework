@@ -16,7 +16,6 @@ class User extends Model
 	public $first_name, $last_name, $username, $pass, $confirm_pass, $email, $confirm_email,  $remember_token, $rol, $status, $img;	
 
 
-
 	public function create (array $data=null){	
 
 

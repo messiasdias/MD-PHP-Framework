@@ -229,6 +229,14 @@ class App
 		return $router->url($url, $method);
 	}
 
+	public function mode_trigger($app,$api,$data){
+		if( $this->mode === 'app' ){
+			return $app($this, $this->args, $data);
+		}elseif( $this->mode === 'api' ){
+			return $api($this, $this->args,$data);	
+		}
+	}
+
 
 
 	private function load_router($app){
@@ -364,7 +372,7 @@ class App
 
 
 
-	private function view_get_data(){
+	public function view_get_data(){
 		$data = [
 			'url'  => $this->request->url,
 			'user' => $this->user($this->request->token),
@@ -384,7 +392,7 @@ class App
 
 
 
-	private function write(String $data , $type = 'html', $code=200, $msg = 'OK!')
+	public function write(String $data , $type = 'html', $code=200, $msg = 'OK!')
 	{	
 		$this->response->write($data,$type,$code,$msg);
 		return $this;
@@ -393,7 +401,7 @@ class App
 
 
 
-	private function json($data, $code=302, $msg = 'Found!')
+	public function json($data, $code=302, $msg = 'Found!')
 	{	
 		$this->response->json($data,$code,$msg);
 		return $this;

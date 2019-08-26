@@ -917,7 +917,7 @@ input{
 
     
 
-    &[type=text], &[type=password]{
+    &[type=text], &[type=password], &[type=file]{
         text-align: left;
         letter-spacing: 2px;
         width: 30vw ;
@@ -926,6 +926,12 @@ input{
             width: 60vw ;
         }
     }
+
+    &[type=file] {
+        button{
+            color: $cor1;
+        }
+    } 
 
 
     &[type=checkbox]{

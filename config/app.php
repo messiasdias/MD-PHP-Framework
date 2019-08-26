@@ -54,23 +54,23 @@ define ("default_users", array (
 	"admin"=> array ( 
 			
 				"first_name" => "Admin",
-				"last_name" => "{Teste}",
+				"last_name" => "Do Sistema",
 				"email" => "admin@teste.ex",
 				"username" => "@admin",
-				"pass" => "12345678",
-				"img"=> "/img/default/avatar.png",
+				"pass" => "123456789",
+				"img"=> "/img/default/avatar-m2.png",
 				"rol"=> 1,
 				"status"=> 1
 			),
 	// --> Default Manager User
 	"manager"=> array ( 
 			
-				"first_name" => "Manager",
-				"last_name" => "{Teste}",
+				"first_name" => "Enzo",
+				"last_name" => "Miguel {Teste}",
 				"email" => "manager@teste.ex",
 				"username" => "@manager",
-				"pass" => "12345678",
-				"img"=> "/img/default/avatar.png" ,
+				"pass" => "123456789",
+				"img"=> "/img/default/avatar-m3.png" ,
 				"rol"=> 2,
 				"status"=> 1 
 			),
@@ -82,7 +82,7 @@ define ("default_users", array (
 				"email" => "messiasdias.ti@gmail.com",
 				"username" => "@messiasdias",
 				"pass" => "P@55w0rd123",
-				"img"=> '/img/default/eu.jpg',
+				"img"=> '/img/default/eu2.jpg',
 				"rol"=> 1,
 				"status"=> 1
 			)

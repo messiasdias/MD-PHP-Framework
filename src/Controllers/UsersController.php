@@ -135,6 +135,32 @@ class UsersController extends Controller
 
 
 
+	public function img_upload($app, $args=null){
+		$filename = "../assets/public/img/users/".$app->request->data['id'].date("YmdHis").".".explode('.', $app->request->files['file']['name'])[1] ;
+		$app = $app->upload($filename);
+		
+		if( file_exists($filename) ){
+			$user = User::find('id', $app->request->data['id']);
+				
+			if( !strpos('/img/default/', $filename) ){
+				@unlink(explode( '/img/', $filename )[0].$user->img );
+			}
+
+			$user = new User( [
+				'id' => $user->id,
+				'img' => "/img/".explode( '/img/', $filename )[1]
+			]);
+			
+			$app->response->set_log($user->update());
+		}
+
+		return $app->redirect('/users/'.$app->request->data['id']);
+	}
+
+	
+
+
+
 
 
 }

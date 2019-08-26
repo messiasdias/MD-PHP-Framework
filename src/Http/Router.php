@@ -133,15 +133,16 @@ class Router
 
 	private function find_by_method($url=null,$routers=null){
 
-		$routers = is_null($routers) ? $this->routers : $routers;
+		$routers = is_null($routers) ? (array) $this->routers : $routers;
 		$i=0; $return=[];
-
-		foreach ($routers as $route) 
-		{	
-			if( $route->method === $this->method ){
-				$return[$i] = $route;
+		if ($routers) {
+			foreach ($routers as $route) 
+			{	
+				if( $route->method === $this->method ){
+					$return[$i] = $route;
+				}
+				$i++;
 			}
-			$i++;
 		}
 
 		return $return;
@@ -154,15 +155,17 @@ class Router
 		
 		$url = preg_replace('/^\/\s*/', '',  is_null($url) ? $this->url : $url );
 		$routers = is_null($routers) ? $this->routers : $routers;
-		$i=0; $return=false;
+		$i=0; $return=[];
 
-		foreach ($routers as $route) 
-		{	
-			if( ( count( array_filter(explode('/', $route->name)) ) === count( array_filter(explode('/',$url )) )) ){
-				$return[$i] = $route;
+		if ($routers) {	
+			foreach ($routers as $route) 
+			{	
+				if( ( count( array_filter(explode('/', $route->name)) ) === count( array_filter(explode('/',$url )) )) ){
+					$return[$i] = $route;
+				}
+				$i++;
 			}
-			$i++;
-		}
+	   }
 
 		return $return;
 	}

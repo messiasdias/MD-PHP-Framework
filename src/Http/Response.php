@@ -150,6 +150,7 @@ class Response extends Request
 
 
 	public function json($data, $code=200, $msg = 'Found!' ){
+		$data = (object) $data;
 		$this->set_content_type('json');
 		$this->set_http_code($code);
 		$this->set_http_msg( !is_null($msg) ? $msg :  $this->get_msg($code) );
