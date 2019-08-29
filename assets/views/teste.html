@@ -2,11 +2,15 @@
   {% set icon, title = 'fas fa-vial', 'Teste' %}
   {% block content %}
    <div class="content center ">
+      <p class="">
         {%if name %}
-            <p class="tx tx-md tx-success"><i class="fa fa-home"></i> Meu nome é: {{name}}</p>
+            <i class="fa fa-user"></i> Seu Nome é: {{name | capitalize}}
+        {% else %}
+           <i class="fa fa-edit"></i> Digite um seu Nome na URL /teste/{nome} e será mostrado Aqui.
         {% endif %}
+      </p>
 
-
+        <br> <br>
         <a class="btn-secundary" href="/upload"><i class="fas fa-upload"></i> Upload  Teste</a>
 
         <a class="btn-default" href="/download"><i class="fas fa-download"></i> Download Teste</a>

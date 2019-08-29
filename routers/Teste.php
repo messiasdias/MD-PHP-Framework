@@ -1,7 +1,7 @@
 <?php
 
 $app->get('/teste', function($app,$args) {  
-	return  $app->controller('teste@index',  ['name' => 'Messias Dias'] );
+	return  $app->controller('teste@index');
  } );
 
 
