@@ -1,62 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title> MD PHP Framework </title>
+<title> {{title ? 'Messias Dias - ' ~ title | capitalize : 'Messias Dias - Portfolio'}} </title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<META NAME="DESCRIPTION" CONTENT="Meu Framework PHP">
-<META NAME="ABSTRACT" CONTENT="Meu Framework PHP">
-<META NAME="KEYWORDS" CONTENT="HTML,CSS,Bootstrap,PHP,Twig,Framework,JavaScript,JQuery,Mysql,Apache2">
+<META NAME="DESCRIPTION" CONTENT="Meu Portifólio de Desenvolvimento Web">
+<META NAME="ABSTRACT" CONTENT="Meu Portifólio de Desenvolvimento Web">
+<META NAME="KEYWORDS" CONTENT="HTML,CSS,Bootstrap,PHP,Twig,Framework,Slim,Laravel,JavaScript,JQuery,Mysql,Apache2">
 <META NAME="ROBOT" CONTENT="All">
 <META NAME="RATING" CONTENT="general">
 <META NAME="DISTRIBUTION" CONTENT="global">
 <META NAME="LANGUAGE" CONTENT="PT">
 <link rel="icon" href="{{assets}}/img/default/favicon.ico" type="image/x-icon"/>
 
-<!-- Folha de Estilo CSS -->
-<link rel="stylesheet" type="text/css" href="{{assets}}css/style.css">
+    <!-- Folha de Estilo CSS -->
+    <link rel="stylesheet" type="text/css" href="{{assets}}css/style.css">
 
-<!--Scripts Jquery-->
-<script type="text/javascript" src="{{assets}}js/jquery.min.js"></script> 
+    <!--Scripts Jquery-->
+    <script type="text/javascript" src="{{assets}}js/jquery.min.js"></script> 
 
-<!--Scripts JavaScript e Jquery-->
-    <script type="text/javascript" src="{{assets}}js/bootstrap.min.js"></script>
+    <!--Scripts JavaScript dependences-->
+    <script async defer src="https://connect.facebook.net/pt_BR/sdk.js"></script>
     <script type="text/javascript" src="{{assets}}js/fontawesome.min.js"></script>
-    <script type="text/javascript" src="{{assets}}js/aos.js"></script>
+    <!--<script type="text/javascript" src="{{assets}}js/bootstrap.min.js"></script> -->
     <script type="text/javascript" src="{{assets}}js/typed.min.js"></script>
-    <script type="text/javascript" src="{{assets}}js/script2.js"></script>
+    <script type="text/javascript" src="{{assets}}js/aos.js"></script>  
+   
 
+    <!--Script Default -->
+    <script type="text/javascript" src="{{assets}}js/script.js"></script>
 
-</head>
-<body id="top"  >
+      <!--Script Vue.js - Development -->
+      <script src="{{assets}}js/vuejs/vue.js"></script>
+      <script type="text/javascript" src="{{assets}}js/axios.min.js"></script>
+    
 
-  <div id="site" class="site" >
-
-        {{ include('layout/modal_delete.html') }}
-        {{ include('layout/menu.html') }} 
-        <a onclick="toggle_menu()" style="display: none;" class="menu-toggle-fixed" id="menu-toggle-fixed" ><i class="fas fa-bars"></i></a> 
-        {{ include('layout/log_msg.html',  { log:log} ) }} 
+  
        
-        {% if log.msg and log.class %}
-          <script>toggle("#log-msg");</script>
-        {% endif %}    
-
-        <!---- home -->
+</head>
+<body>
+    
+<!-- Facbook Scripts -->
+<script src="{{assets}}js/facebook.js"></script>
+   <!-- Site start-->
+  <div id="site" class="site container" >
+        {{ include('layout/modal.html') }}
+        {{ include('layout/menu.html') }}  
+        <!-- home -->
         {% block home %}{% endblock %}
         <!-- page -->
         {% block page %}{% endblock %}
-        
-
-
-      <!-- Site end-->
   </div> 
+   <!-- Site end-->
 
-  <!-- Footer --> 
-        <div class="footer row-center">
-                <p>MD-PHP-Framework is maintained by <a target="_blank" href="https://github.com/messiasdias">messiasdias</a>. </p>
-        </div>
-    
-    <script> redirect('{{url}}');  </script>	
-    
+
+
+    <!--Script Vue-App -->
+    <script>
+      var view_data = JSON.parse({{  view_data | json_encode |raw }}) ;
+      var galery_single = JSON.parse('{{ galery_single ? ( galery_single | json_encode |raw) : "false" }}')  ;
+    </script>
+    <script type="text/javascript" src="{{assets}}js/vuejs/vue-app.js"></script> 
+ 
 </body>
 </html>

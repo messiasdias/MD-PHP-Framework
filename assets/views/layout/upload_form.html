@@ -1,0 +1,59 @@
+
+<div  class="container row col-12"  >
+                  
+    <form  class="uploadfile_form row col-12 center"  action="" method="POST" enctype="multipart/form-data">
+            <input type="hidden"  id="token" name="token" value="{{token}}" />
+            <input type="hidden" name="id" id="Id" value="{{id}}" />
+            <label class="col-10 offset-3 uploadfile_label" for="file" >Choose a file</label>
+            <input class="uploadfile_file" type="file" name="file" id="file"  required />
+            <button disabled class=" btn-default uploadfile_submit" type="submit" name="submit"><i class="fas fa-upload"></i> Upload</button>
+
+            
+    </form>
+
+    <div class="row col-12 center">
+       <p  class="uploadfile_log"></p>
+    </div>
+
+   
+
+      <script type="text/javascript" >
+
+
+            $('.uploadfile_form').submit(function(event){
+                  event.preventDefault();
+                  var url = '{{request.scheme}}://api.{{request.host}}/{{api_url|lower}}';
+                  var data = new FormData(this);
+                    
+                    ajax2(url, 'POST', data, function(data){
+                           var result = JSON.parse(data);
+                            console.log(result.msg);
+                                                      
+                            if( result.status ) {
+                              $('.uploadfile_img').attr('src', '/assets/'+result.data.img);
+                              $('.uploadfile_label').html('Choose a file');
+                              $(".uploadfile_submit").prop('disabled', true);
+                              $(".uploadfile_log").addClass('tx-success');
+                            }else{
+                              $(".uploadfile_log").addClass('tx-error');
+                            } 
+
+                            $(".uploadfile_log").html('File Upload Successfully!');
+                           
+                    }, function(data){
+                         console.log(data);
+                         $(".uploadfile_submit").prop('disabled', true);
+                         $(".uploadfile_log").addClass('tx-error');
+                         $(".uploadfile_log").html('File Upload Error!');
+
+                    });
+
+                   
+
+            });
+
+      
+      
+      </script>
+
+</div>

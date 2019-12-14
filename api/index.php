@@ -13,5 +13,5 @@ Para API, o argumento 'api'.
 */
 
 //Start App Api
-$app = new App([ 'mode' => 'app', 'debug' => false]);
+$app = new App([ 'mode' => 'api', 'debug' => true ]);
 $app->run();

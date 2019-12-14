@@ -1,114 +1,178 @@
-function preview(type, id){
 
-	switch(type){
-		 case "mobile":
-		 	$(id).css('width', 320);
-		 break;
+function ajax(url, method = 'GET', dataType = 'json', formdata=null, async=true){
+	var result;
 
-		 case "tablet":
-		 	$(id).css('width', 768);
-		 break;
+	$.ajax({
+	  method: method,
+	  dataType: dataType,
+	  url: url,
+	  async: async,
+	  data: formdata, 
+	  success: function(data, status) {
+			  result = data;
+			  console.log(status);
+   	 },
+   	 error: function(data, status) {
+			result = false;
+			console.log(status);
+ 
+   	 	if(status == "parsererror"){
+   	 	  console.log("Ajax Error: "+status+",\nO que Pode ser um Erro interno no arquivo chamado pelo Ajax.\nEste Arquivo deve Retornar um Json, Html ou xml (default: json) no Final.");
+   	 	}
 
-		  case "laptop":
-		 	$(id).css('width', 1024);
-		 break;
+   	 }
 
-		  case "desktop":
-		 	$(id).css('width', 1366);
-		 break;
+	});
 
-		  case "tv":
-		 	$(id).css('width', 2500);
-		 break;
-
-	} 
-
-
+	
+	return result;
 }
 
-function typed(speed,component, text=[]){
-	   if ($(component).length) { 
-	    var typed = new Typed(component, {
-	      strings: text ,
-	      typeSpeed: speed,
-	      backSpeed: 30,
-	      backDelay: 2000,
-     	  loop: true, // false = infinite
-	      loopCount: 100,
-	    }); }
 
-}
 
-function toggle(element , target=null){
-	if ($(element).is(':visible')) {
+
+function ajax2(url, method = 'GET',  formdata=null, success=null, error=null){
+
+	$.ajax({
+	  method: method.toUpperCase(),
+	  url: url.toLowerCase(),
+	  async: false,
+	  data: formdata, 
+	  cache:false,
+      contentType: false,
+      processData: false,
+      async: true,
+      success : function(data){
+
+		if( success == null ){
+			return JSON.parse(data);
+		}
+
+		return success(data);
+   	  },
+   	  error: function(data) {
 		
-		$(element).hide('slow');
-
-		 if(target != null){
-		 	window.location.href = target;
-		 }
-
-	}else{
-		$(element).show('slow');
-
-		if(target != null){
-		 	window.location.href = target;
-		 }
-		}
-}
-
-
-function dropdown(element){
-		 	
-
-	if ($(element).is(':visible')) {
-
-		$('.drop-item').css('display', 'none');
-		$(element).css('height', 0);
-		$(element).css('display', 'none');
-
-	}else{
-		$('.drop-item').css('height', 0);	
-		$('.drop-item').css('display', 'none');
-		$(element).css('display', 'flex');
-		$(element).css('height', 100);
-
-		}
-}
-
-
-
-function top_btn() {
-	if ( $(window).scrollTop() > 100 ){
-		$('#top-btn').show('fade');
-	}else{
-		$('#top-btn').hide('slow');
+   	  	if(error == null){
+		console.log(data.status);
+			if(data.status == "parsererror"){
+			  console.log("Ajax Error: "+data.status+",\nO que Pode ser um Erro interno no arquivo chamado pelo Ajax.\nEste Arquivo deve Retornar um Json, Html ou xml (default: json) no Final.");
 			}
+			return JSON.parse(data);
+
+   	 	}else{
+   	 		return error(data);
+   	 	}
+   	 }	
+
+	});
+
+	
 }
 
-function reload_frame(element){
-	$(element).attr('src', $(element).attr('src'));
+
+
+function typed(speed,component, text=[], loop=true){
+	if ($(component).length) { 
+	 var typed = new Typed(component, {
+	   strings: text ,
+	   typeSpeed: speed,
+	   backSpeed: 30,
+	   backDelay: 2000,
+		loop: loop, // false = infinite
+	   loopCount: 100,
+	   showCursor: false,
+	 }); }
+
 }
 
 
-function toogle_modal(element){
 
-	if( $(element).is(':visible') ){
-		 $(element).hide('fast');
+
+function toggle(element){	
+
+    if( $(element).is(':visible') ){
+       $(element).hide();
+    }else{
+		$(element).show();
+    }
+
+	console.log("Toggle() --> Element: "+element+" is_visible:"+$(element).is(':visible') );
+}
+
+
+function toggle_menu_dropdown(element){
+	$('.menu-list-dropdown').removeClass("active");
+	$('.menu-list-dropdown').hide();
+	toggle(element);
+	$(element).addClass("active");
+}
+
+
+function toggle_menu_btn(){
+
+     if( $(this).scrollTop() >= 100){
+        $('#menu-toggle-fixed').show();
+    }else{
+        $('#menu-toggle-fixed').hide();
+    }
+}
+
+function fixed_menu_galery(){
+
+	if( ( $(this).scrollTop() > $('#portfolio').offset().top ) & ( $(this).scrollTop() <= ($('#about').offset().top -10 ) ) ){
+		$('.galery3-header').addClass("galery3-header-fixed");
 	}else{
-		$(element).show('fast');
+		$('.galery3-header').removeClass("galery3-header-fixed");
 	}
+}
 
+function delete_modal(modalid,itemid,action,method="POST", msg="Delete ?"){
+	$(modalid+'>div.modal-custom>p.msg').html(msg);
+	$(modalid+'>div.modal-custom>form').attr('action', action);
+	$(modalid+'>div.modal-custom>form').attr('method', method);
+	$(modalid+'>div.modal-custom>form>input#id').attr('value', itemid);
+	toggle(modalid);
 }
 
 
-function delete_modal(id,action,method="POST", msg="Delete ?"){
+function redirect(url){
+	console.log('Redirect to '+url );
+	if((window.location.pathname != url) && ( window.location.pathname != "/" ) ){
+		history.pushState('data','title',url); 
+	}
+}
 
-	$('.delete_modal>p.msg').html(msg);
-	$('.delete_modal>form').attr('action', action);
-	$('.delete_modal>form').attr('method', method);
-	$('.delete_modal>form>input#id').attr('value', id);
-	toogle_modal('.delete_modal');
+
+function redirect_location(url){
+	return window.location.href = url;
+}
+
+
+function animate_icon_pisca(element){
+	setTimeout(function(){ $(element).html('<i class="far fa-smile"></i>'); }, 1000);
+	setTimeout(function(){ $(element).html('<i class="far fa-smile-beam"></i>'); }, 600);
+	$(element).html('<i class="far fa-smile"></i>');
+	
+}
+
+function animate_icon_pisca2(element){
+	setTimeout(function(){ $(element).html('<i class="far fa-smile"></i>'); }, 900);
+	setTimeout(function(){ $(element).html('<i class="far fa-smile-wink"></i>'); }, 600);
+	$(element).html('<i class="far fa-smile"></i>');
+}
+
+function animate_icon_smile(element){
+	setTimeout(function(){ $(element).html('<i class="far fa-grin-wink"></i>'); }, 500);
+	$(element).html('<i class="far fa-smile"></i>');
+
+}
+
+function animate_icon(element){
+	setTimeout(function(){ animate_icon_pisca(element) }, 200);
+	setTimeout(function(){animate_icon_pisca2(element)}, 1800);
+	setTimeout(function(){animate_icon_smile(element)}, 1600);
+	$(element).html('<i class="far fa-smile"></i>');
+	setInterval( function() {animate_icon(element);} , 4000 );
 }
 
 
@@ -116,32 +180,50 @@ function delete_modal(id,action,method="POST", msg="Delete ?"){
 
 $(document).ready( function(){
  
-  /* Jquery onscroll */	
-  $(window).scroll(function(){
-  	top_btn();
+    /* Jquery onscroll */	
+    $(window).scroll(function(){
+		//toggle_menu_btn();
+		//fixed_menu_galery();
+    });
+  
+  
+    /* Click a.menu-item */
+    $('a.menu-item').click(
+            function () {
+				toggle('#menu');
+            }
+  
+		); 
+		
+
+	$(".modal-box").click(function(event){
+		if( event.target.id === 'mymodal' ){
+			toggle('#mymodal');
+		}
+	});	
+
+
+	$('.uploadfile_file').change(function(event){
+
+		$(".uploadfile_label").html(event.target.value);
+		$(".uploadfile_img").attr("src", $('.uploadfile_file').value );
+		$(".uploadfile_submit").prop('disabled', false);
+
+	} );
+
+	/* Disable Input Autocomplete */	
+	 $('input').attr('autocomplete', 'off');	
+
+
+	  typed(20,'.typed-slogan',[" ", '<b id="smile_icon"   ><i class="far fa-smile"></i></b>&nbsp;Hello!' ], false);
+	  typed(50,'.typed-slogan2',[" ", "I'm messias dias." ], false);
+	  typed(20,'.typed-slogan3',[" ", "Web developer under development" ], false);
+	  //animate_icon('#smile_icon');
+	  //redirect('{{url}}'); 
+	  AOS.init();	
+        
+   
+  
   });
 
 
-  /* Click .drop-item */
-  $('.drop-item-link').click(
-  		function () {
-  			toggle('.drop-item');
-  			toggle('.title-bar-nav ');
-  		}
-
-  	); 
-
-
-
-
-
-
-
-
-  /* Jquery typed function */
-  AOS.init();
-  typed(300,'#typed-slogan',[' ',' Web Developer ',' Freelancer ']);
-  //typed(300,'#loading',[' ','...']);
-
-
-});

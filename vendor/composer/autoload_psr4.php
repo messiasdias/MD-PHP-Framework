@@ -14,5 +14,7 @@ return array(
     'GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
     'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
-    'App\\' => array($baseDir . '/src'),
+    'App\\Models\\' => array($baseDir . '/src/Models'),
+    'App\\Controllers\\' => array($baseDir . '/src/Controllers'),
+    'App\\' => array($baseDir . '/src/App'),
 );

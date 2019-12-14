@@ -6,7 +6,7 @@
 
 namespace App\Models;
 use App\App;
-use App\Models\Model;
+use App\Model\Model;
 use App\Database\DB;
 
 
@@ -14,56 +14,61 @@ use App\Database\DB;
 class User extends Model
 {	
 	public $first_name, $last_name, $username, $pass, $confirm_pass, $email, $confirm_email,  $remember_token, $rol, $status, $img;	
+	public $table = 'users';
 
 
-	public function create (array $data=null){	
 
+	public function create (){	
 
-		if( !is_null($data) && is_null($data['img']) ){
-			$data['img'] = 'img/default/avatar.png';
-		}
-		elseif(is_null($data) && is_null($this->img)){
+		if( is_null($this->img) ){
 			$this->img = 'img/default/avatar.png';
 		}
 
-
 		$validations = [
-			'username' => 'username|minlen:5|noexists:users',
+			'username' => 'username|minlen:5|noexists:user',
 			'pass' => 'string|minlen:6',
 			'confirm_pass' => 'compare_hash:pass',
 			'first_name' => 'string|minlen:4',
 			'last_name' => 'string|minlen:4',
-			'email' => 'email|noexists:users',
-			'status' => 'int|minlen:1|maxlen:1',
+			'email' => 'email|noexists:user',
 			'img' => 'minlen:0',
+			'status' => 'mincount:1|maxlen:2',
 			'rol' => 'int|minlen:1|maxlen:1'
 		];
 
-		return self::save( is_null($data) ? (array) $this: $data , (array) $validations);
 	
+		$this->first_name = ucwords($this->first_name);
+		$this->last_name = ucwords($this->last_name);
 
+		return self::save( (array) $this , $validations);
+	
 	}
 
 
 
 
-	public function update (array $data=null){
+	public function update (){
 
 		$validations = [
-			'id' => 'int|mincount:1|exists:users',
+			'id' => 'int|mincount:1|exists:user',
 			'first_name' => 'string|minlen:4',
 			'last_name' => 'string|minlen:4',
-			'username' => 'username|minlen:5|exists:users',
+			'username' => 'username|minlen:5|exists:user',
 			'email' => 'email',
-			'confirm_email' => 'confirm:email',
-			'status' => 'int|mincount:-1|maxlen:2',
+			'confirm_email' => 'confirm:email|noexists:user',
+			'status' => 'mincount:-1|maxlen:2',
 			'rol' => 'int|mincount:1|maxlen:1',
 			'pass' => 'string|minlen:8',
 			'confirm_pass' => 'confirm:pass',
 			'img' => 'string|minlen:0',
 		];
 
-		return self::save( is_null($data) ? (array) $this: $data , $validations);
+		if( isset($this->first_name) && isset($this->last_name) ) {
+			$this->first_name = ucwords($this->first_name);
+			$this->last_name = ucwords($this->last_name);
+		}
+		
+		return self::save( (array) $this , $validations);
 
 	}
 

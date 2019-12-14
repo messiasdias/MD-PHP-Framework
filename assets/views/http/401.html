@@ -2,17 +2,20 @@
 {% set icon, title = 'fas fa-exclamation-triangle', '401' %}
 {% block content %}
 
-     {% include 'layout/log_template.html' with
+     {% include 'layout/http_layout.html' with
                    
      { 
        'template_class' : 'info',
        'img': 'assets/img/default/erro.png',
        'h2':'Denied Access!',
-       'p': 'Go To Login Page Clicking the Down Button',
-       'btn_text': 'Login',
-       'btn_link': '/login' 
+       'p':   (user == false ) ?  'Go To Login Page Clicking the Down Button' : 'Go To Dashboard Page!',
+       'btn_text':  (user == false ) ? 'Login' : 'Dashboard',
+       'btn_link':   (user == false ) ? '/login' : '/admin' 
      } only 
      
    %}
+
+
  
 {% endblock %}
+

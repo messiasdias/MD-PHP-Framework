@@ -1,45 +1,34 @@
 
 
-      <nav style="display: none;" id="menu" class="menu column-between" >  
+      <nav style="display: none !important; " id="menu" class="menu column-between" >  
             
-            <a onclick="toggle_menu()" class="close"> <i class="fa fa-times"></i> </a>      
+            <a onclick="toggle('#menu')" class="close"> <i class="fa fa-times"></i> </a>      
+       
+                  <div style="" class="menu-list">
+                        <a class="menu-item"  v-bind:class="{'active': location == 'home' }" alt="Home page" href="/#"><b>Home</b></a>
 
-            <!---between, around -->
-            <div class="column-around">
-            <a alt="Home" class="menu-item" href="/"><i class="fas fa-home"></i> <b>Home</b> </a>
+                        {% if   middleware('auth')   %}
+                         <a class="menu-item" alt="Dashboard page" href="/admin"><b>Dashboard</b></a>
+                        {% endif %}
+                        <a class="menu-item" v-bind:class="{'active': location == 'portfolio' }" alt="Galery Jobs" href="/#portfolio"><b>Portfolio</b></a>
+                        <a class="menu-item" v-bind:class="{'active': location == 'about' }" alt="Galery Demos" href="/#about"><b>Me</b></a>
 
-            {% if user.rol %}
-            <a alt="Dashboard Panel" class="menu-item"    href="/admin"><i class="fas fa-cogs"></i> <b>Dashboard</b></a> 
-            {% endif %} 
-          
-            {% if user.rol in [1] %}
-                  <a alt="Users List" class="menu-item"    href="/users"><i class="fas fa-users"></i> <b>Users</b></a> 
-            {% endif %} 
+                         {% if   middleware('guest')   %}
+                         <a class="menu-item" style="opacity: .0000001;" alt="Galery Demos" href="/login"><b>Login</b></a>
+                         {% endif %}
+                  </div>
 
 
-            {% if debug %}
-            <!-- Testes -->
-            <a  alt="Teste" class="menu-item"  href="/teste"><i class="fas fa-vial"></i> <b>Teste</b> </a>
-            <a  alt="Error 404" class="menu-item"  href="/404"><i class="fas fa-vial"></i> <b>404</b> </a>
-                  {% if user == false %}
-                  <a  alt="Error 401" class="menu-item"  href="/users"><i class="fas fa-vial"></i> <b>401</b> </a>  
-                  {% endif %} 
-            {% endif %} 
+            
+                        <br><br> 
+                        <div v-if="user_middleware('auth')" class="column-center">
+                              <a id="avatar" v-bind:href="'/users/profile/'+user.id"> <img width="" class="avatar" v-bind:src="assets+user.img"></a>  
+                              <b class="">{user.first_name} </b><br>
+                              <a alt="Logout Dashboard Panel" class="btn-default"  @click="user_logout($event)"  ><i class="fas fa-sign-out-alt"></i> <b>Logout</b></a> 
+                        </div>
 
-            </div>
-            <br><br>
-            <div class="column-center">
-                  {% if user %}
                   
-                  <a id="avatar" href="/users/profile/{{user.id}}"> <img width="" class="avatar" src="{{assets}}{{ user.img != ' ' ? user.img : '/img/default/avatar.png' }}"></a>  
-                  <b class="">{{user.first_name}} </b><br>
-                  <a alt="Logout Dashboard Panel" class="btn-default"    href="/logout"><i class="fas fa-sign-out-alt"></i> <b>Logout</b></a> 
-                  {% else %}     
-                  <a alt="Login Dashboard Panel" class="btn-primary"    href="/login"> <i class="fas fa-sign-in-alt"></i> <b>Login</b></a> 
-                  {% endif %} 
-            </div>
 
-      
 
       </nav>
 

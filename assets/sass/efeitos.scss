@@ -1,0 +1,365 @@
+/* Start Keyframes animations */
+
+@mixin keyframes($animationName) {
+    @-webkit-keyframes #{$animationName} {
+      @content;
+    }
+    @-moz-keyframes #{$animationName} {
+      @content;
+    }
+    @-o-keyframes #{$animationName} {
+      @content;
+    }
+    @keyframes #{$animationName} {
+      @content;
+    }
+  }
+  
+  @mixin animate($name, $duration, $iteration, $direction) {
+    -webkit-animation-duration: $duration;
+       -moz-animation-duration: $duration;
+         -o-animation-duration: $duration;
+            animation-duration: $duration;
+    -webkit-animation-iteration-count: $iteration;
+       -moz-animation-iteration-count: $iteration;
+         -o-animation-iteration-count: $iteration;
+            animation-iteration-count: $iteration;
+    -webkit-animation-name: $name;
+       -moz-animation-name: $name;
+         -o-animation-name: $name;
+            animation-name: $name;
+    -webkit-animation-direction: $direction;
+       -moz-animation-direction: $direction;
+         -o-animation-direction: $direction;
+            animation-direction: $direction;
+  }
+  
+
+  
+  @include keyframes(pulsate) {
+    0% {
+        transform: scale(1);
+      }
+    50% {
+      transform: scale(1.05);
+    }
+  
+    100% {
+      transform: scale(1);
+    }
+  
+  
+  }
+  
+  
+  @mixin pulsate {
+    @include animate(pulsate, 1s, infinite, normal);
+  }
+  
+
+
+
+
+  @include keyframes(jump) {
+    0% {
+        transform:  translateY(0%);
+    }
+
+    25% {
+        transform:  translateY(10%);
+    }
+  
+    50% {
+        transform:  translateY(0%);
+    }
+
+    75% {
+        transform:  translateY(15%);
+    }
+
+    100% {
+        transform:  translateY(0%);
+    }
+  
+  
+  }
+  
+  
+  @mixin jump {
+    @include animate(jump, .3s, normal, normal);
+  }
+
+  
+//fadein
+  @include keyframes(fadein) {
+    0% {
+        opacity: 0;
+        transform:  scale(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform:  scale(1);
+    }
+  
+  
+  }
+  
+  //fadein
+  @mixin fadein {
+    @include animate(fadein, .3s, normal, normal);
+  }
+
+
+
+//fadeindown
+  @include keyframes(fadeindown) {
+   
+    0% {
+        opacity: 0;
+        transform:  translateY(-100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform:  translateY(0%);
+    }
+  
+  
+  }
+  
+  //fadeindown
+  @mixin fadeindown {
+    @include animate(fadeindown, .3s, normal, normal);
+  }
+
+
+
+
+
+//fadeinup
+  @include keyframes(fadeinup) {
+   
+    0% {
+        opacity: 0;
+        transform:  translateY(100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform:  translateY(0%);
+    }
+  
+  
+  }
+  
+  
+//fadeinup
+  @mixin fadeinup {
+    @include animate(fadeinup, .3s, normal, normal);
+  }
+
+
+
+
+  //fadeoutdown
+  @include keyframes(fadeoutdown) {
+   
+    0% {
+        opacity: 1;
+        transform:  translateY(-100%);
+    }
+
+    100% {
+        opacity: 0;
+        transform:  translateY(0%)
+    }
+  
+  
+  }
+  
+   //fadeoutdown
+  @mixin fadeoutdown {
+    @include animate(fadeoutdown, .3s, normal, normal);
+  }
+
+
+
+
+  //fadeoutup
+  @include keyframes(fadeoutup) {
+   
+    0% {
+        opacity: 1;
+        transform:  translateY(100%);
+    }
+
+    100% {
+        opacity: 0;
+        transform:  translateY(0%)
+    }
+  
+  
+  }
+  
+   //fadeoutup
+  @mixin fadeoutup {
+    @include animate(fadeoutup, .3s, normal, normal);
+  }
+
+
+
+
+  //fadeinleft
+  @include keyframes(fadeinleft) {
+   
+    0% {
+        opacity: 0;
+        transform:  translateX(-100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform:  translateX(0%);
+    }
+  
+  
+  }
+  
+  
+//fadeinleft
+  @mixin fadeinleft {
+    @include animate(fadeinleft, .3s, normal, normal);
+  }
+
+.fadeinleft{
+    @include fadeinleft;
+}
+
+
+  //fadeoutleft
+  @include keyframes(fadeoutleft) {
+   
+    0% {
+        opacity: 1;
+        transform:  translateX(0%);
+    }
+
+    100% {
+        opacity: 0;
+        transform:  translateX(-100%)
+    }
+  
+  
+  }
+  
+  
+//fadeoutleft
+  @mixin fadeoutleft {
+    @include animate(fadeoutleft, .3s, normal, normal);
+  }
+
+.fadeoutleft{
+    @include fadeoutleft;
+}
+
+
+
+
+
+
+   //fadeinright
+   @include keyframes(fadeinright) {
+   
+    0% {
+        opacity: 0;
+        transform:  translateX(100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform:  translateX(0%);
+    }
+  
+  
+  }
+  
+  
+//fadeinright
+  @mixin fadeinright {
+    @include animate(fadeinright, .3s, normal, normal);
+  }
+
+  .fadeinright{
+    @include fadeinright;
+  }
+
+
+
+    //fadeoutright
+    @include keyframes(fadeoutright) {
+   
+        0% {
+            opacity: 1;
+            transform:  translateX(0%);
+        }
+    
+        100% {
+            opacity: 0;
+            transform:  translateX(100%);
+        }
+      
+      
+      }
+      
+      
+    //fadeoutright
+      @mixin fadeoutright {
+        @include animate(fadeoutright, .3s, normal, normal);
+        display: none !important;
+      }
+    
+    .fadeoutright{
+        @include fadeoutright;
+    }
+    
+
+    @mixin btn_shadow($color) {
+
+         box-shadow: inset 300px 1px 5px $color;
+        @media screen and (max-width: #{$md}) {
+          box-shadow: inset 900px 1px 5px $color;
+        }
+
+        transition: all  .3s ease-in-out !important;
+        transition-delay: .1s !important; 
+    }
+
+
+    @mixin scrollbar( $tumb1, $tumb2, $trak, $width:5px ) {
+
+      &::-webkit-scrollbar {
+        width: $width ;
+        max-height: 10px !important;
+      }
+
+    &::-webkit-scrollbar-track {
+        background: $trak !important;
+      }
+
+    &::-webkit-scrollbar-thumb {
+        background:$tumb1 !important;
+        border-radius: 4px !important;
+      }
+
+    &::-webkit-scrollbar-thumb:hover {
+        cursor: pointer;
+        background:$tumb2 !important;
+      }
+
+    }
+
+
+    .jump{
+      @include jump;
+    }

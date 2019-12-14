@@ -1,8 +1,8 @@
 <?php
 namespace App\Controllers;
 use App\App;
-use App\Controllers\Controller;
-use App\Tools\File2;
+use App\Controller\Controller;
+
 
 /**
  * TesteController Class
@@ -12,8 +12,8 @@ class TesteController extends Controller
 {	
 
 	public function index($app, $args=null){
-		$args['name'] = str_replace( '%20', ' ', $args['name']);
-		return $app->view('teste', $args);
+		//$args['name'] = str_replace( '%20', ' ', $args['name']);
+		return $app->view('adminlte/layout/layout', $args);
 	}
 
 

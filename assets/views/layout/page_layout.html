@@ -1,19 +1,22 @@
 {% extends "layout/layout.html" %}
 {% block page %}
-
+<div class="bg-img"></div>
+<div class="page" >
 <!-- Content -->
 
-<div id="{{url}}" class="page">
-
-        <div class="title">
-            <h1><i class="{{ icon ? icon : 'fas fa-vial' }}"></i> {{ title ? title  : 'Test'  }}</h1>
-            <a onclick="toggle_menu()" class="menu-toggle" id="menu-toggle" ><i class="fas fa-bars"></i></a>
+        <div class="page-header">
+                <a href="{{  middleware('admin,manager') ? '/admin' : ( middleware('guest') ? '/' : '#' ) }}"><h1><i class="{{ icon ? icon : 'fas fa-vial' }}"></i> {{ title ? title  : 'Test'  }}</h1></a>
+                <a onclick="toggle('#menu')" class="menu-toggle" id="menu-toggle" ><i class="fas fa-bars"></i></a>
         </div>
-    
-    <!----<div class="content center"> -->
-        {% block content %}{% endblock %}
-    <!----</div> -->
 
-</div>
+        <div class="page-body">                     
+                {% block content %}{% endblock %}
+        </div>
+
+        <!-- Footer --> 
+        <div class="page-footer">
+                <p>&copy;{{ "now"|date("Y") }} Messias Dias</p>
+        </div>
+</div>        
 
 {% endblock %}

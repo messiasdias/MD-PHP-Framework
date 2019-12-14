@@ -1,0 +1,44 @@
+<div  class="btn-group ">
+
+
+        <form action="/{{galery | lower }}/new" method="post" accept-charset="utf-8">
+            <input type="hidden" name="token" id="token" value="{{token}}">
+            <input type="hidden" name="redirect_url" id="redirect_url" value="{{redirect_url}}">
+            <button type="submit" title="Add" class="btn-circle-success" ><i class="fa fa-plus"></i></button>
+        </form> 
+
+
+
+    {% if is_author(item) %}
+
+
+    <form action="/{{galery | lower }}/edit/{{item.id}}" method="post" accept-charset="utf-8">
+
+        <input type="hidden" name="token" id="token" value="{{token}}">
+        <input type="hidden" name="id" id="id" value="{{item.id}}">
+        <input type="hidden" name="redirect_url" id="redirect_url" value="{{redirect_url}}">
+        <button type="submit" title="Edit" class="btn-circle-primary" ><i class="fa fa-edit"></i></button>
+   
+    </form> 
+
+       
+
+        <form action="/{{galery|lower}}/publish" method="post" accept-charset="utf-8">
+
+            <input type="hidden" name="token" id="token" value="{{token}}">
+
+            <input type="hidden" name="id" id="id" value="{{item.id}}">
+            <input type="hidden" name="redirect_url" id="redirect_url" value="{{redirect_url}}">
+
+            <input type="hidden" name="publish" id="publish" value="{{ (item.publish == 1 ) ? 0 : 1 }}">
+
+            <button title="Publish" class="btn-circle-secundary" type="submit"> <i class="far fa-{{ (item.publish == 1)? 'check-square' : 'square' }}"></i> </button>
+
+        </form> 
+
+
+        <button class="btn-circle-error"  title="Delete"  onclick="delete_modal('#mymodal','{{item.id}}','/{{galery | lower }}/del','POST','Do you want to delete the item {{item.title}} ?')" type="button" ><i class="fa fa-trash"></i></button>
+       
+    {% endif %}
+
+</div>

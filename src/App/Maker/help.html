@@ -1,0 +1,26 @@
+
+<center style="padding: 40px;">
+<h1> Maker - Help </h1>
+<h3 style="color: #0F0FFF;">Usage: /maker/{command}/{option[:data]} </h3>
+
+
+<table border="1"  > 
+		<tr> 
+			<td><b>Name:<b></td>  
+			<td> <b>Options:</b> </td>
+			<td> <b>Description:</b> </td> 
+
+		</tr>
+
+		{% for command in commands  %}
+			<tr> 
+				<td>{{ command.name }} </td>
+				<td>{{ command.options }}</td>
+			    <td>{{ command.description }} 
+				 <a href="{{ command.link.href }}"> {{command.link.title}} </a> 
+				</td> 
+			</tr>  
+		{% endfor %}
+
+</table> 
+</center>

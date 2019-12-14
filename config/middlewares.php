@@ -20,7 +20,7 @@ $this->middlewares = (object) [
 
     //guest
     'guest' => function(App $app){
-        return !$app->user();
+        return !$app->user() ? true : false;
     },
 
     //admin
@@ -36,16 +36,12 @@ $this->middlewares = (object) [
 
     //auth
     'auth' => function(App $app){
+        return $app->user() ? true : false;
+    },
 
-        if(isset($app->request->data['id']) ){
-            return ($app->request->data['id'] == $app->user()->id );
-        }
-        elseif( isset($app->args->id) ){
-            return ( $app->user() && ($app->args->id == $app->user()->id) );
-        }else{
-            return false;
-        }
- 
+    //Author
+    'author' => function (App $app){
+        return true;
     },
 
 

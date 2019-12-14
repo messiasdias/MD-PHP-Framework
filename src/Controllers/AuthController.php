@@ -1,6 +1,6 @@
 <?php 
 namespace App\Controllers;
-use App\Controllers\Controller;
+use App\Controller\Controller;
 use App\App;
 
 /**
@@ -11,21 +11,30 @@ class AuthController extends Controller
 
 
 	public function index(App $app, $args=null){
-		return  $app->view(  ( $app->user() ) ? 'dashboard' : 'login' , ['user' => $app->user()] );
+		return  $app->view(  ( $app->user() ) ? 'adminlte/dashboard' : 'adminlte/login' , ['user' => $app->user()] );
 	}
 
 
 	public function login(App $app, $args=null){
 		
 		$response = $app->auth()->login($app->request->data);
+		
 		return $app->mode_trigger( 
 			function ($app, $args,$response) {
 			$app->response->set_log($response);
-			return $app->redirect_header('/admin');
+			$redirect_function = 'redirect';
+			if($response->status){
+				$redirect_function .= '_header';
+			}
+			return $app->$redirect_function('/admin');
 		},function($app, $args, $response){
-			return $app->json($response->data);
+			return $app->json($response);
 		}, $response);
 
+	}
+
+	public function social_login(App $app, $args=null){
+		return $app->json($app->auth()->social_login($app->request->data));
 	}
 
 
@@ -35,12 +44,14 @@ class AuthController extends Controller
 			function ($app, $args,$response) {
 			return $app->redirect_header('/admin');
 		}, function ($app, $args,$response){
-			return $app->json([]);
+			return $app->json($response);
 		}, $response);
 	
 	}
 
 
 }
+
+
 
 

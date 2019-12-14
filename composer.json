@@ -1,8 +1,11 @@
 {	
-
+	"name": "messiasdias/md-php-framework",
+    "description": "A short description of what your package does",
 	"autoload": {
         "psr-4": {
-            "App\\": "src/"
+			"App\\": "src/App/",
+			"App\\Models\\" : "src/Models/",
+			"App\\Controllers\\" : "src/Controllers/"
         }
     },
 	"require": {

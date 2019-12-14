@@ -1,39 +1,107 @@
-{% extends "layout/layout.html" %}
-{% block home %}
-        
-  <div  class="home-left">
-    <div class="bg-img"></div>
-    <a onclick="toggle_menu()" class="menu-toggle-fixed" ><i class="fa fa-bars"></i></a> 
-       <p class="slogan" id="typed-slogan" >...</p> 
 
-      <div class="getstarted">
-          <a style="" class="btn-primary" href="#content"  ><i class="fas fa-play" ></i>&nbsp; Get Started</a>
-      </div>
+{% extends "layout/home_layout.html" %}
+{% block galery %}
 
-  </div>
+  <!-- Galery -->
+  <div  class="galery3"  id="portfolio"  @mouseover="location = 'portfolio';"  >
 
-  <div style=" overflow-x: hidden !important;"  id="content" class="column-center home-right"> 
-    
-      
-      <div class="destak2">
-
-        <h2 class="destak" > MD <i class="fab fa-php" ></i> Framework</h2> 
-       
-        
-        <p>
-          Meu Mini-Framework PHP derivado do trabalho de desenvolvimento do meu próprio portifólio.
-        </p>
-
-          <div>
-            <a class="btn-default" href="https://github.com/messiasdias/MD-PHP-Framework" target="_blank"  ><i class="fab fa-github" ></i>&nbsp;GitHub </a> 
-            <a class="btn-primary" href="https://bitbucket.org/messiasdias/md-php-framework/src/master/" target="_blank"> <i class="fab fa-bitbucket"> </i>&nbsp;Bitbucket</a>
-          </div>
-
-
-      </div>
-       
      
 
-  </div>
+    <div class="galery3-header"   >
+
+      <div class="galery3-header-left" >
+        <ul>
+          <li v-bind:class="{ active: galery.name == 'all' }" @click="galery_select($event, 'all')" >All</li>
+          <li v-bind:class="{ active: galery.name == 'jobs' }" @click="galery_select($event, 'jobs')" >Jobs</li>
+          <li  v-bind:class="{ active: galery.name == 'demos' }" @click="galery_select($event, 'demos')" >Demos</li>
+        </ul>
+
+        <form  class="search" id="formsearchGalery" method="POST" v-on:submit="galery_search"  >
+            <input  type="text" name="search" id="search" placeholder="Search" v-model="search_input" >
+            <button type="submit" ><i class="fa fa-search"></i></button>
+          </form>
+
+    </div>
+
+      <a onclick="toggle('#menu')" class="menu-toggle" id="" ><i class="fas fa-bars"></i></a> 
+
+    </div>
+
+
   
+   
+    <div  class="galery3-body"  >
+
+      <div  class="galery3-body-content"    >
+
+         
+        <div class="sorry" v-if="galery.itens.length == 0" >
+        
+          <h2 class="tx-subtitle">Oops!</h2> 
+
+          <img src="{{assets}}img/default/erro2-a.png"> 
+
+          <p class="tx" >Sorry, Not Found Results <span v-if="search" >for <b class="tx-subtitle" > {search}</b></span> !</p>
+        </div>
+
+        
+       
+        
+        <div  data-aos="flip-down" class="box" v-if="(index < galery.itens.length) && ( index <  galery.show ) "   v-for="  (item, index) in  galery.itens" >
+            
+            <div class="box-header">
+
+                <h2 class="box-title">{item.title}</h2>
+                <p class="box-tx">{item.created}</p>
+            </div>
+            <div  class="box-body">
+    
+              <img  v-bind:title="'Image '+item.title" class="body-img" v-bind:src="{{assets}}+item.img" alt="">
+
+            </div>
+            <div class="box-footer">
+
+                <div title="Tag Categories" class="linkandtags"> 
+                  <a class="btn-primary" title="Visualize" v-bind:href="'/galery/'+item.table+'/'+item.id ">Visualize</a> 
+                  <b if="item.tag"  class="box-tx"> #html, #js,#css {item.tag}</b> 
+                </div>
+
+                <div class="controls">
+                    <button type="button" id="like" title="Like" @click="galery_setLike($event,index)" ><i class="fas fa-heart"></i> <span> 100</span></button>               
+                    <button type="button" id="comments" title="Comments" @click="galery_comments_openBox($event,index)" ><i class="fas fa-comment-dots"></i> <span> 50</span> </button>
+                    <button type="button" id="share" title="Share"  @click="galery_share_openBox($event,index)" ><i class="fas fa-share"></i> <span> 10</span> </button>   
+                </div>
+
+            </div>
+
+        </div>  
+
+
+
+
+
+
+        </div><!--end content-->
+
+    
+        <div class="flex-row">
+          <button  v-if="galery.itens && (galery.itens.length > 6)" type="button"  class="btn-circle-default" @click="galery.show += 6" title="View More" ><i class="fa fa-chevron-down"></i></button>
+          <button  v-if="galery.itens && (galery.show > 6 )" type="button"  class="btn-circle-default" @click="galery.show -= 6" title="View Less" ><i class="fa fa-chevron-up"></i></button>
+       </div>
+    </div>
+
+    
+
+    <div class="galery3-footer">
+
+       
+
+    </div>
+
+
+
+  </div>
+ <!-- /Galery -->
+
+
   {% endblock %}

@@ -2,35 +2,35 @@
 <div class="pagination" >
 
             
-            <a class="pagination-link" href="/{{galery | lower }}/1/{{count}}" >First</a>
+            <a class="pagination-link" href="/{{ paginationlink | lower }}/1/{{count}}" >First</a>
             
               {% if page > 10   %}
 
-            <a class="pagination-link" href="/{{galery | lower }}/{{page-10}}/{{count}}"> -10 </a>
+            <a class="pagination-link" href="/{{ paginationlink | lower }}/{{page-10}}/{{count}}"> -10 </a>
 
              {% endif %}
 
 
              {% if  pages > 1 and ((page - 1) >= 1)  %}
-            <li class="pagination-item" ><a class="pagination-link" href="/{{galery | lower }}/{{page-1}}/{{count}}">{{page-1}}</a>
+            <li class="pagination-item" ><a class="pagination-link" href="/{{ paginationlink | lower }}/{{page-1}}/{{count}}">{{page-1}}</a>
              {% endif %}
 
-           </li><a class="pagination-link active" href="/{{galery | lower }}/{{page}}/{{count}}">{{page}}</a>
+           </li><a class="pagination-link active" href="/{{ paginationlink | lower }}/{{page}}/{{count}}">{{page}}</a>
 
             {% if pages > 1   %}
 
                 {% if ( (page + 1) <= pages ) or (page == 1 ) %}
-                <a class="pagination-link" href="/{{galery | lower }}/{{page+1}}/{{count}}">{{page+1}}</a>
+                <a class="pagination-link" href="/{{ paginationlink | lower }}/{{page+1}}/{{count}}">{{page+1}}</a>
                 {% endif %}
 
 
                  {% if (page + 10 ) <= pages  %}
-                <a class="pagination-link" href="/{{galery | lower }}/{{page+10}}/{{count}}"> +10 </a>
+                <a class="pagination-link" href="/{{ paginationlink | lower }}/{{page+10}}/{{count}}"> +10 </a>
                 {% endif %}
 
                 {% if page < pages  %}
                 
-                <a class="pagination-link" href="/{{galery | lower }}/{{pages}}/{{count}}">Last</a>
+                <a class="pagination-link" href="/{{ paginationlink | lower }}/{{pages}}/{{count}}">Last</a>
                 
                 {% endif %}
 

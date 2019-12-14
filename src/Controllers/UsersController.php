@@ -1,9 +1,10 @@
 <?php 
 namespace App\Controllers;
-use App\Controllers\Controller;
+use App\Controller\Controller;
 use App\App;
 use App\Models\User;
 use App\Auth\Auth;
+
 
 /**
  * UsersController Class
@@ -19,12 +20,15 @@ class UsersController extends Controller
 
 	public function list(App $app,$args=null, $search=null){
 
-		$response = $app->db()->paginate('users',
-			isset($args->page)? $args->page : 1 , 
-			isset($args->ppage) ? $args->ppage : 10, $search);
-
+		$response = User::all([isset($args->page)? $args->page : 1 , 
+				isset($args->ppage) ? $args->ppage : 10, $search] );	
 
 		if ($response){
+
+			foreach($response['data'] as $user ){
+				unset($user->pass);
+			}
+
 			$data = array (
 					 'title' => 'Users',
 					 'galery' => 'users',
@@ -37,9 +41,16 @@ class UsersController extends Controller
 
 			}
 
-		return $app->view('users/list', $data);
+
+		return $app->mode_trigger( 
+		function ($app, $args,$data) {
+			return $app->view('adminlte/users/list', $data);
+		},function($app, $args, $data){
+			return $app->json($data);
+		}, $data);
 
 	}
+
 
 	public function search(App $app,$args=null){
 		$search = ['first_name','last_name','username','id', 'email',strtolower($app->request->data['search']) ];
@@ -47,32 +58,27 @@ class UsersController extends Controller
 	}
 
 
-	public function create_form(App $app,$args=null){
-
-		$data = [
-				'title' => 'New User',
-				'icon' => 'fas fa-user-plus',
-				 'type' => 'add',
-				 'method' => 'POST',
-				 'action' => '/users',
-				];
-
-		return $app->view('users/form', $data);
-	}
-
-
 
 
 	public function create(App $app,$args=null){
+		$app->request->data['username'] =  preg_match('/^(@[0-9a-zA-Z_-]{0,})$/' , $app->request->data['username']  ) ? $app->request->data['username'] : '@'.$app->request->data['username'];
 		$user = new User($app->request->data);
 		$response = $user->create();
 		$response->user = User::find('username',$app->request->data['username']);		
 		
-		if($response->status){
-			return $app->redirect("/users/".$response->user->id );
-		}else{
-			return $app->redirect("/users/add", "GET", ['input' => $response->data, 'errors' => $response->errors ]);
-		}
+
+		return $app->mode_trigger( 
+		function ($app, $args,$response) {
+			
+			if($response->status){
+				return $app->redirect("/users/".$response->user->id );
+			}else{
+				return $app->redirect("/users/add", "GET", ['input' => $response->data, 'errors' => $response->errors ]);
+			}
+
+		},function($app, $args, $response){
+			return $app->json($response);
+		}, $response);
 		
 	}
 
@@ -83,7 +89,7 @@ class UsersController extends Controller
 	public function update(App $app,$args=null){
 
 		$user = new User( (array) User::find('id', $app->request->data['id'])   );
-		
+
 		foreach( (array) $user as $key => $value ){
 			unset($user->$key);
 		}
@@ -94,50 +100,44 @@ class UsersController extends Controller
 
 		$response = $user->update();
 		$app->response->set_log($response);
-		$response->user = User::find('id', $app->request->data['id']) ;
+	
+		return $app->mode_trigger( 
+		function ($app, $args,$response) {
+			
+			if($response->status){
+				return $app->redirect( $app->request->data['redirect_url'] );
+			}else{
+				return $app->redirect("/users/edit/".$app->request->data["type_form"]."/".$app->request->data["id"] , 'GET', 
+				['input' => $response->data, 'errors' => $response->errors ] );
+			}
 
-		if($response->status){
-			return $app->redirect( ($app->user()->rol == 1)  ? "/users" : "/users/".$response->user->id , 'GET', $args);
-		}else{
-			return $app->redirect("/users/edit/".$app->request->data["type_form"]."/".$app->request->data["id"] , 'GET', 
-			['input' => $response->data, 'errors' => $response->errors ] );
-		}
+		},function($app, $args, $response){
+			return $app->json($response);
+		}, $response);
 
 
 	}
-
-
-
-	public function update_form (App $app,$args=null){
-		$user = User::find('id', $args->id);
-		if($user){
-			$data = [ 'title' => 'Edit '.ucfirst($args->attr),
-					   'icon' => 'fas fa-user-edit',
-					   'action' => '/users/edit',
-					  'type' => strtolower($args->attr),
-					  'method' => 'POST',
-					  'input' => ['id' => $args->id ],
-					   ];
-			$app->inputs($user);		   
-			return $app->view('users/form', $data );
-		}else{
-			return $this->list($app,$args);
-		}
-	}
-
 
 
 	public function delete(App $app,$args=null){
 		$user = User::find('id', $app->request->data['id']);
-		$app->response->set_log($user->delete());
-		return $app->redirect("/users");	
+		$response = $user->delete();
+		$app->response->set_log($response);
+	
+		return $app->mode_trigger( 
+		function ($app,$args,$response) {
+			return $app->redirect( isset($app->request->data['redirect_url'])  ? $app->request->data['redirect_url'] : '/users' );
+		},function($app,$args,$response){
+			return $app->json($response);
+		}, $response);
 	}
 
 
 
 	public function img_upload($app, $args=null){
-		$filename = "../assets/public/img/users/".$app->request->data['id'].date("YmdHis").".".explode('.', $app->request->files['file']['name'])[1] ;
-		$app = $app->upload($filename);
+
+		$filename = "../assets/public/img/users/user-".$app->request->data['id'].date("YmdHis").".".explode('.', $app->request->files['file']['name'])[1] ;
+		$app = $app->upload($filename); $response = null;
 		
 		if( file_exists($filename) ){
 			$user = User::find('id', $app->request->data['id']);
@@ -150,11 +150,20 @@ class UsersController extends Controller
 				'id' => $user->id,
 				'img' => "/img/".explode( '/img/', $filename )[1]
 			]);
+
+			$response = $user->update();
 			
-			$app->response->set_log($user->update());
+			$app->response->set_log($response);
 		}
 
-		return $app->redirect('/users/'.$app->request->data['id']);
+
+		return $app->mode_trigger( 
+		function ($app,$args,$response) {
+			return $app->redirect( isset($app->request->data['redirect_url'])  ? $app->request->data['redirect_url'] : '/users/'.$app->request->data['id']);
+		},function($app,$args,$response){
+			return $app->json($response);
+		}, $response);
+
 	}
 
 	

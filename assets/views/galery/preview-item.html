@@ -1,0 +1,90 @@
+{% extends "layout/page_layout.html" %}
+{% set icon, title =  icon  , item.title  %}
+
+{% block content %}
+
+
+  <div  id="{{url}}"  class="container-fluid page">
+
+      <div class="bg-img bg-filter"></div> 
+      <div class="container-fluid" >
+
+        
+
+
+          <div  class="row flex-row flex-center">
+
+            <div id="menu1"   class="zoomin flex-start col-lg-6 col-12 btn-group box3" >
+
+               <a  title="Home" class="btn-group-first" href="/"><i class="fas fa-home"></i> </a>
+
+                <a  title="Jobs" class="btn-group-first" href="/jobs"><i class="fas fa-briefcase"></i> </a>
+
+                <a  title="Demos" class="btn-group-first" href="/demos"><i class="fas fa-desktop"></i> </a>
+
+                 <a title="Reload" class="btn-group-first" onclick="reload_frame('#frame-item{{ item.id }}')" href="#galery-item{{ item.id }}">
+                        <i class="fas fa-redo"></i>
+                     </a> 
+
+                     <a title="Back"  class="btn-group-first" onclick="window.history.back()" href="#galery-item{{item.id}}">
+                      <i class="fas fa-reply"></i>
+                     </a> 
+
+
+             </div>
+
+            <div class="preview-menu co-12 col-lg-6">
+
+                <a class="preview-menu-item" id="prev-mobile" onclick="preview('mobile','#frame-item{{ item.id }}')" ><i class="fa fa-mobile-alt"></i> <b>Phone</b> </a>
+
+                <a class="preview-menu-item" id="prev-tablet" onclick="preview('tablet','#frame-item{{ item.id }}')"><i class="fa fa-tablet-alt"></i>
+                  <b>Tablet</b></a>
+
+                <a class="preview-menu-item" id="prev-laptop" onclick="preview('laptop','#frame-item{{ item.id }}')"><i class="fa fa-laptop"></i>
+                  <b>Laptop</b></a>
+
+                <a class="preview-menu-item" id="prev-desktop" onclick="preview('desktop','#frame-item{{ item.id }}')"><i class="fa fa-desktop"></i><b>Desktop</b></a>
+
+                <a class="preview-menu-item" id="prev-tv" onclick="preview('tv','#frame-item{{ item.id }}')"> <i class="fa fa-tv"></i>
+                  <b>TV</b></a>
+            </div>
+
+          </div>
+
+
+
+      </div>   
+
+
+  <div  class="row ">
+
+
+
+
+     <div id="modal-item{{ item.id }}"  class="preview col-12 " >
+
+              <iframe class="frame" id="frame-item{{ item.id }}" class="" src="{{item.link}}"></iframe> 
+
+      </div>
+
+
+      <div class="page col-12 flex-col flex-center">
+          
+          <p>{{item.description}}</p>
+
+      </div>
+
+
+      <div id="menu2" class="zoomin flex-start col-12 btn-group box3" ></div>
+
+     <!-- append #menu -->
+     <script type="text/javascript">
+       //$("#menu2" ).append($("#menu1").html() );
+     </script>
+
+      
+</div>
+ 
+
+
+{% endblock %}

@@ -3,11 +3,11 @@
 {% set icon, title = 'fas fa-exclamation-triangle', '404' %}
 {% block content %}
 
-    {% include 'layout/log_template.html' with
+    {% include 'layout/http_layout.html' with
                   
     { 
         'template_class' : '',
-        'img': 'assets/img/default/erro.png',
+        'img': 'assets/img/default/404.png',
         'h2':'Page not Found!',
         'p': 'Return to Home Clicking the Down Button',
         'btn_text': 'Back To Home',
@@ -15,7 +15,6 @@
       } only 
       
       %}
-
 
   {% endblock %}
 
