@@ -58,7 +58,7 @@ class View
 		}
 		
 		$path = $app->path.$path;
-		$view = new \Twig_Environment(new \Twig_Loader_Filesystem($path));
+		$view = new  \Twig\Twig_Environment(new  \Twig\Twig_Loader_Filesystem($path));
 		$view = $this->set_filters($this->app, $view);
 		$this->view = $view->render($template , $data);
 

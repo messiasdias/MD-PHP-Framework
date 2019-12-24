@@ -1,7 +1,6 @@
 
 <?php
 
-use App\Models\User;
 /*
 
     Example:
@@ -24,6 +23,11 @@ function convert_array($item){
 }
 
 
-include 'Galery_Filters.php';
-include 'Users_Filters.php';
+foreach ( glob( $this->app->path.'Viewfilters/*.php' )  as $filter ) {
+    if (  file_exists($filter) )
+    {	
+        include $filter;
+    }
+}
+
 

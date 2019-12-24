@@ -98,7 +98,7 @@ class App
 
 		}else{
 
-			$file = "../assets/views/$this->theme/http/".$app->response->get_http_code().".html";
+			$file =  $this->path."../assets/views/$this->theme/http/".$app->response->get_http_code().".html";
 
 			if ( file_exists($file) && ( $app->response->get_http_code() != '200' ) ){
 				
