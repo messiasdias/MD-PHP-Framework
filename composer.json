@@ -2,6 +2,7 @@
     "name": "messias/md-php-framework",
     "description": "Meu Framework PHP",
     "type": "library",
+    "version": "1.0.0",
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.2.0",
