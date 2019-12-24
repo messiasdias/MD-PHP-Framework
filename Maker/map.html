@@ -1,0 +1,31 @@
+					
+<center style="padding: 40px;">
+
+<h1 style="color:#3333FF;" >Router Map</h1> 
+
+<br>
+ <a href="/maker">Maker - Help</a>
+ <br> <br>
+
+    <table border="1"> 
+        
+        <tr>
+            <th>ID:</th> 
+            <th>Name:</th> 
+            <th>Method:</th> 
+            <th>Middlewares:</th>  
+        </tr> 
+
+        {% for router in routers %} 
+            <tr>
+                <td>{{loop.index}}</td> 
+                <td>{{router.name}}</td>
+                <td>{{router.method}}</td>
+                <td>{{router.middlewares}} </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/maker">Maker - Help</a>
+
+</center>
