@@ -6,7 +6,7 @@
 namespace App\Database\Migrations\Seeds;
 use App\Database\Seeds\Seeder;
 
-class {{name}}Seeder extends Seeder
+class {{name}} extends Seeder
 {
 	
 	public function __construct(){
@@ -17,8 +17,8 @@ class {{name}}Seeder extends Seeder
 
 				*/
 
-				//DB resposnse $rs 
+				//DB response $rs 
 				//$rs == (object) ['valid'=> [true|false], 'errors' => [] ];
-				$this->set_response( $rs , 'User '.$user->name);
+				//$this->set_response( $rs , $msg );
 
 	}

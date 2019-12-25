@@ -1,6 +1,6 @@
 
 /**
- * {{name}}Migration Class
+ * {{name}} Migration Class
  */
 
 namespace App\Database\Migrations;
@@ -10,16 +10,18 @@ use App\Database\Table;
 
 
 
-class {{name}}Migration extends Migration 
+class {{name}} extends Migration 
 {
 
 		public function cols(){
-			// table cols
-			// $this->table->addCol('col-name','col-type',col-size [100], NULL [false | true], AI [true|false]);
-			$this->table->addCol('id','int',100, false, true);	
+			/* 
+			   Table cols definitions:
+			   $this->table->addCol('col-name','col-type',col-size [100], NULL [false | true], AI [true|false]);
 			
-				//Outhes Cols
-
+			*/
+			
+			$this->table->addCol('id','int',100, false, true);	
+			/* Outhes Cols */
 			$this->table->addCol('created','timestamp');
 			$this->table->addCol('updated','timestamp');
 

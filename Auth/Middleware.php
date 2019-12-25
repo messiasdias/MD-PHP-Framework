@@ -11,7 +11,13 @@ class Middleware
 
 	public function __construct(App $app, $list = 'guest'){
 		$this->app = $app;
-		include $this->app->path.'../config/middlewares.php'; //Load middlewares
+		
+		if( file_exists($this->app->path.'config/middlewares.php') ){
+			include $this->app->path.'config/middlewares.php'; //Load middlewares
+		}else{
+			echo "File ".$this->app->path."config/middlewares.php not Found!";
+		}
+
 		$this->list = $this->listtoarray($list);
 	}
 

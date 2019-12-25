@@ -11,10 +11,17 @@ use App\App;
 class DB {
 
 	private $host, $port, $database, $user, $pass;
-	public $class;
+	public $class, $conection ;
 
 	public function __construct(string $class ){
-		include '../config/db.php'; //Load DBConfigs
+
+		if( file_exists( __DIR__.'/../../../../config/db.php')  ){
+			include  __DIR__.'/../../../../config/db.php';  //Load DBConfigs
+		}else{
+			echo 'File config/db.php not Found! <br>';
+			exit;
+		}
+
 		$this->class =  !is_null($class) ?  new $class() : false;
 	}
 
@@ -22,10 +29,11 @@ class DB {
 	public function conection(){
 		try {
 			$pdo = "mysql:host=".$this->host."; port=".$this->port."; dbname=".$this->database.";charset=utf8";
-			return new PDO($pdo,$this->user,$this->pass);
+			return @new PDO($pdo,$this->user,$this->pass);
 		  
 		} catch(PDOException $error) {
-		   return (object) ['status' => false, 'msg' => "PDOException error: $error", 'data' => NULL ];
+		  echo $error;
+		  exit;
 		} 
 
 	}

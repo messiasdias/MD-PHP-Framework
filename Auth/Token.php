@@ -98,7 +98,14 @@ class Token
 	* @return string $token_encoded  
 	*/
 	public static function encode(array $token){
-		include '../config/key.php'; //Load key
+		
+		if( file_exists( __DIR__.'/../../../../config/key.php')  ){
+			include  __DIR__.'/../../../../config/key.php'; //Load key
+		}else{
+			echo 'File config/key.php not Found! <br>';
+			return false;
+		}
+
 		if ( isset( $token )  && is_array( $token ) ) {
 			return JWT::encode( $token , $key ); 
 		}else{
@@ -118,7 +125,14 @@ class Token
 	*/
 
 	public static function decode(string $token){
-		include '../config/key.php'; //Load key
+		
+		if( file_exists( __DIR__.'/../../../../config/key.php')  ){
+			include  __DIR__.'/../../../../config/key.php'; //Load key
+		}else{
+			echo 'File config/key.php not Found! <br>';
+			return false;
+		}
+
 		if ( isset($token) &&  ( count( explode('.', $token) ) == 3  )  ) {
 			return  JWT::decode($token, $key , array('HS256') );
 		}else{

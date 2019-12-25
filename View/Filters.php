@@ -14,6 +14,7 @@
 
 */
 
+
 function convert_object($item){
   return is_array($item) ? (object) $item : $item ;
 }
@@ -23,7 +24,7 @@ function convert_array($item){
 }
 
 
-foreach ( glob( $this->app->path.'Viewfilters/*.php' )  as $filter ) {
+foreach ( glob( $this->app->path.'src/Viewfilters/*.php' )  as $filter ) {
     if (  file_exists($filter) )
     {	
         include $filter;

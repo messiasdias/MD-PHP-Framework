@@ -28,24 +28,24 @@ class Maker
 		switch (strtolower($type) ) {
 			case 'migrations': 
 				$action ='Migration';
-				$path = $this->path.'Database/'.ucfirst($type).'/';
+				$path = $this->path.'src/Database/'.ucfirst($type).'/';
 			break;
 			case 'seeds':
 				$action ='Seeder';
-				$path = $this->path.'Database/'.ucfirst($type).'/';
+				$path = $this->path.'src/Database/'.ucfirst($type).'/';
 			break;
 
 			case 'tables':
-				$action ='Seeder';
-				$classes = $this->get_classes('Seeds', $class_name);
+				$action ='Migration';
+				$classes = $this->get_classes('Migration', $class_name);
 
 				  if ( $classes ) {	
 					foreach ($classes as $key => $class) {
 							$table =  strtolower(str_replace('.php' ,'' ,explode('\\', $class)[ count(explode('\\', $class))-1 ])) ;
 							$regex = '/^([a-zA-Z0-9\\]{0,}[\\'.$table.']{1,})$/';
 
-							if ( ( ($class_name == 'all') | @preg_match( $regex , $table ) )   && ($table != 'Seeder' ) ){
-								array_push($return, strtolower(str_replace('Seeder','',$table) ) );
+							if ( ( ($class_name == 'all') | @preg_match( $regex , $table ) )   && ($table != 'Migration' ) ){
+								array_push($return, strtolower(str_replace(['Migration','src/' ],'',$table) ) );
 							}
 						}
 					}
@@ -66,7 +66,7 @@ class Maker
 
 		foreach (glob($path.'*.php') as $key => $value)
 		{	
-			$value = str_replace([$this->path,'/'], ['App/' ,'\\'],str_replace('.php', '', $value));
+			$value = str_replace([$this->path,'/'], ['App/' ,'\\'],str_replace(['src/' ,'.php'], '', $value));
 			$value_exp = str_replace( $action,'', explode('\\', $value)[count( explode('\\', $value) )-1] );
 
 			if(  ( ($class_name == 'all') && ( $value_exp != 'Migration' ) ) | (  strtolower($value_exp ) == strtolower( $class_name )  ) ){
@@ -503,55 +503,75 @@ class Maker
 
 
 	private function makefile($type, $name) {
-		$template = $this->path.'Maker/';
-		$path = $this->path;
+		$template = $this->app->vendor_path.'Maker/';
+		$file = ''; $path = $this->app->path.'src/';
 
 		switch (strtolower($type) ) {
 			case 'controller':
 				$template .= "Controller.txt";
-				$path .= "Controllers/".ucwords(  $name , '_'  ).".php";
+				$path .= "Controllers/";
 			break;
 
 			case 'model':
 				$template .= "Model.txt";
-				$path .= "Models/".ucwords(  $name , '_'  ).".php";
+				$path .= "Models/";
 			break;
 
 			case 'migration':
 				$template .= "Migration.txt";
-				$path .= "Database/Migrations/".ucwords(  $name , '_'  ).".php";
+				$path .= "Database/Migrations/";
 			break;
 
 			case 'seeder':
 				$template .= "Seeder.txt";
-				$path .= "Database/Seeds/".ucwords(  $name , '_'  ).".php";
+				$path .= "Database/Seeds/";
 			break;
 			
 			case 'route':
 				$template .= "Route.txt";
-				$path .= "Routers/".ucwords(  $name , '_'  ).".php";
+				$path .= "Routers/";
+				if( explode('-', $name)[0] === 'api' ){
+				  $path .= 'api/';
+				  $name = explode('-', $name)[1];
+				}
+
+				$file = $path.strtolower($name ).".php";
+
+				//echo var_dump($path, $name, explode($name,'-')[0]);
+				 //exit;
+
 			break;
 
 		}
 
-		if ( file_exists($path)  ) {
-			return [false, 'The file '.ucfirst($name).ucfirst($type).' already exists!'];
+		if( $file == '' ){
+			$file = $path.ucwords( $name , '_'  ).".php";
+		}
+
+		if ( file_exists($file)  ) {
+			return [false, 'The file '.ucfirst($name).' '.ucfirst($type).' already exists!'];
 		}else{
+			
+			if( is_writable($path) ){	
+				$tmp = fopen($template, 'r');
+				$content = fread($tmp, filesize($template));
+				$document = fopen($file, 'a+');
+				$rw = fwrite($document, '<?php ');
+				$rw = fwrite($document , str_replace('{{name}}',ucfirst($name),$content) );
+				fclose($document);	
 
-			$tmp = fopen($template, 'r');
-			$content = fread($tmp, filesize($template));
-			$file = fopen($path, 'a+');
-			$rw = fwrite($file, '<?php ');
-			$rw = fwrite($file , str_replace('{{name}}',ucfirst($name),$content) );
-			fclose($file);	
+				$chmod = chmod($file,0775); 
 
-			$chmod = chmod($path,0775); 
+				if (file_exists($file)) {
+					return [true, 'Creating '.ucfirst($name).' ' .ucfirst($type).' Successfully!'];
+				}
 
-			if (file_exists($path)) {
-				return [true, 'Creating '.ucfirst($name).ucfirst($type).' Successfully!'];
-			}
-
-			return [false, 'An error occurred while creating file '.ucfirst($name).ucfirst($type).'!' ];
+				return [false, 'An error occurred while creating file '.ucfirst($name).ucfirst($type).'!' ];
+			}else{
+				return [false, 'Permission denied for create file '.ucfirst($name).ucfirst($type).'! <br><br> '.
+			           'Execute on cli in the root directory: <br>$ <i>sudo chown user:root -R</i> .
+					   '];
+			} 
 		}
 
 

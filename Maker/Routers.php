@@ -7,7 +7,7 @@ use App\Maker\Maker;
 
 $app->get('/maker',  function($app,$args) {  
 	//Maker index|help	
-	return $app->view('help' , [ 'commands' => maker_commands ] , $app->path.'App/Maker/') ;
+	return $app->view('help' , [ 'commands' => maker_commands ] , $app->vendor_path .'Maker/'  ) ;
  }, 'debug');
 
 
@@ -47,7 +47,7 @@ $app->get('/maker/{command}string/{subcommand}string', function($app,$args) {
 		case 'view' : 
 		case 'app' :
 		case 'html' :  
-			return $app->view('map' , [ 'routers' => $app->routers] , $app->path.'../vendor/messiasdias/md-php-framework/Maker/') ;
+			return $app->view('map' , [ 'routers' => $app->routers] , $app->vendor_path .'Maker/' ) ;
 		break;
 		
 		case 'api' : 

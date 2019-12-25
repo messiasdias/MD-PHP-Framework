@@ -10,12 +10,12 @@ class Seeder
 
 	function __construct(){}
 
-	public function set_response($rs , string $msg=''){
+	public function set_response( Object $rs , string $item_name=''){
 	
 		if ( isset( $rs->status) && $rs->status ) {		
-						$this->response .= '<br><b style="color:green;">Create '.$msg.' Successfully!</b>';
+						$this->response .= '<br><b style="color:green;">Create '.$item_name.' Successfully!</b>';
 			}else{
-				    	$this->response .=  '<br><b style="color:brown;">Erros while creating the '.$msg.'!</b>';
+				    	$this->response .=  '<br><b style="color:brown;">Erros while creating the '.$item_name.'!</b>';
 
 				    	if ( isset($rs->errors) && $rs->errors) {
 				    		foreach ($rs->errors as $key => $value) {

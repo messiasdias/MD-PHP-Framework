@@ -1,4 +1,3 @@
-
 /*
 
 -->> Use Class Example
@@ -62,6 +61,7 @@ $app->get('/myurl' , $callback = function($app,$args) {
 	
 	$app->response->write('<center style="color:#3333FF; padding: 200px;">
 		<h1>My Firt Route is OK! <br> Minha Primeira Rota está ok!</h1>
+		<a href="/map" >App Router Map</a> <br> 	<a href="/api/map" >Api Router Map</a>
 	</center>');
 
 	return $app; 

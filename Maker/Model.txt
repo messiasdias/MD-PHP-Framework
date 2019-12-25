@@ -1,6 +1,6 @@
 
 /**
- * {{name}} Class
+ * {{name}} Model Class
  */
 namespace App\Models;
 use App\Models\Model;
@@ -8,15 +8,13 @@ use App\Models\DB;
 
 class {{name}} extends Model {
 
-	//public $table, $id;
+	public $table = {{name}}s ;
 
 	public function create (){}
 
 	public function update (){}
 
 	public function delete(){}
-
-
 
 
 }

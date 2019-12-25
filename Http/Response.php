@@ -1,5 +1,6 @@
 <?php
 namespace App\Http;
+use App\App;
 use App\Http\Request;
 use App\Auth\Token;
 /**
@@ -8,11 +9,11 @@ use App\Auth\Token;
 class Response extends Request 
 {	
 	protected $headers=[], $http_code, $http_msg, $http_codes;
-	public $view, $log=[], $path;
+	public $view, $log=[], $app;
 	
-	function __construct(Request $request, $path = '../src/')
+	function __construct( App $app)
 	{
-		foreach ($request as $key => $value) {
+		foreach ($app->request as $key => $value) {
 				$this->$key = $value;
 
 			if ( (!is_null($key) && !is_null($value)) && !is_Array($value) ){
@@ -20,7 +21,7 @@ class Response extends Request
 			}
 
 		}
-		$this->path = $path;
+		$this->app = $app;
 		$this->http_codes = $this->get_http_code_list();
 	}
 
@@ -55,7 +56,7 @@ class Response extends Request
 
 
 	public function get_http_code_list(){
-		return (array) json_decode( file_get_contents($this->path.'../vendor/messiasdias/md-php-framework/Http/http_codes.json') );
+		return (array) json_decode( file_get_contents($this->app->vendor_path.'Http/http_codes.json') );
 	}
 
 

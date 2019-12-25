@@ -60,7 +60,7 @@ class Router
 			 foreach( $route_name_exp as $route_name_exp_key => $route_name_exp_value){
 
 
-				if( $route_name_exp_value ===  $url_exp[$route_name_exp_key]  ) {
+				if( isset($url_exp[$route_name_exp_key]) && ($route_name_exp_value ===  $url_exp[$route_name_exp_key])  ) {
 
 					$routers[$i]= $route;
 					$url_start_with .= '/'.$route_name_exp_value;

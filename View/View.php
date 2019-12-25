@@ -10,7 +10,7 @@ class View
 	private $view, $app;
 		
 
-	function __construct(App $app, string $name,$data=null,string $path=null)
+	function __construct(App $app, string $path, string $name,$data=[] )
 	{
 		$this->app = $app;	
 		$template = '';
@@ -54,11 +54,6 @@ class View
 			$template = strtolower($template).'.html';
 		}
 
-		if( is_null($path) ) {
-			$path = views_dir; //Var defined on config file
-		}
-		
-		$path = $app->path.$path;
 		$view = new  \Twig\Environment(new \Twig\Loader\FilesystemLoader($path));
 		$view = $this->set_filters($this->app, $view);
 		$this->view = $view->render($template , $data);
@@ -77,7 +72,14 @@ class View
 			})
 		);
 		
-		include 'Filters.php'; //Load Custom Filters Functions
+		
+
+		if( file_exists($this->app->vendor_path.'View/Filters.php') ){
+			include $this->app->vendor_path.'View/Filters.php'; //Load Custom Filters Functions
+		}else{
+			echo "File ".$this->app->vendor_path."View/Filters.php not Found!";
+		}
+
 		return $view;
 	}
 

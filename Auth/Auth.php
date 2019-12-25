@@ -72,45 +72,6 @@ class Auth  {
 
 
 
-	public function social_login(array $data){
-
-		//"https://graph.facebook.com/v5.0/object-id?access_token=your-access-token"
-		$api_url=false; $api_user=false;
-		switch( strtolower( $data['social_network'] ) ){
-			case "facebook" :
-				$api_url = "https://graph.facebook.com/v5.0/".$data['username']."/?fields=email,id,last_name,first_name,last_name?access_token=".$data['access_token'];
-			break;
-
-			default :
-				//$api_url = 'https://graph.facebook.com/me?fields=email,id,last_name,first_name?access_token='.$data["access_token"];
-			break;
-
-		}
-
-		$validations = [
-			'username' => 'username|exists:user',
-			'email' => 'email|exists:user'
-			];
-	
-
- 
-		$result = App::validate( $data,$validations ,'App\Models\User' );
-		$user = User::find('email', $data['email'] );
-		
-
-		if( !$result->errors && ( $user != false) ){
-			$data = (object) $result->data;
-			$this->user = User::find('username', $data->username );
-			$token = Token::create($this->user);
-			return (object) [ 'status' => false,  'token' => $token, 'user' =>  $this->user($token)  ];
-		} 
-		
-		$this->logout();
-		return (object) [ 'status' => false, 'token' => false ] ;
-	
-	}
-
-
 	public function logout(){
 		session_unset();
 		session_destroy();
@@ -130,6 +91,7 @@ class Auth  {
 					'first_name' => $user->first_name, 
 					'last_name' => $user->last_name,
 					'username' => $user->username,
+					'name' =>  $user->first_name.' '.$user->last_name,
 					'email' => $user->email,
 					'img' => ($user->img) ? $user->img : '/img/default/avatar.png',
 					'rol' => $user->rol,

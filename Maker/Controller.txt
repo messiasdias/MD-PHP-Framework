@@ -5,7 +5,7 @@ use App\App;
 /**
  * {{name}}Controller Class
  */
-class {{name}}Controller extends Controller
+class {{name}} extends Controller
 {	public $app;
 	
 	function __construct(App $app=null)

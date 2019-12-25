@@ -21,17 +21,16 @@ use App\Database\DB;
 
 class App
 {
-	public $request, $response, $routers=[], $args , $path ,$user, $mode, $theme, $timezone;
+	public $request, $response, $routers=[], $args , $path, $vendor_path ,$user, $mode, $theme, $timezone;
 
 
 	function __construct($config=null)
 	{	
 		@session_start();
 		$this->set_config($config);
-		include $this->path.'../config/app.php'; //Load AppConfigs
+		include $this->path.'config/app.php'; //Load AppConfigs
 		date_default_timezone_set($this->timezone);
 		$this->request = new Request();
-		$this->response = new Response($this->request, $this->path);
 		$this->load_assets();  //Creting Sym link for ../assetes/public
 
 		if(  explode('/', $this->request->url )[1] == 'api'  ){
@@ -39,6 +38,7 @@ class App
 			$this->request->url = str_replace('/api/' , '/', $this->request->url );
 		}
 
+		$this->response = new Response($this);
 		return $this->load_router($this); //loading Routers files
 	}
 
@@ -47,7 +47,8 @@ class App
 
 		$default_config['mode']= 'app';
 		$default_config['theme'] = '';
-		$default_config['path'] = '../src/';
+		$default_config['path'] = '../';
+		$default_config['vendor_path'] = $default_config['path'].'vendor/messiasdias/md-php-framework/';
 		$default_config['debug'] = false;
 		$default_config['timezone'] = 'America/Recife';
 
@@ -98,7 +99,7 @@ class App
 
 		}else{
 
-			$file =  $this->path."../assets/views/$this->theme/http/".$app->response->get_http_code().".html";
+			$file =  $this->path."assets/views/$this->theme/http/".$app->response->get_http_code().".html";
 
 			if ( file_exists($file) && ( $app->response->get_http_code() != '200' ) ){
 				
@@ -280,6 +281,8 @@ class App
 		return $router->url($url, $method);
 	}
 
+
+
 	public function mode_trigger($app,$api,$data=null){
 		if( $this->mode === 'app' ){
 			return $app($this, $this->args, $data);
@@ -291,30 +294,29 @@ class App
 
 
 	private function load_router($app){
-
 		//load routers app or api
-		echo $app->mode;
 		switch ( strtolower($app->mode) ) {
 			case 'api':
-				$mode = $this->path.'Routers/api/*.php';
+				$mode = $this->path.'src/Routers/api/*.php';
 			break;
 
 			case 'app':
 			default:
-				$mode = $this->path.'Routers/*.php';
+				$mode = $this->path.'src/Routers/*.php';
 			break;
 		}
 
+
 		foreach ( glob($mode)  as $router_map ) {
 			if (  file_exists($router_map) )
-			{	
+			{
 				include $router_map;
 			}
 		}
 
-		if ($app->debug){
+		if ($app->debug && file_exists($this->vendor_path.'/Maker/Routers.php') ){
 			//Maker Routers
-			include $this->path.'../vendor/messiasdias/md-php-framework/Maker/Routers.php';
+			include $this->vendor_path.'/Maker/Routers.php';
 		}
 
 		return $app;
@@ -325,8 +327,8 @@ class App
 
 	private function load_assets(){
 
-		if (!file_exists($this->path.'../public/assets')) {
-			symlink ($this->path.'../assets/public', '../public/assets' );
+		if (!file_exists($this->path.'public/assets')) {
+			symlink ($this->path.'assets/public', 'public/assets' );
 		}
 
 		return;
@@ -356,8 +358,8 @@ class App
 	public function controller($name,$args=null){
 
 		$method = ( count(explode('@', $name)) == 2 ) ? strtolower(explode('@', $name)[1]) : 'index';
-		$name = ucfirst( str_replace(['Controller', 'controller'], [''],explode('@', $name)[0]) );
-		$class = 'App\Controllers\\'.$name.'Controller'; 
+		$name = ucfirst(explode('@', $name)[0] );
+		$class = 'App\Controllers\\'.$name; 
 
 		if ( class_exists($class)) {
 			$obj = new $class($this);
@@ -367,7 +369,7 @@ class App
 				$this->response->set_http_msg("Method '$method' not Found!");
 			}
 		}else {
-			$this->response->set_http_msg("Class '$clas'  not Found!" );
+			$this->response->set_http_msg("Class '$class'  not Found!" );
 		}
 
 		$this->response->set_http_code(500);
@@ -393,10 +395,10 @@ class App
 
 
 
-	public function view(string $name, array $data=null,string $path=views_dir)
+	public function view(string $name, array $data=null,string $path=null)
 	{	
 		$data = ((!is_null($data))) ? array_merge($data, (array) $this->view_get_data()) : (array) $this->view_get_data();
-		$view = new View($this, $name, $data, $path);
+		$view = new View($this, !is_null($path) ? $path : $this->path.'assets/views/', $name, $data   );
 		$this->response->write( $view->show(), 'html' );
 		return $this;
 	}
@@ -421,8 +423,8 @@ class App
 			'referer'  => $this->request->referer,
 			'host'  => $this->request->host,
 			'scheme'  => $this->request->scheme,
-			//'request'  => $this->request,
-			//'response'  => $this->response,
+			'request'  => $this->request,
+			'response'  => $this->response,
 			'user' => $this->user($this->request->token),
 			'token' => ($this->request->token) ? $this->request->token : false,
 			'input' => ($this->inputs()) ? $this->inputs() : false ,
@@ -465,12 +467,10 @@ class App
 
 
 
-
 	public function redirect($url, $method = "GET", $data=null){
 
 		$this->request->url = strtolower( $url );
 		$this->request->method = $method;
-
 		
 		if(!is_null($data)){
 			$this->response->set_data($data);
@@ -481,21 +481,7 @@ class App
 
 
 
-	
-	public function api(string $url, string $method=null, array $data=null, string $form_type=null)
-	{
-			/*$client = new \GuzzleHttp\Client([ 'base_uri' => API , 
-				"headers" => ['Token' => self::token()],
-				'http_errors' => true
-				 ]);
-			$response = $client->request( strtoupper($method), $url , $data);
-			echo $response->getStatusCode().'<br>';
-			$response->getBody().'<br><br>'; */
-	}
-   
-
-
-	public function api2(string $url, string $method='GET', array $data=[])
+	public function api(string $url, string $method='GET', array $data=[])
 	{
 		$client = new \GuzzleHttp\Client();
 		$response = $client->request( strtoupper($method) , $url, $data);
