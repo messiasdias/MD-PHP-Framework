@@ -47,7 +47,7 @@ $app->get('/maker/{command}string/{subcommand}string', function($app,$args) {
 		case 'view' : 
 		case 'app' :
 		case 'html' :  
-			return $app->view('map' , [ 'routers' => $app->routers] , $app->path.'App/Maker/') ;
+			return $app->view('map' , [ 'routers' => $app->routers] , $app->path.'../vendor/messiasdias/md-php-framework/Maker/') ;
 		break;
 		
 		case 'api' : 

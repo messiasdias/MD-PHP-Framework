@@ -293,6 +293,7 @@ class App
 	private function load_router($app){
 
 		//load routers app or api
+		echo $app->mode;
 		switch ( strtolower($app->mode) ) {
 			case 'api':
 				$mode = $this->path.'Routers/api/*.php';

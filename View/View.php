@@ -59,7 +59,7 @@ class View
 		}
 		
 		$path = $app->path.$path;
-		$view = new  Twig\Twig_Environment(new Twig\Twig_Loader_Filesystem($path));
+		$view = new  \Twig\Environment(new \Twig\Loader\FilesystemLoader($path));
 		$view = $this->set_filters($this->app, $view);
 		$this->view = $view->render($template , $data);
 
@@ -71,7 +71,7 @@ class View
 	private function set_filters(App $app, $view ){
 
 		$view->addFunction( 
-			new Twig\TwigFunction('middleware', function (string $list) {
+			new \Twig\TwigFunction('middleware', function (string $list) {
 				$this->app->middlewares($list);
 				return $this->app->middleware_auth;
 			})
