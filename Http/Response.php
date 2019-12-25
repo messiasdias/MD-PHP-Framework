@@ -55,7 +55,7 @@ class Response extends Request
 
 
 	public function get_http_code_list(){
-		return (array) json_decode( file_get_contents($this->path.'App/Http/http_codes.json') );
+		return (array) json_decode( file_get_contents($this->path.'../vendor/messiasdias/md-php-framework/Http/http_codes.json') );
 	}
 
 

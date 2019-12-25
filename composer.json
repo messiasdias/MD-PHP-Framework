@@ -2,13 +2,13 @@
     "name": "messias/md-php-framework",
     "description": "Meu Framework PHP",
     "type": "library",
-    "version": "1.0.0",
+    "version": "1.0",
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.2.0",
-        "twig/twig": "^3.0",
-        "guzzlehttp/guzzle": "^6.5",
-        "firebase/php-jwt": "^5.0"
+        "php": ">=7.1.0",
+        "twig/twig": "2.5",
+        "guzzlehttp/guzzle": "6.0",
+        "firebase/php-jwt": "5.0"
     },
     "license": "MIT",
     "authors": [

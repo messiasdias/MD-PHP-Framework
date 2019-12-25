@@ -313,7 +313,7 @@ class App
 
 		if ($app->debug){
 			//Maker Routers
-			include $this->path.'App/Maker/Routers.php';
+			include $this->path.'../vendor/messiasdias/md-php-framework/Maker/Routers.php';
 		}
 
 		return $app;
@@ -326,10 +326,6 @@ class App
 
 		if (!file_exists($this->path.'../public/assets')) {
 			symlink ($this->path.'../assets/public', '../public/assets' );
-		}
-
-		if (!file_exists($this->path.'../api/assets')) {
-			symlink ($this->path.'../assets/public', '../api/assets' );
 		}
 
 		return;
