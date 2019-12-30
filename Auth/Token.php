@@ -1,12 +1,26 @@
 <?php
 namespace App\Auth;
+use App\App;
 use Firebase\JWT\JWT;
 use App\Models\User;
+use App\Maker\Maker;
 /**
  * Token Class
  */
 class Token
 {
+	private $app;
+
+	/**
+	* Method __construct
+	*
+	* @param App\App $app   A Object of App Class
+	* @return  
+	*/
+	public function __construct(App $app){
+		$this->app = $app;
+	}
+
 
 	/**
 	* Method create
@@ -16,7 +30,7 @@ class Token
 	* @return string token_encoded 
 	*/
 
-	public static function create(User $user, $data=null){
+	public function create(User $user, $data=null){
 
 		$token = array(
 		    "iss" => app_description,
@@ -43,7 +57,7 @@ class Token
 	* @param string $token - Token Encoded
 	* @return boolean  
 	*/
-	public static function check(string $token){
+	public function check(string $token){
 			
 		$token_decode = self::decode( $token );
 
@@ -62,7 +76,7 @@ class Token
 	* @param string|array|null $data - data for encode
 	* @return boolean  
 	*/
-	public static function renew(string $token, $data=null){
+	public function renew(string $token, $data=null){
 
 		if ( self::check($token) ) {
 			
@@ -97,15 +111,8 @@ class Token
 	* return false 
 	* @return string $token_encoded  
 	*/
-	public static function encode(array $token){
-		
-		if( file_exists( __DIR__.'/../../../../config/key.php')  ){
-			include  __DIR__.'/../../../../config/key.php'; //Load key
-		}else{
-			echo 'File config/key.php not Found! <br>';
-			return false;
-		}
-
+	public function encode(array $token){
+		$key = $this->getKey();
 		if ( isset( $token )  && is_array( $token ) ) {
 			return JWT::encode( $token , $key ); 
 		}else{
@@ -120,25 +127,70 @@ class Token
 	* @param string $token  - Token Encoded
 	* @throws \Exception no is set $token or no is a array
 	* return false 
-	* @return object $token 
+	* @return Object $token 
 	* 
 	*/
 
-	public static function decode(string $token){
-		
-		if( file_exists( __DIR__.'/../../../../config/key.php')  ){
-			include  __DIR__.'/../../../../config/key.php'; //Load key
-		}else{
-			echo 'File config/key.php not Found! <br>';
-			return false;
-		}
-
+	public function decode(string $token){
+		$key = $this->getKey();
 		if ( isset($token) &&  ( count( explode('.', $token) ) == 3  )  ) {
 			return  JWT::decode($token, $key , array('HS256') );
 		}else{
 			return false;
 		}
 
+	}
+
+
+
+	public function generateKey()
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&%$#@!*';
+        $randstring = '';
+        for ($i = 0; $i <= 100; $i++) {
+            $randstring .= $characters[rand(0, 60)];
+        }
+        return $randstring;
+	}
+
+
+		/** 
+	* Method setKey
+	*
+	* @param 
+	* @return String $key
+	* 
+	*/
+
+	public function setKey(){
+		
+		if( !file_exists( $this->app->path.'config/key.php')  ){
+			$maker = new Maker($this->app);
+			$maker->file('config:key', [ ['{your_key_here}'], [$this->generateKey()]] );
+		}
+
+		include  $this->app->path.'config/key.php'; //Load key
+		return $key;
+	}
+	
+
+		/** 
+	* Method getKey
+	*
+	* @param 
+	* @return String
+	* 
+	*/
+
+	public function getKey(){
+		
+		if( file_exists( $this->app->path.'config/key.php')  ){
+			include $this->app->path.'config/key.php'; //Load key
+		}else{
+			$key = $this->setKey()();
+		}
+
+		return $key;
 	}
 
 

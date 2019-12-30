@@ -1,6 +1,8 @@
 <?php
 namespace App\Auth;
 use App\App;
+use App\Maker\Maker;
+
 /**
  * Middleware Class
  */
@@ -15,7 +17,8 @@ class Middleware
 		if( file_exists($this->app->path.'config/middlewares.php') ){
 			include $this->app->path.'config/middlewares.php'; //Load middlewares
 		}else{
-			echo "File ".$this->app->path."config/middlewares.php not Found!";
+			$maker = new Maker($app);
+			$maker->file('config:middlewares');
 		}
 
 		$this->list = $this->listtoarray($list);

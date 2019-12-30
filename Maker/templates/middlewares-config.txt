@@ -1,0 +1,51 @@
+
+/* Middlewares 
+ ex: 
+
+ use App\...;
+   
+ $this->middlewares = (object) [   
+
+    'name1' => function(App $app){
+        return true;
+    },
+
+    'name2' => function(App $app, $arg){
+        return true;
+    },
+    ...
+ ];
+
+*/
+use App\App;
+
+$this->middlewares = (object) [   
+
+    //debug
+    'debug' => function (App $app){
+        return $app->debug;
+    }, 
+
+    //guest
+    'guest' => function(App $app){
+        return !$app->user() ? true : false;
+    },
+
+    //admin
+    'admin' => function(App $app){
+        return ( $app->user() && ($app->user()->rol == 1 ) ) ;
+    },
+
+
+    //manager
+    'manager' => function(App $app){
+        return ( $app->user() && ($app->user()->rol == 2) ) ;
+    },
+
+    //auth
+    'auth' => function(App $app){
+        return $app->user() ? true : false;
+    },
+
+
+];

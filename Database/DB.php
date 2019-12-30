@@ -11,14 +11,19 @@ use App\App;
 class DB {
 
 	private $host, $port, $database, $user, $pass;
-	public $class, $conection ;
+	public $class, $conection, $path ;
 
 	public function __construct(string $class ){
 
-		if( file_exists( __DIR__.'/../../../../config/db.php')  ){
-			include  __DIR__.'/../../../../config/db.php';  //Load DBConfigs
+		$this->path = dirname($_SERVER['SCRIPT_FILENAME']).'/';
+
+		if( file_exists($this->path.'../config/db.php')  ){
+			include  $this->path.'../config/db.php';  //Load DBConfigs
 		}else{
-			echo 'File config/db.php not Found! <br>';
+			$makefile = strtolower( explode( '/', $_SERVER['SERVER_PROTOCOL'])[0] ).'://'.$_SERVER['SERVER_NAME'].'/maker/file/config:db';
+			echo '<p style="color:brown;">File <b>config/db.php</b> not Found!</p>'.
+			'<p> Click to <a href="'.$makefile.'" > Make File </a> or Send a HTTP/GET Request for '.$makefile.'</p>'.
+			'<p> For Help: <a href="/maker" >Maker</p>' ;
 			exit;
 		}
 
@@ -29,10 +34,16 @@ class DB {
 	public function conection(){
 		try {
 			$pdo = "mysql:host=".$this->host."; port=".$this->port."; dbname=".$this->database.";charset=utf8";
-			return @new PDO($pdo,$this->user,$this->pass);
+			
+			if( (isset($this->host) && isset($this->port) ) && isset($this->database) ){
+				return new PDO($pdo,$this->user,$this->pass);
+			}else{
+				echo '<p style="color:brown;">DB Config Not Found on <b>"../config/db.php"</b> !</p> ';
+				exit;
+			}
 		  
 		} catch(PDOException $error) {
-		  echo $error;
+		  echo 'PDO Error: '.$error;
 		  exit;
 		} 
 

@@ -12,7 +12,12 @@ use App\Auth\Token;
 
 class Auth  {
 
-	public $app, $user;
+	public $app, $user, $token;
+
+	public function __construct(App $app){
+		$this->app = $app;
+		$this->token = new Token($app);
+	}
 
 
 	public function login(array $data){
@@ -35,7 +40,7 @@ class Auth  {
 
 						if( $this->user->status == 1 ) {
 
-							$_SESSION['token'] = Token::create($this->user);
+							$_SESSION['token'] = $this->token->create($this->user);
 
 							 return (object) [ 'status' =>  ['msg' => 'Login Successfully!', 
 							 	'code' => 202 ] , 'token' => $_SESSION['token'], 
@@ -82,14 +87,15 @@ class Auth  {
 
 	public function user(string $token){
 
-		if (Token::check( $token ) && Token::decode($token) ) {
+		if ($this->token->check( $token ) && $this->token->decode($token) ) {
 
-			$user =  User::find('id', Token::decode($token)->usr->id );
+			$user =  User::find('id', $this->token->decode($token)->usr->id );
 			if ($user) {		
 				return (object) [ 
 					'id' => $user->id,
 					'first_name' => $user->first_name, 
 					'last_name' => $user->last_name,
+					'full_name' => $user->first_name.' '.$user->last_name,
 					'username' => $user->username,
 					'name' =>  $user->first_name.' '.$user->last_name,
 					'email' => $user->email,

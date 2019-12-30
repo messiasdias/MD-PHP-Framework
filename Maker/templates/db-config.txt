@@ -1,0 +1,12 @@
+
+    /* 
+        Example Object db config
+        $this-> { host| port | database | user| pass } = 'value';
+
+        $this->host = 'localhost';
+        $this->port = '3306';
+        $this->database = 'db_name';
+        $this->user = 'user';
+        $this->pass = 'pass'; 
+    
+    */	

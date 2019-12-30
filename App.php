@@ -17,6 +17,7 @@ use App\Others\Validator;
 use App\View\View;
 use App\Others\File;
 use App\Database\DB;
+use App\Maker\Maker;
 
 
 class App
@@ -28,7 +29,13 @@ class App
 	{	
 		@session_start();
 		$this->set_config($config);
-		include $this->path.'config/app.php'; //Load AppConfigs
+		if( file_exists( $this->path.'config/app.php' ) ){
+			include $this->path.'config/app.php'; //Load AppConfigs
+		}else{
+			$maker = new Maker($this);
+			$maker->file('config:app');
+		}
+
 		date_default_timezone_set($this->timezone);
 		$this->request = new Request();
 		$this->load_assets();  //Creting Sym link for ../assetes/public
@@ -96,10 +103,9 @@ class App
 			}
 			
 
-
 		}else{
 
-			$file =  $this->path."assets/views/$this->theme/http/".$app->response->get_http_code().".html";
+			$file =  $this->path."assets/private/views/$this->theme/http/".$app->response->get_http_code().".html";
 
 			if ( file_exists($file) && ( $app->response->get_http_code() != '200' ) ){
 				
@@ -167,7 +173,8 @@ class App
 
 		if(isset($response->token)){
 			 //Renews Token
-			 $renew_token = Token::renew($response->token);
+			 $token = new Token($this);
+			 $renew_token = $token->renew($response->token);
 			 if(isset($_SESSION['token']) && $app->user() ){
 				 $_SESSION['token'] = $renew_token;
 				 $response->token = $renew_token;
@@ -398,7 +405,7 @@ class App
 	public function view(string $name, array $data=null,string $path=null)
 	{	
 		$data = ((!is_null($data))) ? array_merge($data, (array) $this->view_get_data()) : (array) $this->view_get_data();
-		$view = new View($this, !is_null($path) ? $path : $this->path.'assets/views/', $name, $data   );
+		$view = new View($this, !is_null($path) ? $path : $this->path.'assets/private/views/', $name, $data   );
 		$this->response->write( $view->show(), 'html' );
 		return $this;
 	}
@@ -430,7 +437,6 @@ class App
 			'input' => ($this->inputs()) ? $this->inputs() : false ,
 			'assets' => '/assets/',
 			'log' => ($this->response->get_log()) ? $this->response->get_log() : false,
-			'app_description' => app_description,
 			'debug' => $this->debug,
 			'session' =>  ($_SESSION) ? ( (object) $_SESSION ) : false,
 			'cookies' =>  ($this->request->cookies) ? ( (object) $this->request->cookies) : false,

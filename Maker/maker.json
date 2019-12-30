@@ -1,0 +1,50 @@
+{
+    "templates": {
+
+        "controller": {
+            "src" : "controller.txt",
+            "path": "src/Controllers/"
+        },
+        "model": {
+            "src" : "model.txt",
+            "path": "src/Models/"
+        },
+        "route": {
+            "src" : "route.txt",
+            "type" : {
+                "app":{
+                    "path": "src/Routers/"
+                },
+                "api":{
+                    "path": "src/Routers/api/"
+                }
+            }
+        },
+        "seeder": {
+            "src" : "seeder.txt",
+            "path": "src/Database/Seeds/"
+        },
+        "migration": {
+            "src" : "migration.txt",
+            "path": "src/Database/Migrations/"
+        },
+        "config" : {
+            "path": "config/",
+            "type" : {
+                "app":{
+                    "src" : "app-config.txt"
+                },
+                "db": {
+                    "src" : "db-config.txt"
+                },
+                "middlewares" :{
+                    "src" : "middlewares-config.txt"
+                },
+                "key":{
+                    "src" : "key-config.txt"
+                }
+            }
+        }
+
+    }
+}

@@ -443,141 +443,134 @@ class Maker
 
 
 
-	public function file($data){
+	public function file($data,$replace=[[],[]]){
 
-		$rs=null; $response = '';
-		$explode = explode( ':', $data); 
+			$usage = '<p style="color:brown;"><br>'
+			.'Usage Command: /maker/file/[controller|model|seeder|migration]:[class_name]|route:[app|api:file_name ]|'.
+			'config:[middlewares|db|key|app]</b><br>';
 
-		if ( is_array($explode) &&  (count($explode) > 1 ) ) {
+			$rs=null; $response = ''; $continue = false; $explode = explode( ':', $data); 
+			$command = isset($explode[0]) ? $explode[0] : false ;
+			$subcommand= isset($explode[1]) ? $explode[1] : false ;
+			$subcommand2= isset($explode[2]) ? $explode[2] : false ;
+			$type_exists = function($this_command ,  $this_subcommand , $this_makefile ){	
+				return  isset( $this_makefile->templates->$this_command->type ) && ( $this_subcommand && isset( $this_makefile->templates->$this_command->type->$this_subcommand )) ;
+			};
 
-		$response .= '<h3>Running Make '.ucfirst($explode[0]).'!</h3>';	
+			$response .= '<h3>Running Make File '.ucfirst($explode[0]).'!</h3>';	
 
-			switch ($explode[0]) {
-				case 'controller':
-					$rs =  $this->makefile('controller',$explode[1]);	
-				break;
-				
-				case 'model' :
-					$rs =  $this->makefile('model',$explode[1]);
-				break;
-
-				case 'migration' : 
-					$rs =  $this->makefile('migration',$explode[1]);
-				break;
-
-				case 'seeder' : 
-					$rs =  $this->makefile('seeder',$explode[1]);
-				break;
-
-				case 'route' : 
-					$rs =  $this->makefile('route',$explode[1]);
-				break;
-
-				default:
-					$response .= '<br><p style="color:brown;">'.
-					'Usage Command: /maker/file/[controller|model|seeder|migration]:[class_name]</b>' ;
-				break;
-			}
-
-			if ( $rs[0] ) {
-				$response .= '<br> <p style="color:green;">'.$rs[1].'</b>';
-			}else{
-				$response .= '<br><p style="color:brown;">'.$rs[1].'</b>';
-			}
-
+			$templates_path =  $this->app->vendor_path.'Maker/templates/';
+			$makefile = json_decode(file_get_contents($this->app->vendor_path.'Maker/maker.json') );
+			$template = $templates_path;
+			$filename = $this->app->path;
 			
+			if( $command && isset( $makefile->templates->$command )  ){
 
-		}else{
-				 $response .= '<p style="color:brown;"><br>'
-				 .'Usage Command: /maker/file/[controller|model|seeder|migration]:[class_name]
-	   			</b><br>';
-	   }
+				if( $subcommand  ){
 
-	  
-		
-		return $response;
-		
-		
+					foreach( array('template', 'filename' ) as $item ) {
+
+						$subitem = '';
+							switch ($item) {
+								case 'template':
+									$subitem = 'src';
+								break;
+
+								case 'filename':
+									$subitem = 'path';
+								break;
+			
+							}
+
+							if( $type_exists($command, $subcommand, $makefile) && isset(  $makefile->templates->$command->type->$subcommand->$subitem )  ) {
+								$$item .= $makefile->templates->$command->type->$subcommand->$subitem;
+							}else{
+								if(isset( $makefile->templates->$command->$subitem  )){
+										$$item .= $makefile->templates->$command->$subitem;
+								}else{
+									$$item = false;
+								}
+							}
+						
+
+					}
+
+					if( $filename && $template ){
+						$cocat_name = '';		
+							
+						if ( $subcommand2 && in_array($command, array('route','config' )) ){
+							$cocat_name = $subcommand2;
+						}elseif( !isset($makefile->templates->$command->type) ){
+							$cocat_name = $subcommand;
+						}elseif( isset($makefile->templates->$command->type->$subcommand ) ) {
+							$cocat_name = $subcommand;
+						}else{
+							$filename = false;
+						}
+
+						if( $filename){
+							$filename .=  str_replace('_' , '', !in_array($command, array('route','config' ) ) ? ucwords($cocat_name , '_') : strtolower($cocat_name) )   .'.php';
+							$rs =  $this->makefile($filename ,$template, $replace);
+						}
+						else{
+							$rs = [false, "Filename not isset!" ];
+						}			
+						
+
+					}else{
+						$rs = [false, "Template for $command <b>'$subcommand'</b> not fount !" ];
+					}
+
+					
+
+					if ( $rs[0] ) {
+						$response .= '<br> <p style="color:green;">'.$rs[1].'</b>';
+					}else{
+						$response .=  '<br><p style="color:brown;">'.$rs[1].'</b>';
+					}
+
+
+				}else{
+					$response .= $usage;
+				}	
+			
+			}else{
+				$response .= $usage;
+			}
+			
+		return $response;	
 	}
 
 
+	private function makefile(string $filename, string $template , $replace=[[],[]] ) {
 
-	private function makefile($type, $name) {
-		$template = $this->app->vendor_path.'Maker/';
-		$file = ''; $path = $this->app->path.'src/';
-
-		switch (strtolower($type) ) {
-			case 'controller':
-				$template .= "Controller.txt";
-				$path .= "Controllers/";
-			break;
-
-			case 'model':
-				$template .= "Model.txt";
-				$path .= "Models/";
-			break;
-
-			case 'migration':
-				$template .= "Migration.txt";
-				$path .= "Database/Migrations/";
-			break;
-
-			case 'seeder':
-				$template .= "Seeder.txt";
-				$path .= "Database/Seeds/";
-			break;
-			
-			case 'route':
-				$template .= "Route.txt";
-				$path .= "Routers/";
-				if( explode('-', $name)[0] === 'api' ){
-				  $path .= 'api/';
-				  $name = explode('-', $name)[1];
-				}
-
-				$file = $path.strtolower($name ).".php";
-
-				//echo var_dump($path, $name, explode($name,'-')[0]);
-				 //exit;
-
-			break;
-
-		}
-
-		if( $file == '' ){
-			$file = $path.ucwords( $name , '_'  ).".php";
-		}
-
-		if ( file_exists($file)  ) {
-			return [false, 'The file '.ucfirst($name).' '.ucfirst($type).' already exists!'];
+		if ( file_exists( $filename )  ) {
+			return [false, 'The file <b>"'.$filename.'"</b> already exists!'];
 		}else{
-			
-			if( is_writable($path) ){	
+			if( is_writable(dirname($filename)) && $template ){	
 				$tmp = fopen($template, 'r');
 				$content = fread($tmp, filesize($template));
-				$document = fopen($file, 'a+');
+				$document = fopen($filename, 'a+');
 				$rw = fwrite($document, '<?php ');
-				$rw = fwrite($document , str_replace('{{name}}',ucfirst($name),$content) );
+				$rw = fwrite($document , str_replace( array_merge( ['{{name}}'], $replace[0] ) , array_merge( [ ucwords( basename($filename, '.php' ), '_' ) ], $replace[1] )  ,$content) );
 				fclose($document);	
 
-				$chmod = chmod($file,0775); 
+				$chmod = chmod($filename,0775); 
 
-				if (file_exists($file)) {
-					return [true, 'Creating '.ucfirst($name).' ' .ucfirst($type).' Successfully!'];
+				if (file_exists($filename)) {
+					return [true, "Creating <b>$filename</b> Successfully!" ];
 				}
 
-				return [false, 'An error occurred while creating file '.ucfirst($name).ucfirst($type).'!' ];
+				return [false, "An error occurred while creating file  <b>$filename</b> !" ];
 			}else{
-				return [false, 'Permission denied for create file '.ucfirst($name).ucfirst($type).'! <br><br> '.
+				return [false, "Permission denied for create file <b>$filename</b>! <br><br> ".
 			           'Execute on cli in the root directory: <br>$ <i>sudo chown user:root -R</i> .
 					   '];
 			} 
+
 		}
 
-
-
-	}
-
+	}	
 
 
 	public function show(String $subcommand){
