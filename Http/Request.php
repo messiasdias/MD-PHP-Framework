@@ -76,19 +76,13 @@ class Request
 					$exp1 =  explode(';', $param);
 
 					foreach ($exp1 as $exp_v1) {
-
 						if (strrpos( $exp_v1 , '=' )){
-							
 							$exp2 =  explode('=', $exp_v1);
 						 	$param_array[$exp2[0]] = $exp2[1]; 
-						 	
 						}else{
-
 							array_push($param_array , $exp_v1 );
-							
 						}
 					}
-					
 
 				}
 					

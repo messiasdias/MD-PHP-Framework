@@ -86,6 +86,7 @@ class Auth  {
 
 
 	public function user(string $token){
+		var_export($token, $this->token->check( $token )); exit;
 
 		if ($this->token->check( $token ) && $this->token->decode($token) ) {
 

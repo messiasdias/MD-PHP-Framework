@@ -17,7 +17,6 @@ class Route
 		$this->middlewares = $middlewares;
 	}
 
-
 	public function callback(App $app, array $args=null){
 		 $function = $this->callback;
 		 return $function($app, (object) $args);

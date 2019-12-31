@@ -155,7 +155,7 @@ class App
 
 
 
-	private function put_header(App $app ,$display_erro=false){
+	private function put_header(App $app ,$display_erro=false ){
 		$response = $app->response;
 
 		@header( $response->protocol.' '.$response->get_http_code().' '.$response->get_http_msg() );
@@ -283,7 +283,7 @@ class App
 
 
 
-	private function get_route(string $url, $method,  array $routers){
+	private function get_route(string $url, $method, array $routers){		
 		$router = new Router($routers);
 		return $router->url($url, $method);
 	}
@@ -348,8 +348,7 @@ class App
 
 
 	public function user(){
-		
-		if( $this->request->token ) {	
+		if( isset($this->request->token) ) {	
 			return $this->auth()->user($this->request->token);
 		}
 		return false;

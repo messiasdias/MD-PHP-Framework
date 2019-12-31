@@ -157,7 +157,7 @@ class Response extends Request
 		$this->set_http_code($code);
 		$this->set_http_msg( !is_null($msg) ? $msg :  $this->get_msg($code) );
 		if( !isset($data->token) ){	
-			$data->token = isset($this->token) ? Token::renew($this->token) : false;
+			$data->token = isset($this->token) ? $this->app->auth()->token->renew($this->token) : false;
 		}
 		if( !isset($data->status) ){	
 			$data->status = (object) ['code' => $this->get_http_code(), 'msg' => $this->get_http_msg()];

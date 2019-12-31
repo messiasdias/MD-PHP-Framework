@@ -1,7 +1,7 @@
 <?php
 namespace App\Auth;
 use App\App;
-use Firebase\JWT\JWT;
+use \Firebase\JWT\JWT;
 use App\Models\User;
 use App\Maker\Maker;
 /**
@@ -46,7 +46,7 @@ class Token
 			$token['dat'] = $data ;
 		}
 
-		return self::encode( $token ) ; 
+		return $this->encode( $token ) ; 
 	}
 
 
@@ -59,7 +59,7 @@ class Token
 	*/
 	public function check(string $token){
 			
-		$token_decode = self::decode( $token );
+		$token_decode = $this->decode($token);
 
 		if ( $token_decode ) {
 			return ( $token_decode->nbf > $token_decode->iat ) ? true : false;
@@ -78,9 +78,9 @@ class Token
 	*/
 	public function renew(string $token, $data=null){
 
-		if ( self::check($token) ) {
+		if ( $this->check($token) ) {
 			
-			$token_decode =  self::decode( $token ) ;
+			$token_decode =  $this->decode( $token ) ;
 
 			if ($token_decode) {
 
@@ -91,7 +91,7 @@ class Token
 					$token_decode->dat = $data;
 				}
 
-				return self::encode((array) $token_decode) ;
+				return $this->encode((array) $token_decode) ;
 			} 
 			   
 
@@ -112,13 +112,11 @@ class Token
 	* @return string $token_encoded  
 	*/
 	public function encode(array $token){
-		$key = $this->getKey();
 		if ( isset( $token )  && is_array( $token ) ) {
-			return JWT::encode( $token , $key ); 
+			return JWT::encode( $token ,  $this->getKey() ); 
 		}else{
 			return false;
 		}
-
 	}
 
 	/** 
@@ -130,11 +128,10 @@ class Token
 	* @return Object $token 
 	* 
 	*/
-
 	public function decode(string $token){
-		$key = $this->getKey();
+		//var_dump($token, ( count( explode('.', $token) ) == 3  ) ); exit;
 		if ( isset($token) &&  ( count( explode('.', $token) ) == 3  )  ) {
-			return  JWT::decode($token, $key , array('HS256') );
+			return  JWT::decode($token, $this->getKey() , array('HS256') );
 		}else{
 			return false;
 		}
@@ -142,46 +139,49 @@ class Token
 	}
 
 
-
+	/** 
+	* Method generateKey
+	*
+	* @param 
+	* @return String $randstring
+	* 
+	*/
 	public function generateKey()
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&%$#@!*';
         $randstring = '';
         for ($i = 0; $i <= 100; $i++) {
-            $randstring .= $characters[rand(0, 60)];
+            $randstring .= $characters[rand(0, 65)];
         }
         return $randstring;
 	}
 
 
-		/** 
+	/** 
 	* Method setKey
 	*
 	* @param 
 	* @return String $key
 	* 
 	*/
-
 	public function setKey(){
 		
 		if( !file_exists( $this->app->path.'config/key.php')  ){
 			$maker = new Maker($this->app);
 			$maker->file('config:key', [ ['{your_key_here}'], [$this->generateKey()]] );
 		}
-
 		include  $this->app->path.'config/key.php'; //Load key
 		return $key;
 	}
 	
 
-		/** 
+	/** 
 	* Method getKey
 	*
 	* @param 
-	* @return String
+	* @return String $key
 	* 
 	*/
-
 	public function getKey(){
 		
 		if( file_exists( $this->app->path.'config/key.php')  ){
