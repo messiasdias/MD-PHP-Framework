@@ -129,9 +129,8 @@ class Token
 	* 
 	*/
 	public function decode(string $token){
-		//var_dump($token, ( count( explode('.', $token) ) == 3  ) ); exit;
 		if ( isset($token) &&  ( count( explode('.', $token) ) == 3  )  ) {
-			return  JWT::decode($token, $this->getKey() , array('HS256') );
+			return  JWT::decode($token, $this->getKey() , array('HS256'));
 		}else{
 			return false;
 		}
@@ -148,7 +147,7 @@ class Token
 	*/
 	public function generateKey()
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&%$#@!*';
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $randstring = '';
         for ($i = 0; $i <= 100; $i++) {
             $randstring .= $characters[rand(0, 65)];
@@ -164,7 +163,7 @@ class Token
 	* @return String $key
 	* 
 	*/
-	public function setKey(){
+	private function setKey(){
 		
 		if( !file_exists( $this->app->path.'config/key.php')  ){
 			$maker = new Maker($this->app);
@@ -182,7 +181,7 @@ class Token
 	* @return String $key
 	* 
 	*/
-	public function getKey(){
+	private function getKey(){
 		
 		if( file_exists( $this->app->path.'config/key.php')  ){
 			include $this->app->path.'config/key.php'; //Load key

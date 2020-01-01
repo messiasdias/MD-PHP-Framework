@@ -63,7 +63,7 @@ class Model implements ModelInterface
 
 	/*
 	
-	Clears the array of validations as per data arrey,
+	Clears the array of validations as per data array,
 	only validates what arrived in the request as form data
 	
 	*/

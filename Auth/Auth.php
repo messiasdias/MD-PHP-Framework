@@ -4,15 +4,13 @@
  */
 namespace App\Auth;
 use App\App;
-use App\Models\User;
-use App\Database\DB;
-use App\Auth\Roles;
 use App\Auth\Token;
+use App\Models\User;
 
 
 class Auth  {
 
-	public $app, $user, $token;
+	public $app, $token;
 
 	public function __construct(App $app){
 		$this->app = $app;
@@ -41,12 +39,9 @@ class Auth  {
 						if( $this->user->status == 1 ) {
 
 							$_SESSION['token'] = $this->token->create($this->user);
-
 							 return (object) [ 'status' =>  ['msg' => 'Login Successfully!', 
 							 	'code' => 202 ] , 'token' => $_SESSION['token'], 
 							 	'user' => $this->user($_SESSION['token']) ] ;
-
-
 
 					  	}else{
 
@@ -79,26 +74,22 @@ class Auth  {
 
 	public function logout(){
 		session_unset();
-		session_destroy();
-		return true;
+		return session_destroy() ? true : false;
 	}
 
 
 
 	public function user(string $token){
-		var_export($token, $this->token->check( $token )); exit;
-
 		if ($this->token->check( $token ) && $this->token->decode($token) ) {
 
 			$user =  User::find('id', $this->token->decode($token)->usr->id );
 			if ($user) {		
 				return (object) [ 
 					'id' => $user->id,
+					'name', 'full_name' =>  $user->first_name.' '.$user->last_name,
 					'first_name' => $user->first_name, 
 					'last_name' => $user->last_name,
-					'full_name' => $user->first_name.' '.$user->last_name,
 					'username' => $user->username,
-					'name' =>  $user->first_name.' '.$user->last_name,
 					'email' => $user->email,
 					'img' => ($user->img) ? $user->img : '/img/default/avatar.png',
 					'rol' => $user->rol,

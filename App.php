@@ -44,8 +44,12 @@ class App
 			$this->mode = 'api';
 			$this->request->url = str_replace('/api/' , '/', $this->request->url );
 		}
-
 		$this->response = new Response($this);
+
+		/*if(){
+
+		} */
+
 		return $this->load_router($this); //loading Routers files
 	}
 
@@ -74,7 +78,7 @@ class App
 
 	public function run(){
 
-		$result = $this->get_route($this->request->url, $this->request->method, $this->routers );
+		$result = $this->get_callback($this->request->url, $this->request->method, $this->routers );
 		$this->args = isset($result->route->args) ?  (object) $result->route->args : null;
 		$this->response->set_http_code($result->code);
 
@@ -183,8 +187,8 @@ class App
 			@header('token: '.$renew_token );
 		}
 
-		header("Access-Control-Allow-Origin: *");
-		header("Access-Control-Allow-Headers: Content-Type");
+		@header("Access-Control-Allow-Origin: *");
+		@header("Access-Control-Allow-Headers: Content-Type");
 	
 		return $app;		
 
@@ -283,7 +287,7 @@ class App
 
 
 
-	private function get_route(string $url, $method, array $routers){		
+	private function get_callback(string $url, $method, array $routers){		
 		$router = new Router($routers);
 		return $router->url($url, $method);
 	}
