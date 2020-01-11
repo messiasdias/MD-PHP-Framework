@@ -26,13 +26,20 @@ class Maker
 		$class_name = is_null($class_name) ? 'all' : $class_name;
 
 		switch (strtolower($type) ) {
+			
+			case 'seeds':
 			case 'migrations': 
-				$action ='Migration';
 				$path = $this->path.'src/Database/'.ucfirst($type).'/';
 			break;
-			case 'seeds':
-				$action ='Seeder';
-				$path = $this->path.'src/Database/'.ucfirst($type).'/';
+
+			case 'controllers':
+			case 'models':
+			case 'viewfilters':
+				$path = $this->path.'src/'.ucfirst($type).'/';
+			break;
+
+			case 'config':
+				$path = $this->path.strtolower($type).'/';
 			break;
 
 			case 'tables':
@@ -69,7 +76,7 @@ class Maker
 			$value = str_replace([$this->path,'/'], ['App/' ,'\\'],str_replace(['src/' ,'.php'], '', $value));
 			$value_exp = str_replace( $action,'', explode('\\', $value)[count( explode('\\', $value) )-1] );
 
-			if(  ( ($class_name == 'all') && ( $value_exp != 'Migration' ) ) | (  strtolower($value_exp ) == strtolower( $class_name )  ) ){
+			if(   ($class_name == 'all')   | (  strtolower($value_exp ) == strtolower( $class_name )  ) ){
 				 array_push($return, $value);
 			}
 		}
@@ -113,24 +120,15 @@ class Maker
 				case 'seed':
 
 					$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
-
 					$classes = $this->get_classes('Seeds', $command_exp[1]);
 	
-					if ($classes ) {
+					if ( $classes ) {
 
-					  if ( $command_exp[1] == 'all') {	
-					   foreach ($classes as $key => $class) {
-					   		$class_exp = str_replace('Seeder',null,explode('\\', $class)[count(explode('\\', $class))-1]);
-					
-					   		if ($class ) {
-					   			$response .= $this->seed( $class, maker_args[strtolower($class_exp)] );
-					   		}
-
-					   	}	
-
-					   }elseif( isset(maker_args[$command_exp[1]]) ) {
-					   		$response .= $this->seed( $classes[0], maker_args[$command_exp[1]] );
-					   }
+						$count = (count($classes) > 1 ) ? count($classes) : 1  ;
+					   for($i=0; $i < $count; $i++){
+							$args_name = strtolower(str_replace('Seeder',null,explode('\\', $classes[$i])[count(explode('\\', $classes[$i]))-1]) );
+							$response .= $this->seed( $classes[$i] , maker_args[$args_name] );
+						}
 						
 					}else{
 						
@@ -302,30 +300,18 @@ class Maker
 		$class_obj=null; $response=''; $name='';
 
 		if ($classes) {
+			$count = ( is_array($classes) && (count($classes) > 1) ) ? count($classes) : 1;
 
-			if ( is_array($classes)  ) {
-
-				foreach ($classes as $class) {
-					 $name = explode('\\', $class)[ count(explode('\\', $class))-1 ];
-					 $class_obj = class_exists($class) ? new $class($args): false ;
-					 $response .= $class_obj->get_response();
-				}
-
-			}else{
-				$name = explode('\\', $classes)[ count(explode('\\', $classes))-1 ];
-				$class_obj = class_exists($classes) ? new $classes($args): false ;
+			for ( $i=0; $i < $count; $i++ ) {
+				$class = ( is_array($classes) && (count($classes) > 1) ) ?  $classes[$i] : $classes;
+				$class_obj = class_exists( $class ) ? new $class($args): false ;
 				$response .= $class_obj->get_response();
-			}	
+		   }
 
-
-				return $response;
-
+			return $response;
 		}
 
 		$response .= '<p style="color: brown;" >The <b>'.$name.'</b> class does not exist in database!</p>';
-	
-
-
 		return $response;
 
 	}
@@ -542,6 +528,9 @@ class Maker
 	}
 
 
+
+
+
 	private function makefile(string $filename, string $template , $replace=[[],[]] ) {
 
 		if ( file_exists( $filename )  ) {
@@ -573,11 +562,19 @@ class Maker
 	}	
 
 
+	
+
 	public function show(String $subcommand){
 
 		switch($subcommand){
+
+			
+			case 'models':
 			case 'seeds':
 			case 'migrations':
+			case 'controllers':
+			case 'config':
+			case 'viewfilters':
 				$type = ucfirst($subcommand);
 			break;
 
@@ -591,10 +588,12 @@ class Maker
 
 		}
 
-		$response = '<h3  style="color: #3333FF;" >Running List '.ucfirst($subcommand).'!</h3>';	
-		$response .=  '<ul>';
+	
 
 		if ( $type != false ) {
+			$response = '<h3  style="color: #3333FF;" >Running List '.ucfirst($subcommand).'!</h3>';	
+			$response .=  '<ul>';
+
 			foreach( $this->get_classes($type, 'all') as $class ){
 				if( $type == 'Migrations') {
 				 $obj = new $class();
@@ -603,11 +602,28 @@ class Maker
 					$response .=  '<li style="color:green;" >';
 				}
 
-				$response .=  explode('\\', $class )[ count(explode('\\', $class )) -1];
+				$response .=  @end( explode('\\', $class ) );
 				$response .=  '</li>';
 			}
 		}else{
-			$this->app->redirect('/maker');
+			//$this->app->redirect('/maker');
+
+			$response = '<h3  style="color: #3333FF;" >Running Show List Help!</h3>';	
+			$response .=  '<ul>';
+
+			$types = [
+				'models',
+				'seeds',
+				'migrations',
+				'controllers',
+				'config',
+				'viewfilters'
+			];
+
+			foreach($types as $type ){
+				$response .=  '<li style="color:green;" >'.$type.' </li>';
+			}	
+
 		}
 		
 		$response .=  '</ul>  ';

@@ -12,7 +12,7 @@ $app->get('/maker',  function($app,$args) {
 
 
 
-$app->get('/maker/{command}string/{subcommand}string', function($app,$args) {  
+$app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{command}string' ], function($app,$args) {  
 	//Maker File | Migrate	
 
 	$maker = new Maker($app);
@@ -24,7 +24,7 @@ $app->get('/maker/{command}string/{subcommand}string', function($app,$args) {
 		}
 	}
 
-	if($continue && ( strtolower($args->subcommand) != 'help')  ){
+	if($continue && ( isset($args->subcommand) && ( strtolower($args->subcommand) != 'help'))  ){
 		return $app->write($maker->$command($args->subcommand) , 200) ;
 	}else{
 		return $app->redirect('/maker');

@@ -3,8 +3,8 @@
  * {{name}}Seeder Class
  */
  
-namespace App\Database\Migrations\Seeds;
-use App\Database\Seeds\Seeder;
+namespace App\Database\Seeds;
+use App\Database\Seeder;
 
 class {{name}} extends Seeder
 {

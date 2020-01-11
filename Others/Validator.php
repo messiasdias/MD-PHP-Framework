@@ -2,6 +2,7 @@
 namespace App\Others;
 use App\Database\DB;
 use App\App;
+use App\Database\Table;
 /**
  * Validator Class
  */
@@ -11,12 +12,12 @@ class Validator
 
 	public function __construct(string $class=null){
 		$this->valid = false;
-		$this->class = $class;
+		$this->class = (!is_null($class) && class_exists($class) )? $class : false;
 	}
 
 	public function valid_string(string $data, string $validations){
 		$this->data = $data ? $data : null;
-		$valid =  $this->valid_array([ 'value' => $data], ['value' => $validations.'|nonull']);
+		$valid =  $this->valid_array([ 'value' => $data], ['value' => $validations]);
 		if(!$valid->errors){
 			return true;
 		}
@@ -132,29 +133,22 @@ class Validator
 
 
 	private function exists(array $arg) {
-		//array(3) { [0]=> value [1]=> class [2]=> key }
-		//$class = 'App\\Models\\'.ucfirst($arg[1]);
-
-		if( !is_null($this->class) ){
-
+		
+		if( $this->class ){
 			$obj = $this->class::find($arg[2], $arg[0] );
-
-			if (  $obj != false ) {
-				$obj = (array) $obj;
-				if ( $obj[$arg[2]]  == $arg[0] ) {
-					return  (object) ['valid' => true] ;
-				}
+			$prop = $arg[2];
+			if (  ($obj != false) && ($obj->$prop ==  $arg[0] ) ) {
+				return  (object) ['valid' => true] ;
 			}
-			
-			
-		}		
-			
-		return  (object) [
-			'valid' => false, 
-			'error' => ucfirst($arg[2]).':'.$arg[0] ." no exists in the database !"
-			] ;
-		 
 
+		}
+					
+		return  (object) [
+				'valid' => false, 
+				'error' => ucfirst($arg[2]).':'.$arg[0] ." no exists in the database !"
+			] ;
+		
+		 
 	}
 
 	private function noexists(array $arg) {
@@ -275,13 +269,21 @@ class Validator
 
 
 	private function startwith($arg){
-		$arg[1] = '\\'.$arg[1];
-		$select = "/[\s]*(".$arg[1].")/i";
 
-		if ( @preg_match( $select, $arg[0] ) ) {
+		if ( substr( strtolower($arg[0]), 0, strlen($arg[1])) ===  strtolower($arg[1]) ) {
 			return (object) ['valid' => true];
 		}else{
-			return (object) ['valid' => false, 'error' => 'This is a Nullable Value!' ];
+			return (object) ['valid' => false, 'error' => "Value no startwith '$arg[1]' !" ];
+		} 
+	}
+
+
+	private function endwith($arg){
+		
+		if ( substr( strtolower($arg[0]), -abs(strlen($arg[1])) ) === strtolower($arg[1]) ) {
+			return (object) ['valid' => true];
+		}else{
+			return (object) ['valid' => false, 'error' => "Value no startwith '$arg[1]' !" ];
 		} 
 	}
 

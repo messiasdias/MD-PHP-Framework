@@ -1,6 +1,6 @@
 
 namespace App\Controllers;
-use App\Controllers\Controller;
+use App\Controller\Controller;
 use App\App;
 /**
  * {{name}}Controller Class

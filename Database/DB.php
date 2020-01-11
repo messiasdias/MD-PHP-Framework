@@ -6,19 +6,20 @@
 namespace App\Database;
 use \PDO;
 use App\App;
+use App\Database\Table;
 
 
 class DB {
 
-	private $host, $port, $database, $user, $pass;
-	public $class, $conection, $path ;
+	protected $path, $host, $port, $database, $user, $pass, $table, $class;
 
-	public function __construct(string $class ){
 
-		$this->path = dirname($_SERVER['SCRIPT_FILENAME']).'/';
+	public function __construct($class=null){
 
-		if( file_exists($this->path.'../config/db.php')  ){
-			include  $this->path.'../config/db.php';  //Load DBConfigs
+		$path = dirname($_SERVER['SCRIPT_FILENAME']);
+
+		if( file_exists($path.'/../config/db.php')  ){
+			include  $path.'/../config/db.php';  //Load DBConfigs
 		}else{
 			$makefile = strtolower( explode( '/', $_SERVER['SERVER_PROTOCOL'])[0] ).'://'.$_SERVER['SERVER_NAME'].'/maker/file/config:db';
 			echo '<p style="color:brown;">File <b>config/db.php</b> not Found!</p>'.
@@ -27,7 +28,19 @@ class DB {
 			exit;
 		}
 
-		$this->class =  !is_null($class) ?  new $class() : false;
+		if( !is_null($class) && !App::validate($class, 'startwith:App\\Models\\' ) ){
+			$class = 'App\\Models\\'.ucfirst($class);
+		}
+		
+		if(  !is_null($class) && class_exists($class) ){
+			$this->class = new $class();
+			$this->table = $this->class->table;
+		}else{
+			$this->class = false;
+			$this->table = false;
+		}
+		
+
 	}
 
 
@@ -51,25 +64,28 @@ class DB {
 
 
 
-
 	public function select($select='*'){
-		
-		$sql = $this->sql_generator('select', $select);
-		$data = $this->return_select( $this->conection()->query($sql) );	
 
-		if( !$data | isset($data->scalar) ) {
-			return false;
+		if( isset( $this->table ) ) {
+			$sql = $this->sql_generator('select', $select );
+			$data = $this->return_select( $this->conection()->query($sql) );	
+
+			if( !$data | isset($data->scalar) ) {
+				return false;
+			}
+			
+			return $data;
 		}
-		
-		return $data;
+
+		return false;
 	}
 
 
 
 	public function paginate($page = null , $per_page = null, $search=null){
-		
+
 		$start = 0; $end = 12;
-		$total = $this->count($this->class->table);	
+		$total = $this->count();	
 
 		if ( ($page == 'first') | ($page == 1) ){
 			$page = 1;
@@ -87,7 +103,7 @@ class DB {
 			$end = $per_page;  
 		}
 
-		if ( isset($this->class->table) ) {
+		if ( isset($this->table) ) {
 
 			$search['start'] = $start; $search['end'] = $end;
 			$sql = $this->sql_generator('paginate_and_search', $search);
@@ -154,12 +170,16 @@ class DB {
 
 
 	public function count(){
-		$rs = $this->conection()->query('SELECT COUNT(*) FROM '.$this->class->table);
-		if ($rs) {
-			$rs->setFetchMode(PDO::FETCH_ASSOC);
-			$total = (array)$rs->fetch()['COUNT(*)'];
-			return (int) $total[0] ;
+		if( $this->table ){
+
+			$rs = $this->conection()->query('SELECT COUNT(*) FROM '.$this->table);
+			if ($rs) {
+				$rs->setFetchMode(PDO::FETCH_ASSOC);
+				$total = (array)$rs->fetch()['COUNT(*)'];
+				return (int) $total[0] ;
+			}
 		}
+
 		return 0;
 	}
 
@@ -167,7 +187,7 @@ class DB {
 
 
 	public function save( array $data, string $noexists = null){	
-		$sql = null; $rs = -1;
+		$sql = null; $rs = -1; 
 		if ( array_key_exists('id', $data) && $this->exists( 'id', $data['id']) ){
 			$sql = $this->sql_generator('update', $data);
 		}
@@ -177,7 +197,7 @@ class DB {
 			if ( !is_null($noexists) ){
 				 foreach (explode(',', $noexists) as $noexists_key => $noexists_value) {
 				 	if ( $this->exists($noexists_value, $data[$noexists_value]) ){
-					  	return (object) ['status' => false, 'msg' => "Registration $noexists_value $data[$noexists_value] already exists on ".ucfirst($this->class->table).'!', 'data' => $data ];
+					  	return (object) ['status' => false, 'msg' => "Registration $noexists_value $data[$noexists_value] already exists on ".ucfirst($this->table).'!', 'data' => $data ];
 				 	}
 				 }
 			 }	
@@ -210,24 +230,21 @@ class DB {
 	public function delete( array $data){
 
 		if ( !$this->exists('id', $data['id']) ){
-
-		  return (object) ['status' => false, 'msg' => 'Registration not exists on '.ucfirst($this->class->table).' !', 'data' => $data ];
+		  return (object) ['status' => false, 'msg' => 'Registration not exists on '.ucfirst($this->table).' !', 'data' => $data ];
 		}
 		else{
 
 			$sql = $this->sql_generator('delete',$data);
 
 			if  ( !is_null($sql) && ( $this->conection()->exec($sql) >= 1)){
-				 return (object) ['status' => true, 'msg' => 'Registration deleted successfully in the '.ucfirst($this->class->table).'!', 'data' => $data ];
+				 return (object) ['status' => true, 'msg' => 'Registration deleted successfully in the '.ucfirst($this->table).'!', 'data' => $data ];
 
 			}else{
-				 return (object) ['status' => false, 'msg' =>  'An error occurred while deleting data in the '.ucfirst($this->class->table).' !', 'data' => $data ];
+				 return (object) ['status' => false, 'msg' =>  'An error occurred while deleting data in the '.ucfirst($this->table).' !', 'data' => $data ];
 			}
 
 
 		}
-
-		
 	}
 
 
@@ -235,38 +252,50 @@ class DB {
 
 	
 	private function sql_generator($type='select', $data=null ) {
-
+	
 		$keys=null; $values=[]; $sql="";
 
 		if( is_array($data) ){
 			$keys = array_keys($data);
 		}
-
+		
 		switch (strtolower($type)) {
 
 			default:
 			case 'select':
-			//SELECT * FROM $this->class->tables WHERE $id=$value
-					$sql = "SELECT * FROM ".$this->class->table; 
-					if ( isset($data) && is_array($data)  ){
-						//SELECT * FROM portifolio.jobs where publish=1 and id=1 and author_id=3;
-						$sql .= " WHERE ".$data[0]."='".$data[1]."' ";
-
-						if( count( $data ) ){
-
+			//SELECT * FROM $this->table WHERE $id=$value;
+				$sql = "SELECT * FROM ".$this->table;
+				if ( isset($data) && is_array($data)  ){
+					//SELECT * FROM portifolio.jobs where publish=1 and id=1 and author_id=3;
+					$sql .= " WHERE ";
+					
+					if(  is_array($data[0]) &&  is_array($data[1])  ){
+						$for_sql = '';
+						foreach( $data[0] as $key => $value ){
+							$and = ( $key == ( count($data[0]) - 1 )  ) ? '' : ' and ';
+							$for_sql .= $data[0][$key]."='".$data[1][$key]."' ".$and ;
 						}
-
-
-					}elseif( is_string($data) ) {
-			
-						if( ($data == "*") | (strtolower($data) == "all") ){
-							$sql .= "  WHERE 1";
-						}elseif( count(explode(',', $data )) == 2 ){
-							$sql .= " WHERE ".explode(',',$data)[0]."='".explode(',',$data)[1]."' ";
-						}
+						$sql .= $for_sql;
+					}else{
+						$sql .= $data[0]."='".$data[1]."' ";
 					}
+					//var_dump($sql); exit;
+					
+					if( count( $data ) ){
+
+					}
+
+
+				}elseif( is_string($data) ) {
 			
-					$sql .= ';';
+					if( ($data == "*") | (strtolower($data) == "all") ){
+						$sql .= "  WHERE 1";
+					}elseif( count(explode(',', $data )) == 2 ){
+						$sql .= " WHERE ".explode(',',$data)[0]."='".explode(',',$data)[1]."' ";
+					}
+				}
+			
+				$sql .= ';';
 
 			break;
 			
@@ -278,7 +307,7 @@ class DB {
 				foreach ($data as $i => $value) {
 					array_push($values, $value);
 				}
-				$sql = "INSERT INTO ".$this->class->table." (".implode($keys,", ").") VALUES ('".mb_convert_encoding(implode($values,"', '"), 'UTF-8')." ');";
+				$sql = "INSERT INTO ".$this->table." (".implode($keys,", ").") VALUES ('".mb_convert_encoding(implode($values,"', '"), 'UTF-8')." ');";
 				
 				break;
 
@@ -293,7 +322,7 @@ class DB {
 							}
 					}	
 
-					$sql = "UPDATE ".$this->class->table." SET ".mb_convert_encoding(implode($values, "', "), 'UTF-8')."' WHERE id = '".mb_convert_encoding($data['id'], 'UTF-8')."'";
+					$sql = "UPDATE ".$this->table." SET ".mb_convert_encoding(implode($values, "', "), 'UTF-8')."' WHERE id = '".mb_convert_encoding($data['id'], 'UTF-8')."'";
 
 				break;
 
@@ -302,7 +331,7 @@ class DB {
 
 			case 'delete':
 			//DELETE FROM table WHERE id = ?
-					$sql = "DELETE FROM ".$this->class->table."  WHERE id='".$data['id']."'";
+					$sql = "DELETE FROM ".$this->table."  WHERE id='".$data['id']."'";
 				break;
 
 
@@ -311,7 +340,7 @@ class DB {
 			case 'paginate_and_search':
 			//"SELECT * FROM table WHERE `colunm1` LIKE '%1%' or `colunm2` LIMIT 0,10;"
 		
-				$sql = "SELECT * FROM ".$this->class->table." WHERE  ";
+				$sql = "SELECT * FROM ".$this->table." WHERE  ";
 				$start = $data['start']; unset($data['start']); 
 				$end= $data['end']; unset($data['end']);
 

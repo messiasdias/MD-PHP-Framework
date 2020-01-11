@@ -26,8 +26,8 @@ class Model implements ModelInterface
 
 	} 
 
-	private function db(){
-		return  new DB( get_called_class() );
+	public function db($class = null){
+		return  new DB( is_null($class) ? get_called_class(): $class );
 	}
 
 	
@@ -147,13 +147,14 @@ class Model implements ModelInterface
 	//Delete	
 	public function delete(){
 		$validations = [
-				'id' => 'int|mincount:1|exists:'.explode("\\", get_called_class() )[ count( explode("\\", get_called_class() ) ) -1],
+				//'id' => 'int|mincount:1|exists:'.explode("\\", get_called_class() )[ count( explode("\\", get_called_class() ) ) -1],
+				'id' => 'int|mincount:1|exists:'.self::$table,
 			];
 		$clear = self::clear($validations, (array) $this );	
 		$validate = App::validate($clear->data, $clear->validations, get_called_class() );
 
+
 		if(!$validate->errors){	
-			//return (object) [ 'status'=> true , 'msg' => 'Teste delete OK!' , 'data' => $validate->data ];
 			return  self::db()->delete($validate->data);
 		}else {
 			return (object) [ 'status'=> false , 'msg' => 'Error while Deleting object!' , 'data'=> $validate->data ];

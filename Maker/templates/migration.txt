@@ -12,12 +12,12 @@ use App\Database\Table;
 
 class {{name}} extends Migration 
 {
+		public $class = '<class_name_here>';
 
 		public function cols(){
 			/* 
 			   Table cols definitions:
 			   $this->table->addCol('col-name','col-type',col-size [100], NULL [false | true], AI [true|false]);
-			
 			*/
 			
 			$this->table->addCol('id','int',100, false, true);	

@@ -22,8 +22,8 @@ class Request
 		
 
 		//Get All Form data posts
-		   parse_str(file_get_contents('php://input'), $this->data );
-			$this->data = $_POST;
+		parse_str(file_get_contents('php://input'), $this->data );
+		$this->data = $_POST;
 		
    		//Get User Auth Token 
    		if(isset( $this->data['token'] )) {

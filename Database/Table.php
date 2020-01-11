@@ -9,15 +9,20 @@ use App\Database\DB;
 
 class Table 
 {
-		public $name,$class, $cols=[];
+		public $name;
+		private $cols=[];
 
 
-		public function __construct(string $name ){
-			$this->name($name);
+		public function __construct(String $name=null ){
+			if( !is_null($name) && is_string($name) ){
+				$this->name = $name;
+			}else{
+				return false;
+			}
 		}
 
-		private function db(){
-			return App::db();
+		private function db($class=null){
+			return App::db($class);
 		}
 
 
@@ -44,51 +49,24 @@ class Table
 
 
 
-		public function exists($table=null){
+		public function exists(){
 			$sql = "SHOW TABLES;"; 	$return=[]; 
 			$rs = $this->db()->conection()->query($sql);
 
 			while ( $row = $rs->fetch(\PDO::FETCH_NUM) ) {
 				array_push($return, $row[0]);
 			}
-			
-
-			if ( !is_null($table) ){
-				if ( in_array($table, $return) ){
-					return true;
-				}
-			}else{
 		
-				if ( in_array($this->name, $return) ){
-					return true;
-				}
-			} 
+			if ( in_array( $this->name , $return) ){
+				return true;
+			}
 
 			return false;
 			
 		}
 		
 
-		public function name($name = null){
-			if ($name){
-				$this->name = $name;
-			}else{
-				if (isset($this->name)){
-					return $this->name;
-				}
-			}
-		}
-
-		public function class($class = null){
-			if ($class){
-				$this->class = $class;
-			}else{
-				if (isset($this->class)){
-					return $this->class;
-				}
-			}
-		}
-
+		
 
 
 		public function addCol($name,$type = 'varchar' ,$tam=0,$null=false,$ai=false, $default=null){

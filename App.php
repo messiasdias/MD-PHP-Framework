@@ -17,6 +17,7 @@ use App\Others\Validator;
 use App\View\View;
 use App\Others\File;
 use App\Database\DB;
+use App\Database\Table;
 use App\Maker\Maker;
 
 
@@ -358,9 +359,14 @@ class App
 		return false;
 	}
 
+	
 
-	public function db(string $class=null){
-		return new DB( is_null($class) ? get_called_class() : 'App\\Models\\'.ucfirst($class) );
+	public function db(string $class = null ){
+		if( !is_null($class) ){
+			$class = (  !App::validate($class, 'startwith:App\\Models\\' ) ) ? 'App\\Models\\'.ucfirst($class) : ucfirst($class) ;
+		}
+
+		return new DB($class);
 	}
 
 
@@ -391,8 +397,8 @@ class App
 
 
 
-	public static function validate($data,$validations,$class=null){
-		$validator = new Validator($class);
+	public static function validate($data,$validations,$class=''){
+		$validator = new Validator( $class );
 		if(  is_array($data) && is_array($validations)  ) {
 			return $validator->valid_array($data,$validations);
 		}elseif( is_string((string) $data) &&  is_string((string) $validations)  ){

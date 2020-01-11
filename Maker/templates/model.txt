@@ -3,12 +3,12 @@
  * {{name}} Model Class
  */
 namespace App\Models;
-use App\Models\Model;
-use App\Models\DB;
+use App\Model\Model;
+use App\Database\DB;
 
 class {{name}} extends Model {
 
-	public $table = {{name}}s ;
+	public $table = '<table_name_here>' ;
 
 	public function create (){}
 

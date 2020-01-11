@@ -12,7 +12,7 @@ use App\Database\DB;
  */
 class Migration 
 {
-	public $table;
+	public $table, $class;
 	
 	/* Seting Table, if this not exists, create on construct Method*/
 	public function __construct($tb=null){
