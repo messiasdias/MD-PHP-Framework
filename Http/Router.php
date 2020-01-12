@@ -30,7 +30,7 @@ class Router
 
 		if ( $routers &&  ( count($routers) > 1) )
 		{
-			return (object) [ 'status' => false, 'code' => 500, 'route' => null, 'msg' => 'Duplicate routes, '.count($routers).' Routes with the same name or signature for '.$this->url.'.' ];
+			return (object) [ 'status' => false, 'code' => 500, 'route' => null, 'msg' => 'Replicate routes, '.count($routers).' Routes with the same name or signature for '.$this->url.'.' ];
 		}
 		elseif( $routers &&  ( count($routers) == 1) )
 		{

@@ -32,6 +32,7 @@ class DB {
 			$class = 'App\\Models\\'.ucfirst($class);
 		}
 		
+
 		if(  !is_null($class) && class_exists($class) ){
 			$this->class = new $class();
 			$this->table = $this->class->table;
@@ -278,11 +279,6 @@ class DB {
 						$sql .= $for_sql;
 					}else{
 						$sql .= $data[0]."='".$data[1]."' ";
-					}
-					//var_dump($sql); exit;
-					
-					if( count( $data ) ){
-
 					}
 
 

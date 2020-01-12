@@ -374,8 +374,7 @@ class App
 	public function controller($name,$args=null){
 
 		$method = ( count(explode('@', $name)) == 2 ) ? strtolower(explode('@', $name)[1]) : 'index';
-		$name = ucfirst(explode('@', $name)[0] );
-		$class = 'App\Controllers\\'.$name; 
+		$class = 'App\Controllers\\'.ucfirst(explode('@', $name)[0] ); 
 
 		if ( class_exists($class)) {
 			$obj = new $class($this);

@@ -26,26 +26,44 @@ class Model implements ModelInterface
 
 	} 
 
+
+	//DataBase
 	public function db($class = null){
 		return  new DB( is_null($class) ? get_called_class(): $class );
 	}
 
 	
-	//Object exists
-	public function exists(){
 
-		if (  self::db()->exists(strtolower('id'), $this->id )  ) {
+
+	//Object exists
+	public function exists( array $props_exceptions_exclude=[ 'id', 'table','created', 'updated'] )
+	{
+		$values=[]; $keys=[]; $i=0;
+		$obj = (array) $this;
+		foreach($obj as $key => $value ){
+			if( !App::validate( $key , 'startwith:confirm_', get_called_class() ) && !in_array( $key , $props_exceptions_exclude  ) ){
+				$keys[$i] = $key;
+				$values[$i] = $value;
+				$i++;
+			}
+		} 
+
+		if ( self::db()->select([$keys, $values]) ) {
 			return true;
-		}
+		} 
 
 		return false;
 	}
+
+
 
 	//Find a User Object
 	public static function find($col, $value){
 		$user =  self::db()->select([strtolower($col), $value] );
 		return isset($user->scalar) ? false : $user;
 	}
+
+
 
 	//Finde and Get all Users on Object with optional pagination
 	public static function all(array $paginate=null ){
@@ -56,8 +74,6 @@ class Model implements ModelInterface
 
 		return  self::db()->select( '*');
 	}
-
-
 
 
 
@@ -104,15 +120,6 @@ class Model implements ModelInterface
 	}
 
 
-	//Get Table Name
-	public function table(){
-		if( !isset( self::$table ) ){
-			$table =  substr(get_called_class() ,strripos(get_called_class(), '\\')+1 , strlen(get_called_class())-1 );
-			return strtolower($table).'s';
-		}else{
-			return self::$table;
-		}
-	}
 
 
 	//Save Data - Save data at the end of create and update methods
@@ -146,9 +153,9 @@ class Model implements ModelInterface
 
 	//Delete	
 	public function delete(){
+
 		$validations = [
-				//'id' => 'int|mincount:1|exists:'.explode("\\", get_called_class() )[ count( explode("\\", get_called_class() ) ) -1],
-				'id' => 'int|mincount:1|exists:'.self::$table,
+				'id' => 'int|mincount:1|exists:'.@end( explode("\\", get_called_class()) ),
 			];
 		$clear = self::clear($validations, (array) $this );	
 		$validate = App::validate($clear->data, $clear->validations, get_called_class() );
