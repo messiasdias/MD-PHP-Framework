@@ -152,11 +152,15 @@ class Model implements ModelInterface
 	
 
 	//Delete	
-	public function delete(){
+	public function delete(array $validations=null){
 
-		$validations = [
+		if (is_null($validations) ){	
+			$validations = [
 				'id' => 'int|mincount:1|exists:'.@end( explode("\\", get_called_class()) ),
 			];
+		}
+
+
 		$clear = self::clear($validations, (array) $this );	
 		$validate = App::validate($clear->data, $clear->validations, get_called_class() );
 
