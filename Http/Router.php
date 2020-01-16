@@ -24,10 +24,9 @@ class Router
 		$this->url = $url;
 		//set method
 		$this->method = $method;	
-
 		$routers = $this->find_by_name($this->url);
 		$routers = ($routers) ? $routers : $this->find_by_regex($this->url);
-
+		
 		if ( $routers &&  ( count($routers) > 1) )
 		{
 			return (object) [ 'status' => false, 'code' => 500, 'route' => null, 'msg' => 'Replicate routes, '.count($routers).' Routes with the same name or signature for '.$this->url.'.' ];

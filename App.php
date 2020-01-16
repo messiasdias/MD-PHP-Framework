@@ -124,7 +124,7 @@ class App
 
 							return $this->json( array_merge( [ 'status' => (object)
 							[ 'msg' => $app->response->get_http_msg(),
-							'code' =>  $app->response->get_http_code()  ] ], (array) $result )  );
+							'code' =>  $app->response->get_http_code()  ] ] )  );
 
 						}, $result );
 			

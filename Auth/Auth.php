@@ -20,52 +20,57 @@ class Auth  {
 
 	public function login(array $data){
 
-		$validations = [
-			'username' => 'username|minlen:4|exists:user',
-			'pass' => 'string|minlen:8'
-			];
-	
-		$result = App::validate($data, $validations,'App\Models\User' );
-
-		if ( !$result->errors ){
+		if( isset($data['username']) && isset($data['pass'])  ) {
 			$data = (object) $result->data;
-			$this->user = User::find('username', $data->username );
+			
+			$validations = [
+				'username' => 'username|minlen:4|exists:user',
+				'pass' => 'string|minlen:8'
+				];
+
+			$result = App::validate($data, $validations,'App\Models\User' );
+
+			if ( !$result->errors ){
+				$this->user = User::find('username', $data->username );
 
 				if( $this->user ){
 
 					if ( password_verify( $data->pass , $this->user->pass )  ) {
+							
+							if( $this->user->status == 1 ) {
+
+									$_SESSION['token'] = $this->token->create($this->user);
+									return (object) [ 'status' =>  ['msg' => 'Login Successfully!', 
+										'code' => 202 ] , 'token' => $_SESSION['token'], 
+										'user' => $this->user($_SESSION['token']) ] ;
+
+							}else{
+
+									return (object) ['status' => false, 'msg' => 'Inactive User, contact system support.', 'data' => NULL];
 						
+							}
 
-						if( $this->user->status == 1 ) {
+						}else{
 
-							$_SESSION['token'] = $this->token->create($this->user);
-							 return (object) [ 'status' =>  ['msg' => 'Login Successfully!', 
-							 	'code' => 202 ] , 'token' => $_SESSION['token'], 
-							 	'user' => $this->user($_SESSION['token']) ] ;
-
-					  	}else{
-
-							return (object) ['status' => false, 'msg' => 'Inactive User, contact system support.', 'data' => NULL];
-				
-					  	}
-
-					}else{
-
-						return (object) ['status' => false, 'msg' => 'Username or Password is Incorrect!', 
-							 'data' => NULL  ];
-				
-					}
+							return (object) ['status' => false, 'msg' => 'Username or Password is Incorrect!', 
+								'data' => NULL  ];
+						}
 
 				}else {
-					
+						
 					return (object) ['status' => false, 'msg' => 'The User '. $data->username.' does not exist in the Database!', 'data' => NULL];
-					
-				 }
+						
+				}
 			
 			} else{
 
 				return (object) ['status' => false, 'msg' => implode(',', (array) $result->errors),'data' => NULL];
 			}
+
+		}
+		else{
+			return (object) ['status' => false, 'msg' => 'Invalid values ​​for username and/or pass!', 'data' => $data ];
+		}	
 
 				
 	}

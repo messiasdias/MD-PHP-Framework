@@ -267,18 +267,29 @@ class DB {
 			//SELECT * FROM $this->table WHERE $id=$value;
 				$sql = "SELECT * FROM ".$this->table;
 				if ( isset($data) && is_array($data)  ){
-					//SELECT * FROM portifolio.jobs where publish=1 and id=1 and author_id=3;
+					//SELECT * FROM portifolio.jobs where publish=1 and id=1 and author_id=3 and teste IS NULL;
 					$sql .= " WHERE ";
 					
 					if(  is_array($data[0]) &&  is_array($data[1])  ){
 						$for_sql = '';
+
 						foreach( $data[0] as $key => $value ){
 							$and = ( $key == ( count($data[0]) - 1 )  ) ? '' : ' and ';
 							$for_sql .= $data[0][$key]."='".$data[1][$key]."' ".$and ;
 						}
 						$sql .= $for_sql;
 					}else{
-						$sql .= $data[0]."='".$data[1]."' ";
+						$sql .= @$data[0]."='".@$data[1]."' ";
+					}
+
+
+					if( isset($data[2]) ){
+						$for_sql = ' and ';
+						foreach( $data[2] as $key => $value ){
+							$and = ( $key == ( count($data[2]) - 1 )  ) ? '' : ' and ';
+							$for_sql .= $data[2][$key]." IS NULL  ".$and ;
+						}
+						$sql .= $for_sql;
 					}
 
 

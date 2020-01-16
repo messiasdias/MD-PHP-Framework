@@ -9,8 +9,7 @@ use App\Database\Validator;
 use App\Database\DB;
 use App\Model\ModelInterface;
 
-class Model implements ModelInterface
-{	
+abstract class Model implements ModelInterface {	
 	
 	public  $id, $created, $updated ;
 
@@ -42,13 +41,16 @@ class Model implements ModelInterface
 		$obj = (array) $this;
 		foreach($obj as $key => $value ){
 			if( !App::validate( $key , 'startwith:confirm_', get_called_class() ) && !in_array( $key , $props_exceptions_exclude  ) ){
-				$keys[$i] = $key;
-				$values[$i] = $value;
-				$i++;
+				if( !is_array($value)  ) {
+					$keys[$i] = $key;
+					$values[$i] = $value;
+					$i++;
+				}
+					
 			}
 		} 
 
-		if ( self::db()->select([$keys, $values]) ) {
+		if ( self::db()->select([$keys,$values]) ) {
 			return true;
 		} 
 
@@ -59,13 +61,13 @@ class Model implements ModelInterface
 
 	//Find a User Object
 	public static function find($col, $value){
-		$user =  self::db()->select([strtolower($col), $value] );
+		$user =  self::db()->select([[strtolower($col)],[$value]] );
 		return isset($user->scalar) ? false : $user;
 	}
 
 
 
-	//Finde and Get all Users on Object with optional pagination
+	//Find and Get all Users on Object with optional pagination
 	public static function all(array $paginate=null ){
 
 		if ( !is_null($paginate) ){
@@ -123,25 +125,29 @@ class Model implements ModelInterface
 
 
 	//Save Data - Save data at the end of create and update methods
-	public function save(array $data, array $validations,$noexists=null){
+	public function save(array $data, array $validations=null,$noexists=null){
 		
-		$clear = self::clear($validations, $data);
-		$validate = App::validate($clear->data, $clear->validations, get_called_class() );
+		if( !is_null($validations) ){
+			$clear = self::clear($validations, $data);
+			$validate = App::validate($clear->data, $clear->validations, get_called_class() );
 
-		if(!$validate->errors){	
-			
-			foreach ($validate->data as $key => $value) {
-				if ( preg_match('/^confirm_[a-zA-Z0-9]{1,}$/', $key) ){
-					unset($clear->data[$key]);
-				}
-			} 	
-			
-			return  self::db()->save($clear->data);
+			if(!$validate->errors){	
 				
-		}else{
-			return (object) [ 'status'=> false , 'msg' => "Error while Validating data!" , 'data'=> $validate->data, 'errors' => $validate->errors];
-		} 
+				foreach ($validate->data as $key => $value) {
+					if ( preg_match('/^confirm_[a-zA-Z0-9]{1,}$/', $key) ){
+						unset($clear->data[$key]);
+					}
+				} 	
+				
+				return  self::db()->save($clear->data, $noexists);
+					
+			}else{
+				return (object) [ 'status'=> false , 'msg' => "Error while Validating data!" , 'data'=> $validate->data, 'errors' => $validate->errors];
+			}
 
+		}else{
+			return  self::db()->save($data, $noexists);
+		}
 
 	}
 
@@ -149,10 +155,11 @@ class Model implements ModelInterface
 	//Create and Update methods - Validations
 	public function create (){}
 	public function update (){}
+	public abstract function delete();
 	
-
-	//Delete	
-	public function delete(array $validations=null){
+	
+	//Remove	
+	public function remove(array $validations=null){
 
 		if (is_null($validations) ){	
 			$validations = [
@@ -160,16 +167,15 @@ class Model implements ModelInterface
 			];
 		}
 
-
 		$clear = self::clear($validations, (array) $this );	
 		$validate = App::validate($clear->data, $clear->validations, get_called_class() );
-
 
 		if(!$validate->errors){	
 			return  self::db()->delete($validate->data);
 		}else {
 			return (object) [ 'status'=> false , 'msg' => 'Error while Deleting object!' , 'data'=> $validate->data ];
-		}
+		} 
+
 
 	}
 

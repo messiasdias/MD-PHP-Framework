@@ -9,7 +9,9 @@ interface ModelInterface {
 
 	public function delete();
 
-	public function save(array $data,array $validations);
+	public function save(array $data,array $validations=null);
+
+	public function remove(array $validations=null);
 
 	public static function find($id, $value);
 

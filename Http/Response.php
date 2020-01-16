@@ -151,26 +151,24 @@ class Response extends Request
 
 
 
-	public function json($data, $code=200, $msg = 'Found!' ){
+	public function json($data, $code=null, $msg=null ){
 		$data = (object) $data;
 		$this->set_content_type('json');
-		$this->set_http_code($code);
-		$this->set_http_msg( !is_null($msg) ? $msg :  $this->get_msg($code) );
+		
 		if( !isset($data->token) ){	
 			$data->token = isset($this->token) ? $this->app->auth()->token->renew($this->token) : false;
-		}
-		if( !isset($data->status) ){	
-			$data->status = (object) ['code' => $this->get_http_code(), 'msg' => $this->get_http_msg()];
-		}
+		}	
+		$data->status = (object) ['code' => $this->get_http_code(), 'msg' => $this->get_http_msg()];
+
 		$this->view = json_encode($data);
 	}
 
 
 
-	public function write(String $data , $type = 'html', $code=200, $msg = 'OK!'){
-		$this->set_content_type($type);
-		$this->set_http_code($code);
-		$this->set_http_msg($msg);
+	public function write(String $data , $content_type = 'html', $code=null, $msg=null ){
+		$this->set_content_type($content_type);
+		$this->set_http_code( !is_null($code) ? $code : $this->get_http_code() );
+		$this->set_http_msg( !is_null($msg) ? $msg :  $this->get_msg($this->get_http_code()) );
 		$this->view = $data;
 	}
 
