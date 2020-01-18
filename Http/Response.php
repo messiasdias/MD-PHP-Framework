@@ -168,7 +168,7 @@ class Response extends Request
 	public function write(String $data , $content_type = 'html', $code=null, $msg=null ){
 		$this->set_content_type($content_type);
 		$this->set_http_code( !is_null($code) ? $code : $this->get_http_code() );
-		$this->set_http_msg( !is_null($msg) ? $msg :  $this->get_msg($this->get_http_code()) );
+		$this->set_http_msg( !is_null($msg) ? $msg :  $this->get_http_msg($this->get_http_code()) );
 		$this->view = $data;
 	}
 

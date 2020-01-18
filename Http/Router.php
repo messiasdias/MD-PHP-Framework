@@ -18,7 +18,7 @@ class Router
 
 
 	//return  (object) [ 'verify'=> true, 'code'=> 200, 'route' => (object) $route];
-	public function url($url, $method = 'GET'){
+	public function url(String $url, String $method = 'GET'){
 
 		//set url
 		$this->url = $url;
@@ -44,7 +44,7 @@ class Router
 
 
 
-	private function find_by_regex($url=null){
+	private function find_by_regex(String $url=null){
 
 		$url = is_null($url) ? $this->url : $url;
 		$url_exp = array_filter(explode('/',$url )) ;

@@ -21,7 +21,9 @@ class Auth  {
 	public function login(array $data){
 
 		if( isset($data['username']) && isset($data['pass'])  ) {
-			$data = (object) $result->data;
+			
+			$data['username'] = !App::validate($data['username'], 'startwith:@','App\Models\User' ) ? 
+			'@'.$data['username'] : $data['username'];
 			
 			$validations = [
 				'username' => 'username|minlen:4|exists:user',
@@ -31,6 +33,7 @@ class Auth  {
 			$result = App::validate($data, $validations,'App\Models\User' );
 
 			if ( !$result->errors ){
+				$data = (object) $result->data;
 				$this->user = User::find('username', $data->username );
 
 				if( $this->user ){

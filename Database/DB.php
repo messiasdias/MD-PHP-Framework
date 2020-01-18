@@ -65,10 +65,10 @@ class DB {
 
 
 
-	public function select($select='*'){
+	public function select($select='*', array $orderby=['created', 'desc'] ){
 
 		if( isset( $this->table ) ) {
-			$sql = $this->sql_generator('select', $select );
+			$sql = $this->sql_generator('select', $select , $orderby);
 			$data = $this->return_select( $this->conection()->query($sql) );	
 
 			if( !$data | isset($data->scalar) ) {
@@ -252,7 +252,7 @@ class DB {
 
 
 	
-	private function sql_generator($type='select', $data=null ) {
+	private function sql_generator($type='select', $data=null, array $orderby = null ) {
 	
 		$keys=null; $values=[]; $sql="";
 
@@ -301,8 +301,11 @@ class DB {
 						$sql .= " WHERE ".explode(',',$data)[0]."='".explode(',',$data)[1]."' ";
 					}
 				}
+
+
 			
-				$sql .= ';';
+			
+				//$sql .= ';';
 
 			break;
 			
@@ -329,7 +332,7 @@ class DB {
 							}
 					}	
 
-					$sql = "UPDATE ".$this->table." SET ".mb_convert_encoding(implode($values, "', "), 'UTF-8')."' WHERE id = '".mb_convert_encoding($data['id'], 'UTF-8')."'";
+					$sql = "UPDATE ".$this->table." SET ".mb_convert_encoding(implode($values, "', "), 'UTF-8')."' WHERE id = '".mb_convert_encoding($data['id'], 'UTF-8')."';";
 
 				break;
 
@@ -338,7 +341,7 @@ class DB {
 
 			case 'delete':
 			//DELETE FROM table WHERE id = ?
-					$sql = "DELETE FROM ".$this->table."  WHERE id='".$data['id']."'";
+					$sql = "DELETE FROM ".$this->table."  WHERE id='".$data['id']."';";
 				break;
 
 
@@ -354,7 +357,7 @@ class DB {
 				if( !is_null($data) ){
 					$find = '';
 					if( is_array($data) && ( count($data) >= 2 ) ){
-						$find = $data[count($data)-1];
+						$find = @end($data);
 						unset( $data[count($data)-1]);
 						$sql .= "`".implode( "` LIKE '%$find%' or `" ,$data)."` LIKE '%$find%' ";
 					}else{
@@ -367,11 +370,25 @@ class DB {
 					$sql .= ' 1 ';
 				}
 	
-				$sql .= " LIMIT ".$start.",". $end.";";
+				$sql .= " LIMIT ".$start.",". $end." ";
 
 				break;
 
 		}
+
+
+		if( 
+			(( strtolower($type) == 'paginate_and_search') | ( strtolower($type) == 'select')) &&
+			(isset($orderby) && ( (count($orderby) >= 1) | (count($orderby) == 2 )  ))
+		){
+
+			$sql .= 'ORDER BY ' .$orderby[0].' ';
+			$sql .=  count($orderby) == 2  ? strtoupper($orderby[1]) : ' DESC' ;
+			$sql .= ';';
+		}	
+
+
+		//var_dump($sql);
 
 		return $sql;
 			
