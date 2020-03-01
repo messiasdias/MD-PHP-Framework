@@ -74,10 +74,10 @@ class View
 		
 		
 
-		if( file_exists($this->app->vendor_path.'View/Filters.php') ){
-			include $this->app->vendor_path.'View/Filters.php'; //Load Custom Filters Functions
+		if( file_exists($this->app->config->vendor_path.'View/Filters.php') ){
+			include $this->app->config->vendor_path.'View/Filters.php'; //Load Custom Filters Functions
 		}else{
-			echo "File ".$this->app->vendor_path."View/Filters.php not Found!";
+			echo "File ".$this->app->config->vendor_path."View/Filters.php not Found!";
 		}
 
 		return $view;

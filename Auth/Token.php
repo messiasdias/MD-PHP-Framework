@@ -33,7 +33,7 @@ class Token
 	public function create(User $user, $data=null){
 
 		$token = array(
-		    "iss" => app_description,
+		    "iss" => $this->app->config->description,
 		    "iat" =>(int) date( 'mdHis' , strtotime('now')),
 		    "nbf" => (int) date( 'mdHis' , strtotime('+1 day') ),
 		    "usr" => [
@@ -165,11 +165,11 @@ class Token
 	*/
 	private function setKey(){
 		
-		if( !file_exists( $this->app->path.'config/key.php')  ){
+		if( !file_exists( $this->app->config->path.'config/key.php')  ){
 			$maker = new Maker($this->app);
 			$maker->file('config:key', [ ['{your_key_here}'], [$this->generateKey()]] );
 		}
-		include  $this->app->path.'config/key.php'; //Load key
+		include  $this->app->config->path.'config/key.php'; //Load key
 		return $key;
 	}
 	
@@ -183,8 +183,8 @@ class Token
 	*/
 	private function getKey(){
 		
-		if( file_exists( $this->app->path.'config/key.php')  ){
-			include $this->app->path.'config/key.php'; //Load key
+		if( file_exists( $this->app->config->path.'config/key.php')  ){
+			include $this->app->config->path.'config/key.php'; //Load key
 		}else{
 			$key = $this->setKey()();
 		}

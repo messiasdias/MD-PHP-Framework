@@ -65,7 +65,7 @@ class DB {
 
 
 
-	public function select($select='*', array $orderby=['created', 'desc'] ){
+	public function select( $select='*', array $orderby=['created', 'desc'] ){
 
 		if( isset( $this->table ) ) {
 			$sql = $this->sql_generator('select', $select , $orderby);
@@ -109,11 +109,18 @@ class DB {
 			$search['start'] = $start; $search['end'] = $end;
 			$sql = $this->sql_generator('paginate_and_search', $search);
 
-			return ['page'=> $page,
-					'pages' => ceil($total/$per_page),	 
-					'count'=> $per_page, 
-					'data' => $this->return_select( $this->conection()->query($sql) ) 
-					];  
+			$return = [];
+
+			if( !is_null($page) && !is_null($per_page) ){
+				$return =  ['page'=> $page,
+							'pages' => ceil($total/$per_page),	 
+							'count'=> $per_page, 
+					]; 
+			}			
+					
+			$return['data'] = $this->return_select( $this->conection()->query($sql) ) ;		
+
+			return $return;
 
 		} 
 
@@ -121,10 +128,20 @@ class DB {
 	}
 
 
-	public function search($search){
+	public function search_paginate($search){
 		return $this->paginate( 1, 100, $search);
 	}
 
+
+	public function search($search){
+		$sql = $this->sql_generator('paginate_and_search', $search);
+		$result = $this->return_select( $this->conection()->query($sql) );
+		if( !isset($result->scalar) ){
+			return $result;
+		}else{
+			return false;
+		}
+	}
 
 
 	private function return_select($rs) {
@@ -351,8 +368,11 @@ class DB {
 			//"SELECT * FROM table WHERE `colunm1` LIKE '%1%' or `colunm2` LIMIT 0,10;"
 		
 				$sql = "SELECT * FROM ".$this->table." WHERE  ";
-				$start = $data['start']; unset($data['start']); 
-				$end= $data['end']; unset($data['end']);
+				$start; $end;
+				if( isset($data['start'] ) && isset($data['end'] )  ){
+					$start = $data['start']; unset($data['start']); 
+					$end= $data['end']; unset($data['end']);
+				}
 
 				if( !is_null($data) ){
 					$find = '';
@@ -370,7 +390,9 @@ class DB {
 					$sql .= ' 1 ';
 				}
 	
-				$sql .= " LIMIT ".$start.",". $end." ";
+				if( isset($start) && isset($end) ){
+					$sql .= " LIMIT ".$start.",". $end." ";
+				}
 
 				break;
 
@@ -388,7 +410,6 @@ class DB {
 		}	
 
 
-		//var_dump($sql);
 
 		return $sql;
 			

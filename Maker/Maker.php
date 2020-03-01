@@ -12,12 +12,17 @@ use App\Database\Table;
 
 class Maker
 {
-	private $app, $path, $response, $migrations=[], $seeds=[], $tables=null;
+	private $app, $path,  $response, $migrations=[], $seeds=[], $tables=null;
 
 	public function __construct(App $app ) {
 		$this->app = $app;
-		$this->path = $app->path;
-	}	
+		$this->path = $this->app->config->vendor_path.'Maker/';
+		$this->args = isset($this->app->maker_config) ? $this->app->maker_config : false;
+	}
+	
+	public function commands(){
+		return json_decode( file_get_contents($this->path.'commands.json') );
+	}
 
 
 	private function get_classes(string $type,string $class_name=null){
@@ -29,40 +34,17 @@ class Maker
 			
 			case 'seeds':
 			case 'migrations': 
-				$path = $this->path.'src/Database/'.ucfirst($type).'/';
+				$path = $this->app->config->path.'src/Database/'.ucfirst($type).'/';
 			break;
 
 			case 'controllers':
 			case 'models':
 			case 'viewfilters':
-				$path = $this->path.'src/'.ucfirst($type).'/';
+				$path = $this->app->config->path.'src/'.ucfirst($type).'/';
 			break;
 
 			case 'config':
-				$path = $this->path.strtolower($type).'/';
-			break;
-
-			case 'tables':
-				$action ='Migration';
-				$classes = $this->get_classes('Migration', $class_name);
-
-				  if ( $classes ) {	
-					foreach ($classes as $key => $class) {
-							$table =  strtolower(str_replace('.php' ,'' ,explode('\\', $class)[ count(explode('\\', $class))-1 ])) ;
-							$regex = '/^([a-zA-Z0-9\\]{0,}[\\'.$table.']{1,})$/';
-
-							if ( ( ($class_name == 'all') | @preg_match( $regex , $table ) )   && ($table != 'Migration' ) ){
-								array_push($return, strtolower(str_replace(['Migration','src/' ],'',$table) ) );
-							}
-						}
-					}
-						
-						if ($return) {
-							return $return;
-						}else{
-							return false;
-						}
-
+				$path = $this->app->config->path.strtolower($type).'/';
 			break;		
 			
 			default:
@@ -73,7 +55,7 @@ class Maker
 
 		foreach (glob($path.'*.php') as $key => $value)
 		{	
-			$value = str_replace([$this->path,'/'], ['App/' ,'\\'],str_replace(['src/' ,'.php'], '', $value));
+			$value = str_replace([$this->app->config->path,'/'], ['App/' ,'\\'],str_replace(['src/' ,'.php'], '', $value));
 			$value_exp = str_replace( $action,'', explode('\\', $value)[count( explode('\\', $value) )-1] );
 
 			if(   ($class_name == 'all')   | (  strtolower($value_exp ) == strtolower( $class_name )  ) ){
@@ -127,7 +109,7 @@ class Maker
 						$count = (count($classes) > 1 ) ? count($classes) : 1  ;
 					   for($i=0; $i < $count; $i++){
 							$args_name = strtolower(str_replace('Seeder',null,explode('\\', $classes[$i])[count(explode('\\', $classes[$i]))-1]) );
-							$response .= $this->seed( $classes[$i] , maker_args[$args_name] );
+							$response .= $this->seed( $classes[$i] , $this->app->maker_config->$args_name );
 						}
 						
 					}else{
@@ -140,12 +122,19 @@ class Maker
 
 				case 'spoon' :
 					 $response .= '<h3 style="color: #3333FF;">Running Spoon Tables!</h3>';
-					 
-					 $classes = $this->get_classes('tables', $command_exp[1] );	
+					 $classes = $this->get_classes('migrations', $command_exp[1] );
+					
 					 if ($classes) {
-						 foreach ($classes as $table) {
-							$response .= $this->spoon($table);	
+						 $tables = [];
+						 foreach ($classes as $class) {
+							 $class_obj = new $class();
+							 if( $class_obj){
+								array_push($tables, $class_obj );
+							 }
 						 } 
+
+						 $response .= $this->spoon($tables, $this->app->maker_config->spoon_flag );
+
 					 }else{
 						 $response .= '<p style="color: brown;" >The <b>'.ucfirst($command_exp[1]).
 						 '</b> table does not exist in database!</p>';
@@ -291,10 +280,6 @@ class Maker
 
 
 
-
-
-
-
 	public function seed($classes, $args= null){
 
 		$class_obj=null; $response=''; $name='';
@@ -319,113 +304,44 @@ class Maker
 
 
 
+	public function spoon(array $migrations, $flag = '##teste##' ){
+		$response = '';
 
-
-	public function spoon($tables_spoon){
-	
-		$tables=[]; $response = '';
-		if (!is_array($tables_spoon)){
-			$tables[0] = $tables_spoon;
-		}	
-
-		foreach ($tables as $table) {
-
-					$db = new DB();
-				 	$args = null;  $data_array=[];
-					$data = $db->select($table, '*');
+		if(count($migrations ) >= 1){
+			
+			foreach ($migrations as $migration ) {
+				$class = 'App\\Models\\'.$migration->class;
+				$class_obj = new $class();
+				$search = [];
 				
-				 	if ( is_object($data)){
-				 		$data_array[0] = $data;
-				 	}else{
-				 		$data_array = $data;
-					} 
-					 
+				foreach( $migration->table->getCols() as $i => $col ){
+					array_push($search,  $col['name']);
+				}
+				
+				array_push($search, $flag);
+				$results = $class::db()->search($search);
 
-				 	if ($data_array) {
+				if($results) {
+					foreach($results as $obj){
 
-				 		switch ($table) {
+						$id = $obj->id;
+						if ($obj->delete() ){
+							$response .=  '<br><p style="color:green;">Deleting '.ucfirst($migration->table->name)." item id:".$id."!</b>";
+						}
+					}
+				}else{
+					$response .=  '<br><p style="color:brown;">No Found Test Resgisters in the table <b>'.ucfirst($migration->table->name).'</b>!</p> ';
+				}
 
-				 			case 'jobs':
-				 			case 'demos':		
-				 	
-				 				if ($data_array) {
-				 					
-						 			foreach ($data_array as $key => $value) {
-						 				if ( strrpos(strtolower($value->title),'teste') | strrpos(strtolower($value->description), 'teste') ){
-						 					$rs = $db->delete($table, ['id'=> $value->id]);
-						 					if( $rs->status) {
-												 $response .=  '<br><p style="color:green;">Deleting '
-												 .ucfirst($table)." ".$value->title."</b>";
-						 					}else{
-
-						 						if ($rs->errors) {
-										    		foreach ($rs->errors as $key => $value) 
-										    		{
-										    			$response .= '<p  style="color:brown;">Error: '.$key.' | '.$value.'</p>' ;
-										    		}
-										    	}	
-						 					}
-
-
-										}
-										else{
-											$response .=  '<br><p style="color:0000FF;">The '.ucfirst($table)
-													." ".$value->title." n is Test Item! </b>";
-										}	
-						 			}
-
-						 			
-					 			}else{
-									 $response .=  '<br><p style="color:brown;">No Found Resgisters of Test in table '.
-									 $table.'!</b>';
-						 		}
-						 			
-				 				break;
-				 			
-
-							case 'users':
+				$response .= '<br>';
+			}
+		}
 		
-								if ($data_array) {	
-									foreach ($data_array as $key => $value) {
 
-												if ( strrpos(strtolower($value->last_name),'teste') | strrpos(strtolower($value->email), 'teste') ){
-													$rs = $db->delete($table, ['id'=> $value->id]);
-													if($rs) {
-														$response .=  '<br><p style="color:green;">Deleting '
-														.ucfirst($table)." ".$value->first_name."!</b>";
-													}
-												}else{
-													$response .=  '<br><p style="color:0000FF;">The user '.ucfirst($table)
-													." ".$value->first_name." n is Test Item! </b>";
-												}
+		return $response;
 
-									}	
-								}
-								else {
-									$response .=  '<br><p style="color:brown;">No Found Resgisters of Test in table '
-																.$table.'! </b>';
-								}
-						 				
+	}	
 
-							 break;
-							 
-				 		} //end switch
-
-				 	 }else{
-							$response .=  '<br><p style="color:brown;">No Found table '
-							.$table.' in database, or this is empty! </b>';
-				 	 }
-				 	 	
-
-				 }
-
-				 exit;
-
-				 
-
-		return $response;	
-	}
-	
 
 
 
@@ -445,10 +361,10 @@ class Maker
 
 			$response .= '<h3>Running Make File '.ucfirst($explode[0]).'!</h3>';	
 
-			$templates_path =  $this->app->vendor_path.'Maker/templates/';
-			$makefile = json_decode(file_get_contents($this->app->vendor_path.'Maker/maker.json') );
+			$templates_path =  $this->path.'templates/';
+			$makefile = json_decode(file_get_contents($this->app->config->vendor_path.'Maker/maker.json') );
 			$template = $templates_path;
-			$filename = $this->app->path;
+			$filename = $this->app->config->path;
 			
 			if( $command && isset( $makefile->templates->$command )  ){
 
@@ -606,7 +522,6 @@ class Maker
 				$response .=  '</li>';
 			}
 		}else{
-			//$this->app->redirect('/maker');
 
 			$response = '<h3  style="color: #3333FF;" >Running Show List Help!</h3>';	
 			$response .=  '<ul>';

@@ -6,6 +6,7 @@
 
 namespace App;
 
+
 use App\Http\Request;
 use App\Http\Response;
 use App\Http\Route;
@@ -21,62 +22,64 @@ use App\Database\Table;
 use App\Maker\Maker;
 
 
+
 class App
 {
-	public $request, $response, $routers=[];
-	public $args , $path, $vendor_path ,$user, $mode, $theme, $timezone;
+	public $config, $maker_config, $request, $response, $routers=[], $args , $user;
 	public $middleware_obj, $middleware_auth;
+	private $root_dir;
 
 
 	function __construct($config=null)
-	{	
+	{		
 		@session_start();
-		$this->set_config($config);
-		if( file_exists( $this->path.'config/app.php' ) ){
-			include $this->path.'config/app.php'; //Load AppConfigs
+
+		if( file_exists( getcwd().'/../config/app.php' ) ){
+			include getcwd().'/../config/app.php'; //Load AppConfigs
+			$this->set_config($config);
 		}else{
 			$maker = new Maker($this);
 			$maker->file('config:app');
 		}
 
-		date_default_timezone_set($this->timezone);
+		date_default_timezone_set($this->config->timezone);
 		$this->request = new Request();
 		$this->load_assets();  //Creting Sym link for ../assetes/public
 
 		if(  explode('/', $this->request->url )[1] == 'api'  ){
-			$this->mode = 'api';
+			$this->config->mode = 'api';
 			$this->request->url = str_replace('/api/' , '/', $this->request->url );
 		}
 		$this->response = new Response($this);
-
-		/*if(){
-
-		} */
-
-		return $this->load_router($this); //loading Routers files
+		return $this->load_router($this); //loading Routers files 
 	}
 
 
 	public function set_config($config=null){
-
-		$default_config['mode']= 'app';
-		$default_config['theme'] = '';
-		$default_config['path'] = '../';
-		$default_config['vendor_path'] = $default_config['path'].'vendor/messiasdias/md-php-framework/';
-		$default_config['debug'] = false;
-		$default_config['timezone'] = 'America/Recife';
-
-		foreach($default_config as $key => $value ){
-			$this->$key = $value;	
-		}	
-
-		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $default_config;
 	
+		$this->config->path = getcwd().'/../';
+		$this->config->vendor_path   = $this->config->path.'vendor/messiasdias/md-php-framework/';
+		$this->config->mode = 'app';
+		$this->config->theme = '';
+		$this->config->timezone = 'America/Recife';
+		$this->config->views = $this->config->views.$this->config->theme;
+
+		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
+
 		foreach($config_array as $key => $value ){
-			$this->$key = $value;	
+			if($key !== 'debug' ) $this->config->$key = $value;
 		}
 		
-	}	
+	}
+	
+	
+
+	private function load_assets(){
+		if (!file_exists($this->config->path.'public/assets')) {
+			symlink ($this->config->path.'assets/public', 'public/assets' );
+		}
+		return;
+	}
 
 
 	public function run(){
@@ -112,7 +115,7 @@ class App
 
 		}else{
 
-			$file =  $this->path."assets/private/views/$this->theme/http/".$app->response->get_http_code().".html";
+			$file =  $this->config->path."assets/private/views/".$this->config->theme."/http/".$app->response->get_http_code().".html";
 
 			if ( file_exists($file) && ( $app->response->get_http_code() != '200' ) ){
 				
@@ -149,7 +152,7 @@ class App
 		$app = $this->put_header($app);
 		$app->response->view();
 		
-		if(debug_msg){
+		if($app->config->debug_msg){
 			echo '<div id="debug" class="debug">';
 			echo '<h3>Debug --> $app->view_get_data() </h3>';	
 			print_r($app->view_get_data());
@@ -303,9 +306,9 @@ class App
 
 
 	public function mode_trigger($app,$api,$data=null){
-		if( $this->mode === 'app' ){
+		if( $this->config->mode === 'app' ){
 			return $app($this, $this->args, $data);
-		}elseif( $this->mode === 'api' ){
+		}elseif( $this->config->mode === 'api' ){
 			return $api($this, $this->args,$data);	
 		}
 	}
@@ -314,14 +317,14 @@ class App
 
 	private function load_router($app){
 		//load routers app or api
-		switch ( strtolower($app->mode) ) {
+		switch ( strtolower($app->config->mode) ) {
 			case 'api':
-				$mode = $this->path.'src/Routers/api/*.php';
+				$mode = $this->config->path.'src/Routers/api/*.php';
 			break;
 
 			case 'app':
 			default:
-				$mode = $this->path.'src/Routers/*.php';
+				$mode = $this->config->path.'src/Routers/*.php';
 			break;
 		}
 
@@ -333,24 +336,12 @@ class App
 			}
 		}
 
-		if ($app->debug && file_exists($this->vendor_path.'/Maker/Routers.php') ){
+		if ( $this->config->debug && file_exists($this->config->vendor_path.'/Maker/Routers.php') ){
 			//Maker Routers
-			include $this->vendor_path.'/Maker/Routers.php';
+			include $this->config->vendor_path.'/Maker/Routers.php';
 		}
 
 		return $app;
-	}
-
-
-
-
-	private function load_assets(){
-
-		if (!file_exists($this->path.'public/assets')) {
-			symlink ($this->path.'assets/public', 'public/assets' );
-		}
-
-		return;
 	}
 
 
@@ -420,7 +411,7 @@ class App
 	public function view(string $name, array $data=null,string $path=null)
 	{	
 		$data = ((!is_null($data))) ? array_merge($data, (array) $this->view_get_data()) : (array) $this->view_get_data();
-		$view = new View($this, !is_null($path) ? $path : $this->path.'assets/private/views/', $name, $data   );
+		$view = new View($this, !is_null($path) ? $path : $this->config->path.'assets/private/views/', $name, $data   );
 		$this->response->write( $view->show(), 'html' );
 		return $this;
 	}
@@ -452,11 +443,12 @@ class App
 			'input' => ($this->inputs()) ? $this->inputs() : false ,
 			'assets' => '/assets/',
 			'log' => ($this->response->get_log()) ? $this->response->get_log() : false,
-			'debug' => $this->debug,
+			'debug' => $this->config->debug,
 			'session' =>  ($_SESSION) ? ( (object) $_SESSION ) : false,
 			'cookies' =>  ($this->request->cookies) ? ( (object) $this->request->cookies) : false,
 			
 		]; 
+
 		$data =  array_merge($data, (array) $this->response->get_data() );
 		$data = (object) array_merge($data, [ 'view_data' => json_encode($data) ] ) ;
 		return (object) $data;

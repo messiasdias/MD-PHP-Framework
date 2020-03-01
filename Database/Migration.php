@@ -24,11 +24,7 @@ class Migration
 		$this->table = new Table(strtolower($tb));
 
 	    if ($this->table) {	
-
-			if ( !$this->table->exists() ) {
-					  $this->cols();
-				} 
-
+			$this->cols();
 	    }		
 
 	}

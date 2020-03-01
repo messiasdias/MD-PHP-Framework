@@ -56,12 +56,12 @@ abstract class Model implements ModelInterface {
 
 	//Find and Get all Users on Object with optional pagination
 	public static function all(array $paginate=null ){
-
+	
 		if ( !is_null($paginate) ){
 		  return  self::db()->paginate($paginate[0], $paginate[1],$paginate[2]);
 		}
-
-		return  self::db()->select( '*');
+		
+		return  self::db()->select('*');
 	}
 
 

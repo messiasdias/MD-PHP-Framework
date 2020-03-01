@@ -24,7 +24,7 @@ function convert_array($item){
 }
 
 
-foreach ( glob( $this->app->path.'src/Viewfilters/*.php' )  as $filter ) {
+foreach ( glob( $this->app->config->path.'src/Viewfilters/*.php' )  as $filter ) {
     if (  file_exists($filter) )
     {	
         include $filter;

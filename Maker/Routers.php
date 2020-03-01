@@ -4,28 +4,28 @@
 use App\Maker\Maker;
 
 
-
 $app->get('/maker',  function($app,$args) {  
-	//Maker index|help	
-	return $app->view('help' , [ 'commands' => maker_commands ] , $app->vendor_path .'Maker/views'  ) ;
+	//Maker index|help
+	$maker = new Maker($app);	
+	return $app->view('help' , [ 'commands' => $maker->commands() ] , $app->config->vendor_path .'Maker/views'  ) ;
  }, 'debug');
-
 
 
 $app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{command}string' ], function($app,$args) {  
 	//Maker File | Migrate	
-
 	$maker = new Maker($app);
-	$command = $args->command; $continue = false;
+	$continue = false;
 
-	foreach (maker_commands as $i => $maker_command) {
-		if($maker_command['name'] == $command){
+	foreach ($maker->commands() as $i => $command ) {
+		if($command->name == $args->command){
 			$continue = true;
 		}
 	}
+	
+	$method = $args->command;
 
 	if($continue && ( isset($args->subcommand) && ( strtolower($args->subcommand) != 'help'))  ){
-		return $app->write($maker->$command($args->subcommand) , 200) ;
+		return $app->write($maker->$method($args->subcommand) , 200) ;
 	}else{
 		return $app->redirect('/maker');
 	}
@@ -47,7 +47,7 @@ $app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{comman
 		case 'view' : 
 		case 'app' :
 		case 'html' :  
-			return $app->view('map' , [ 'routers' => $app->routers] , $app->vendor_path .'Maker/views/' ) ;
+			return $app->view('map' , [ 'routers' => $app->routers] , $app->config->vendor_path .'Maker/views/' ) ;
 		break;
 		
 		case 'api' : 
