@@ -1,6 +1,6 @@
 {
     "name": "messias/md-php-framework",
-    "description": "Meu Framework PHP",
+    "description": "PHP Framework Libray - Messias Dias",
     "type": "library",
     "version": "1.0",
     "minimum-stability": "stable",

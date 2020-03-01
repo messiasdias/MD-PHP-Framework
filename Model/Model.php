@@ -37,22 +37,9 @@ abstract class Model implements ModelInterface {
 	//Object exists
 	public function exists( array $props_exceptions_exclude=[ 'id', 'table','created', 'updated'] )
 	{
-		$values=[]; $keys=[]; $i=0;
-		$obj = (array) $this;
-		foreach($obj as $key => $value ){
-			if( !App::validate( $key , 'startwith:confirm_', get_called_class() ) && !in_array( $key , $props_exceptions_exclude  ) ){
-				if( !is_array($value)  ) {
-					$keys[$i] = $key;
-					$values[$i] = $value;
-					$i++;
-				}
-					
-			}
-		} 
-
-		if ( self::db()->select([$keys,$values]) ) {
+		if( self::find('id', $this->id) ){
 			return true;
-		} 
+		}
 
 		return false;
 	}

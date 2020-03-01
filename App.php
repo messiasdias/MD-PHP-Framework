@@ -1,7 +1,6 @@
 <?php
 
-/*
- *
+/**
  * App Class
  */
 
@@ -24,7 +23,9 @@ use App\Maker\Maker;
 
 class App
 {
-	public $request, $response, $routers=[], $args , $path, $vendor_path ,$user, $mode, $theme, $timezone;
+	public $request, $response, $routers=[];
+	public $args , $path, $vendor_path ,$user, $mode, $theme, $timezone;
+	public $middleware_obj, $middleware_auth;
 
 
 	function __construct($config=null)
@@ -91,7 +92,7 @@ class App
 		 	$this->response->set_http_msg($this->response->get_http_msg($this->response->get_http_code()) );
 		  }
 
-		 $app = $this->middlewares( isset($result->route->middlewares) ? $result->route->middlewares : null);
+		 $app = $this->middlewares( isset($result->route->middlewares) ? $result->route->middlewares : null, true);
 
 		if ( $result->status &&  $app->middleware_auth  ){ 
 
@@ -199,7 +200,7 @@ class App
 
 
 
-	public function middlewares($list=null){
+	public function middlewares($list=null, $return_app=false){
 
 		$this->middleware_auth = true;
 
@@ -215,7 +216,12 @@ class App
 			}
 		}
 
-		return $this; 
+		if($return_app){
+			return $this; 
+		}else{
+			return $this->middleware_auth;
+		}
+		
 	}
 	
 

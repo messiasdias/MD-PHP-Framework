@@ -45,7 +45,7 @@ class Middleware
 				array_push($array_list , trim($list," ") );
 			}
 
-		}elseif(is_array($middleware_list)) {
+		}elseif(is_array($list)) {
 			$array_list = array_map('trim', $list );
 		}
 
@@ -60,14 +60,13 @@ class Middleware
 		foreach( $this->list as $name  ){
 			if( isset($this->middlewares->$name) ) {
 				$middleware = $this->middlewares->$name;
-				if($middleware($this->app)){
+				if ( $middleware($this->app, (object) $this->app->middleware_obj ) ) {
 					return true;
 				}
 			}
 		}
 		
 		return false;
-	
 	}
 
 
