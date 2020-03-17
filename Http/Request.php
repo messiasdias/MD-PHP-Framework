@@ -12,7 +12,7 @@ class Request
 	{
 		$this->url = strtolower($_SERVER['REQUEST_URI']);
 		$this->protocol = $_SERVER['SERVER_PROTOCOL']; // HTTP 1.0 | HTTPS
-		$this->scheme = $_SERVER ["REQUEST_SCHEME"]; //http | https
+		$this->scheme = isset($_SERVER ["REQUEST_SCHEME"]) ? $_SERVER ["REQUEST_SCHEME"] : 'http'; //http | https
 		$this->method =  $_SERVER['REQUEST_METHOD'];
 		$this->host =  $_SERVER['HTTP_HOST']; //localhost.local
 		$this->origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : false; //localhost.local
