@@ -76,7 +76,7 @@ class App
 
 	private function load_assets(){
 		if (!file_exists($this->config->path.'public/assets')) {
-			symlink ($this->config->path.'assets/public', $this->config->path.'public/assets' );
+			@symlink ($this->config->path.'assets/public', $this->config->path.'public/assets' );
 		}
 		return;
 	}
