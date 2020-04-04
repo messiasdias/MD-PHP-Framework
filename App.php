@@ -58,7 +58,7 @@ class App
 	public function set_config($config=null){
 	
 		$this->config->path = getcwd().'/../';
-		$this->config->vendor_path   = $this->config->path.'vendor/messiasdias/md-php-framework/';
+		$this->config->vendor_path   = $this->config->path.'vendor/messiasdias/md-php-framework-lib/';
 		$this->config->mode = 'app';
 		$this->config->theme = '';
 		$this->config->timezone = 'America/Recife';
