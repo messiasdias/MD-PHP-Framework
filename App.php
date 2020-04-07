@@ -33,36 +33,45 @@ class App
 	function __construct($config=null)
 	{		
 		@session_start();
+		$this->request = new Request();
+		$this->config = (object) [];
+		$this->set_config($config);
 
 		if( file_exists( getcwd().'/../config/app.php' ) ){
 			include getcwd().'/../config/app.php'; //Load AppConfigs
-			$this->set_config($config);
-		}else{
-			$maker = new Maker($this);
-			$maker->file('config:app');
 		}
-
+		
 		date_default_timezone_set($this->config->timezone);
-		$this->request = new Request();
 		$this->load_assets();  //Creting Sym link for ../assetes/public
 
-		if(  explode('/', $this->request->url )[1] == 'api'  ){
+		if( explode('/', $this->request->url )[1] == 'api'  ){
 			$this->config->mode = 'api';
 			$this->request->url = str_replace('/api/' , '/', $this->request->url );
 		}
+
 		$this->response = new Response($this);
+
+		if( !file_exists( getcwd().'/../config/app.php' ) ){
+			$this->response->set_log((object)[ 
+				  'msg' => "/config/app.php Not Found!",
+				  'status' => false
+				], 'error'); 
+		} 
+
 		return $this->load_router($this); //loading Routers files 
 	}
 
 
 	public function set_config($config=null){
-	
-		$this->config->path = getcwd().'/../';
+		
+		$this->config->path = getcwd()."/../";
 		$this->config->vendor_path   = $this->config->path.'vendor/messiasdias/md-php-framework-lib/';
 		$this->config->mode = 'app';
-		$this->config->theme = '';
 		$this->config->timezone = 'America/Recife';
-		$this->config->views = $this->config->views.$this->config->theme;
+		$this->config->views = $this->config->path.'assets/private/views/';
+		$this->config->debug = true;
+		$this->config->debug_msg = false;
+		$this->config->theme = '';
 
 		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
 
@@ -98,32 +107,32 @@ class App
 		 $app = $this->middlewares( isset($result->route->middlewares) ? $result->route->middlewares : null, true);
 
 		if ( $result->status &&  $app->middleware_auth  ){ 
-
 			//Exec Callback Function of Route
-		  $app = $result->route->callback($app, isset($result->route->args )? $result->route->args : null);
+		  	$app = $result->route->callback($app, isset($result->route->args )? $result->route->args : null);
 
 			if( !$app instanceof App ){
-
-				$app = $this->view('http/500',
-					['msg' => 'Return the var <i>App</i> $app end of router method!</h1> <p style="color:brown;">'.
-					' Ex:<br> $app->get("/url/:param", $callback = function($app, $args)'.
-					'{<b style="color: green"> return $app; </b> },[[string|Array] $middlewares | null] );'.
-					' </p></center>' ]);
-					exit;
+				$app = $this->view('layout/msg',[
+					'title' => 'Return the variable "App $app" end of router method!',
+					'subtitle' =>  '$app->get("/url/:param", function($app, $args)'.
+					'{ return $app; } , < <[array|string]$middlewares> | null] > );' 
+				]);
 			}
 			
-
 		}else{
 
 			$file =  $this->config->path."assets/private/views/".$this->config->theme."/http/".$app->response->get_http_code().".html";
+			if( !file_exists($file) ){
+				$file = $this->config->path."assets/private/views/".$this->config->theme."/layout/http.html";	
+			}
 
 			if ( file_exists($file) && ( $app->response->get_http_code() != '200' ) ){
 				
 				$app =  $this->mode_trigger( 
 						function ($app, $args, $result) {
-							return $this->view('http/'.$app->response->get_http_code(),
-							['page' => $app->request->url,
-							'msg' => isset($result->msg) ? $result->msg : $app->response->get_http_msg() ]); 
+							return $this->view('layout/http',
+							[	'page' => $app->request->url,
+								'code' => $app->response->get_http_code(),
+								'msg' => isset($result->msg) ? $result->msg : $app->response->get_http_msg() ]); 
 
 						},function($app, $args, $result){
 
@@ -141,7 +150,7 @@ class App
 					<h1  style="color:brown;" >Erro: '.$app->response->get_http_code().'</h1> '.
 					$app->response->get_http_msg().'</h3></div>', //data writing
 					'html',						 //type
-					$app->response->get_http_code(), //reposnse code
+					$app->response->get_http_code(), //response code
 					$app->response->get_http_msg() //reponse msg
 				);
 
@@ -150,15 +159,15 @@ class App
 		}
 
 		$app = $this->put_header($app);
-		$app->response->view();
-		
-		if($app->config->debug_msg){
-			echo '<div id="debug" class="debug">';
-			echo '<h3>Debug --> $app->view_get_data() </h3>';	
+
+		if( $app->config->debug_msg){
+			echo '<div id="debug" class="log">';
+			echo '<h1>Debug --> $app->view_get_data() </h1>';	
 			print_r($app->view_get_data());
 			echo "</div>";
 		}
-		
+
+		$app->response->view();
 		exit;
 	}
 
@@ -369,7 +378,8 @@ class App
 
 
 
-	public function controller($name,$args=null){
+	public function controller($name,$args=null)
+	{
 
 		$method = ( count(explode('@', $name)) == 2 ) ? strtolower(explode('@', $name)[1]) : 'index';
 		$class = 'App\Controllers\\'.ucfirst(explode('@', $name)[0] ); 
@@ -386,15 +396,16 @@ class App
 		}
 
 		$this->response->set_http_code(500);
-		return $this->view('http/500', ['page' => $this->request->url,
-				 'msg' => $this->response->get_http_msg() ]);
+		return $this->view('layout/msg', ['title' => $this->request->url,
+				 'subtitle' => $this->response->get_http_msg() ]);
 
 	}
 
 
 
 
-	public static function validate($data,$validations,$class=''){
+	public static function validate($data,$validations,$class='')
+	{
 		$validator = new Validator( $class );
 		if(  is_array($data) && is_array($validations)  ) {
 			return $validator->valid_array($data,$validations);
@@ -408,18 +419,19 @@ class App
 
 
 
-	public function view(string $name, array $data=null,string $path=null)
+	public function view(string $name, array $data=null, string $path=null)
 	{	
 		$data = ((!is_null($data))) ? array_merge($data, (array) $this->view_get_data()) : (array) $this->view_get_data();
-		$view = new View($this, !is_null($path) ? $path : $this->config->path.'assets/private/views/', $name, $data   );
+		$path = is_null($path) ? $this->config->views : $path;
+		$view = new View($this, $path , $name, $data );
 		$this->response->write( $view->show(), 'html' );
 		return $this;
 	}
 
 
 
-	public function inputs($inputs=null){
-
+	public function inputs($inputs=null)
+	{
 		if( is_null($inputs) ){
 			return isset($this->request->data) ? $this->request->data : false;
 		}else{
@@ -430,7 +442,8 @@ class App
 
 
 
-	public function view_get_data(){
+	private function view_get_data()
+	{
 		$data = [
 			'url'  => $this->request->url,
 			'referer'  => $this->request->referer,
@@ -442,14 +455,13 @@ class App
 			'token' => ($this->request->token) ? $this->request->token : false,
 			'input' => ($this->inputs()) ? $this->inputs() : false ,
 			'assets' => '/assets/',
-			'log' => ($this->response->get_log()) ? $this->response->get_log() : false,
-			'debug' => $this->config->debug,
+			'log' => ( isset($this->response) && $this->response->get_log()) ? $this->response->get_log() : false,
+			'debug' => isset($this->config) ? $this->config->debug: true,
 			'session' =>  ($_SESSION) ? ( (object) $_SESSION ) : false,
 			'cookies' =>  ($this->request->cookies) ? ( (object) $this->request->cookies) : false,
-			
 		]; 
 
-		$data =  array_merge($data, (array) $this->response->get_data() );
+		$data =  array_merge($data, $this->response ?  (array) $this->response->get_data() : [] );
 		$data = (object) array_merge($data, [ 'view_data' => json_encode($data) ] ) ;
 		return (object) $data;
 	}
@@ -474,13 +486,15 @@ class App
 
 
 
-	public function redirect_header($url){
+	public function redirect_header($url)
+	{
 		header('location:'.$url);
 	}
 
 
 
-	public function redirect($url, $method = "GET", $data=null){
+	public function redirect($url, $method = "GET", $data=null)
+	{
 
 		$this->request->url = strtolower( $url );
 		$this->request->method = $method;
@@ -535,9 +549,7 @@ class App
 	}
 
 
-	
 
-
-}
+}// end App
 
 ?>

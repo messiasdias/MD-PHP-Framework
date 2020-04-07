@@ -8,7 +8,7 @@ use App\Auth\Token;
  */
 class Response extends Request 
 {	
-	protected $headers=[], $http_code, $http_msg, $http_codes;
+	private $headers=[], $http_code, $http_msg, $http_codes;
 	public $view, $log=[], $app;
 	
 	function __construct( App $app)

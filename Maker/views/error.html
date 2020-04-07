@@ -1,0 +1,14 @@
+{% extends 'layout/page.html' %}
+{% block home %} 
+
+<h1>{{title|escape}}</h1> 
+
+{% if subtitle %}
+<p>{{subtitle|escape}}</p>
+{% endif %}
+
+
+
+<a href="/maker">Maker</a>
+
+{% endblock %} 

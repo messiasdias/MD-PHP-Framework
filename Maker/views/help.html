@@ -1,17 +1,18 @@
 
-<center style="padding: 40px;">
-<h1> Maker - Help </h1>
-<h3 style="color: #0F0FFF;">Usage: /maker/{command}/{option[:data]} </h3>
+{% extends 'layout/page.html' %}
+{% block home %} 
+
+<h1>Maker</h1>
+<p>Usage: /maker/{command}/{option[:data]} </p>
 
 
 <table border="1"  > 
-		<tr> 
-			<td><b>Command:<b></td>  
-			<td> <b>Options:</b> </td>
-			<td> <b>Description:</b> </td> 
-
-		</tr>
-
+	<thead>  
+		<th>Command:</th>  
+		<th>Options:</th>
+		<th>Description:</th> 
+	</thead>
+	<tbody>	
 		{% for command in commands  %}
 			<tr> 
 				<td>{{ command.name }} </td>
@@ -21,6 +22,8 @@
 				</td> 
 			</tr>  
 		{% endfor %}
-
+	</tbody>
 </table> 
-</center>
+
+
+{% endblock %} 

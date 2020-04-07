@@ -25,7 +25,7 @@ class DB {
 			echo '<p style="color:brown;">File <b>config/db.php</b> not Found!</p>'.
 			'<p> Click to <a href="'.$makefile.'" > Make File </a> or Send a HTTP/GET Request for '.$makefile.'</p>'.
 			'<p> For Help: <a href="/maker" >Maker</p>' ;
-			exit;
+			exit; 
 		}
 
 		if( !is_null($class) && !App::validate($class, 'startwith:App\\Models\\' ) ){

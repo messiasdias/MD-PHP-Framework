@@ -6,8 +6,8 @@ use App\Maker\Maker;
 
 $app->get('/maker',  function($app,$args) {  
 	//Maker index|help
-	$maker = new Maker($app);	
-	return $app->view('help' , [ 'commands' => $maker->commands() ] , $app->config->vendor_path .'Maker/views'  ) ;
+	$maker = new Maker($app);
+	return $app->view('help' , [ 'commands' => $maker->commands() ] , $app->config->vendor_path .'Maker/views/'  ) ;
  }, 'debug');
 
 
@@ -25,7 +25,11 @@ $app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{comman
 	$method = $args->command;
 
 	if($continue && ( isset($args->subcommand) && ( strtolower($args->subcommand) != 'help'))  ){
-		return $app->write($maker->$method($args->subcommand) , 200) ;
+
+		//var_dump($maker->$method($args->subcommand));
+
+		//return $app->write($maker->$method($args->subcommand) , 200) ;
+	
 	}else{
 		return $app->redirect('/maker');
 	}

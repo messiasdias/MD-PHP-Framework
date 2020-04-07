@@ -12,12 +12,18 @@ use App\Database\Table;
 
 class Maker
 {
-	private $app, $path,  $response, $migrations=[], $seeds=[], $tables=null;
+	private $app, $path, $response, $migrations=[], $seeds=[], $tables=null;
+	private $spoon_flag, $seeder_objects;
 
-	public function __construct(App $app ) {
+	public function __construct(App $app) {
 		$this->app = $app;
 		$this->path = $this->app->config->vendor_path.'Maker/';
-		$this->args = isset($this->app->maker_config) ? $this->app->maker_config : false;
+		if( file_exists($this->app->config->path.'/config/maker.php' ) ){
+			include $this->app->config->path.'/config/maker.php';
+			$this->args = isset($this->app->maker_config) ? $this->app->maker_config : false;
+		}else{
+			$this->args = false;
+		}
 	}
 	
 	public function commands(){
@@ -76,24 +82,27 @@ class Maker
 
 
 	public function migrate($command){
-		
+		$title = '';
 		$response = '<center style="padding:50px;">'; 
 
 		if ( !is_null($command) && ( count( explode( ':',$command) ) > 1 ) ) {
 
 			$command_exp = explode( ':',$command);
+			$title .= 'Running '.ucfirst($command_exp[0]).' Tables!';
+			//tmp
+			$response .= '<h3 style="color: #3333FF;">' . $title . '</h3>'; 
 
 			switch ($command_exp[0]) {
 				case 'create':
 				case 'drop':
 			
-					$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
+					//$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
 					$response .= $this->migrator( strtolower($command_exp[0]) ,$this->get_classes('Migrations', $command_exp[1]));
 					
 					break;
 				case 'reset':
 
-					$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
+					//$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
 					$response .= $this->migrator('drop',$this->get_classes('Migrations', $command_exp[1]));
 					$response .= $this->migrator('create',$this->get_classes('Migrations', $command_exp[1]));
 
@@ -101,15 +110,18 @@ class Maker
 
 				case 'seed':
 
-					$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
+					//$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
 					$classes = $this->get_classes('Seeds', $command_exp[1]);
 	
 					if ( $classes ) {
-
 						$count = (count($classes) > 1 ) ? count($classes) : 1  ;
 					   for($i=0; $i < $count; $i++){
 							$args_name = strtolower(str_replace('Seeder',null,explode('\\', $classes[$i])[count(explode('\\', $classes[$i]))-1]) );
-							$response .= $this->seed( $classes[$i] , $this->app->maker_config->$args_name );
+							if($this->seeder_objects){
+								$response .= $this->seed( $classes[$i] , $this->seeder_objects->$args_name);
+							}else{
+								$response .= '<p style="color: brown;" > Variable <b>seeder_objects</b> no is set! </p>';
+							}
 						}
 						
 					}else{
@@ -121,7 +133,7 @@ class Maker
 				break;
 
 				case 'spoon' :
-					 $response .= '<h3 style="color: #3333FF;">Running Spoon Tables!</h3>';
+					 //$response .= '<h3 style="color: #3333FF;">Running Spoon Tables!</h3>';
 					 $classes = $this->get_classes('migrations', $command_exp[1] );
 					
 					 if ($classes) {
@@ -133,7 +145,7 @@ class Maker
 							 }
 						 } 
 
-						 $response .= $this->spoon($tables, $this->app->maker_config->spoon_flag );
+						 $response .= $this->spoon($tables, $this->spoon_flag ? $this->spoon_flag : "##teste##" );
 
 					 }else{
 						 $response .= '<p style="color: brown;" >The <b>'.ucfirst($command_exp[1]).
@@ -174,7 +186,7 @@ class Maker
 
 	private function migrator($type, $classes){ 
 
-	 $msg=[]; $rs=null; 	$response='';
+	 $msg=[]; $rs=null; $response='';
 
 	 if($classes) {	
 
