@@ -62,6 +62,7 @@ class App
 	}
 
 
+
 	public function set_config($config=null){
 		
 		$this->config->path = getcwd()."/../";
@@ -74,7 +75,6 @@ class App
 		$this->config->theme = '';
 
 		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
-
 		foreach($config_array as $key => $value ){
 			if($key !== 'debug' ) $this->config->$key = $value;
 		}
@@ -91,6 +91,7 @@ class App
 	}
 
 
+
 	public function run(){
 
 		$result = $this->get_callback($this->request->url, $this->request->method, $this->routers );
@@ -99,10 +100,10 @@ class App
 
 		 if ( isset($result->msg) ){
 		 	 $this->response->set_http_msg($result->msg);
-		  }
+		 }
 		 else { 
 		 	$this->response->set_http_msg($this->response->get_http_msg($this->response->get_http_code()) );
-		  }
+		 }
 
 		 $app = $this->middlewares( isset($result->route->middlewares) ? $result->route->middlewares : null, true);
 
@@ -237,6 +238,7 @@ class App
 	}
 	
 
+	
 	public function middleware_verify($list=null) {
 		if( !is_null($list) ) {
 			$middleware = new Middleware($this, $list);

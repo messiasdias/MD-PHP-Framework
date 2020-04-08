@@ -42,6 +42,10 @@
                 },
                 "key":{
                     "src" : "key-config.txt"
+                },
+
+                "maker":{
+                    "src" : "maker-config.txt"
                 }
             }
         }

@@ -12,17 +12,17 @@ use App\Database\Table;
 
 class Maker
 {
-	private $app, $path, $response, $migrations=[], $seeds=[], $tables=null;
-	private $spoon_flag, $seeder_objects;
+	private $app, $path, $response, $migrations=[], $seeds=[], $tables=null, $spoon_flag, $seeder_objects;
 
 	public function __construct(App $app) {
 		$this->app = $app;
 		$this->path = $this->app->config->vendor_path.'Maker/';
+
 		if( file_exists($this->app->config->path.'/config/maker.php' ) ){
 			include $this->app->config->path.'/config/maker.php';
-			$this->args = isset($this->app->maker_config) ? $this->app->maker_config : false;
 		}else{
-			$this->args = false;
+			$this->seeder_objects = false;
+			$this->spoon_flag = '##test##';
 		}
 	}
 	
@@ -45,7 +45,9 @@ class Maker
 			case 'controllers':
 			case 'models':
 			case 'viewfilters':
-				$path = $this->app->config->path.'src/'.ucfirst($type).'/';
+			case 'routers':
+			case 'routers/api':
+				$path = $this->app->config->path.'src/'.ucfirst( str_replace(':', '/', $type) ).'/';
 			break;
 
 			case 'config':
@@ -57,13 +59,17 @@ class Maker
 			break;
 		}
 
+	
+
 		foreach (glob($path.'*.php') as $key => $value)
 		{	
 			$value = str_replace([$this->app->config->path,'/'], ['App/' ,'\\'],str_replace(['src/' ,'.php'], '', $value));
 			$value_exp = str_replace( $action,'', explode('\\', $value)[count( explode('\\', $value) )-1] );
 
-			if(   ($class_name == 'all')   | (  strtolower($value_exp ) == strtolower( $class_name )  ) ){
-				 array_push($return, $value);
+			if( ($class_name == 'all')   |  (  strtolower($value_exp ) == strtolower( $class_name )  )  ){
+				if(!App::validate($value_exp, 'endwith:.example')) {
+					array_push($return, $value);
+				}
 			}
 		}
 
@@ -296,7 +302,7 @@ class Maker
 
 
 
-	public function spoon(array $migrations, $flag = '##teste##' ){
+	public function spoon(array $migrations, $flag = '##test##' ){
 		$response = [];
 
 		if(count($migrations ) >= 1){
@@ -478,7 +484,10 @@ class Maker
 			case 'controllers':
 			case 'config':
 			case 'viewfilters':
-				$type = ucfirst($subcommand);
+			case 'routers':	
+			case 'routers:app':		
+			case 'routers:api':
+				$type = ucfirst(str_replace([':api', ':app'], ['/api',''], $subcommand) );
 			break;
 
 			case 'tables':
@@ -491,27 +500,29 @@ class Maker
 
 		}
 
-	
 
 		if ( $type != false ) {
-			$title = 'Running List '.ucfirst($subcommand);	
-			$response =  '<ul>';
+			
+			$title = 'Running List '.ucfirst($subcommand);
+			$title .= ($this->app->config->mode != 'console' ) ? '' : "\n";	
+			$response = ($this->app->config->mode != 'console' ) ? '<ul>' : '';
 
 			foreach( $this->get_classes($type, 'all') as $class ){
 				if( $type == 'Migrations') {
 				 $obj = new $class();
-				 $response .=  '<li style="color:'.(  $obj->exists() ? 'green' : 'brown' ).';" >';
+				 $response .= ($this->app->config->mode != 'console' ) ? '<li style="color:'.(  $obj->exists() ? 'green' : 'brown' ).';" >' : '';
 				}else{
-					$response .=  '<li style="color:green;" >';
+					$response .=  ($this->app->config->mode != 'console' ) ? '<li style="color:green;" >' : '';
 				}
 
-				$response .=  @end( explode('\\', $class ) );
-				$response .=  '</li>';
+				$response .=  @end( explode('\\', $class . ' ' ) );
+				$response .= ($this->app->config->mode != 'console' ) ?'' : "\n ";
+				$response .= ($this->app->config->mode != 'console' ) ? '</li>' : '';
 			}
 		}else{
 
-			$title = 'Running Show List | Help';	
-			$response =  '<ul>';
+			$title = "Running Show List | Help \n";	
+			$response =  ($this->app->config->mode != 'console' ) ? '<ul>' : '';
 
 			$types = [
 				'models',
@@ -523,12 +534,15 @@ class Maker
 			];
 
 			foreach($types as $type ){
-				$response .=  '<li style="color:green;" > <a href="/maker/show/'.$type.'">'.$type.' </li>';
+				$response .= ($this->app->config->mode != 'console' ) ? '<li style="color:green;" > <a href="/maker/show/'.$type.'">' : ''; 
+				$response .= $type ;
+				$response .= ($this->app->config->mode != 'console' ) ?'' : "\n ";
+				$response .= ($this->app->config->mode != 'console' ) ? '</li>' : '';
 			}	
 
 		}
 		
-		$response .=  '</ul>  ';
+		$response .=  ($this->app->config->mode != 'console' ) ? '</ul>':'' ;
 		return [ 'title' => $title, 'subtitle' =>  [$response]];
 
 	}

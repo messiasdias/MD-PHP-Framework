@@ -19,7 +19,7 @@
     
     {   
         "name":"show",
-        "options":" [migrations | tables ] | seeds",
+        "options":" [migrations | tables ] | seeds | models | controllers| config | viewfilters",
         "description":"List Script Files exists foreach respective options."
     },
     

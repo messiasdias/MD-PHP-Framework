@@ -1,14 +1,18 @@
 <?php
 namespace App\Database;
-
+use App\App;
 /**
  *  Database Seeder Class
  */
 class Seeder 
 {
-	protected $response = [];		
+	private $spoon_flag, $seeder_objects, $response = [];		
 
-	function __construct(){}
+	function __construct(App $app){
+		if( file_exists($app->config->path.'/config/maker.php' ) ){
+			include $app->config->path.'/config/maker.php';
+		}
+	}
 
 	public function set_response( Object $rs , string $item_name=''){
 	
