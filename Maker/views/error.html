@@ -5,7 +5,7 @@
 
 {% if subtitle %}
     {% for sub in subtitle %}
-        <p>{{sub}}</p>
+        <p>{{sub|raw}}</p>
     {% endfor %}
 {% endif %}
 <br>

@@ -494,8 +494,8 @@ class Maker
 	
 
 		if ( $type != false ) {
-			$response = '<h3  style="color: #3333FF;" >Running List '.ucfirst($subcommand).'!</h3>';	
-			$response .=  '<ul>';
+			$title = 'Running List '.ucfirst($subcommand);	
+			$response =  '<ul>';
 
 			foreach( $this->get_classes($type, 'all') as $class ){
 				if( $type == 'Migrations') {
@@ -510,8 +510,8 @@ class Maker
 			}
 		}else{
 
-			$response = '<h3  style="color: #3333FF;" >Running Show List Help!</h3>';	
-			$response .=  '<ul>';
+			$title = 'Running Show List | Help';	
+			$response =  '<ul>';
 
 			$types = [
 				'models',
@@ -523,13 +523,13 @@ class Maker
 			];
 
 			foreach($types as $type ){
-				$response .=  '<li style="color:green;" >'.$type.' </li>';
+				$response .=  '<li style="color:green;" > <a href="/maker/show/'.$type.'">'.$type.' </li>';
 			}	
 
 		}
 		
 		$response .=  '</ul>  ';
-		return $response;
+		return [ 'title' => $title, 'subtitle' =>  [$response]];
 
 	}
 
