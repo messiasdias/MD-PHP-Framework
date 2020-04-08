@@ -13,7 +13,7 @@
     
     {   
         "name":"file",
-        "options":"controller|model|migration:",
+        "options":"controller|model|migration:<class_name>|config:<app|db|key|maker|middlewares>",
         "description":"Create file script models."
     },
     

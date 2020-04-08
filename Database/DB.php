@@ -16,15 +16,17 @@ class DB {
 
 	public function __construct($class=null){
 
-		$path = dirname($_SERVER['SCRIPT_FILENAME']);
+		$path = getcwd();
+		if( App::validate($path, 'endwith:public' ) ){
+			$path .= "/..";
+		}
 
-		if( file_exists($path.'/../config/db.php')  ){
-			include  $path.'/../config/db.php';  //Load DBConfigs
+		if( file_exists($path.'/config/db.php')  ){
+			include  $path.'/config/db.php';  //Load DBConfigs
 		}else{
-			$makefile = strtolower( explode( '/', $_SERVER['SERVER_PROTOCOL'])[0] ).'://'.$_SERVER['SERVER_NAME'].'/maker/file/config:db';
-			echo '<p style="color:brown;">File <b>config/db.php</b> not Found!</p>'.
-			'<p> Click to <a href="'.$makefile.'" > Make File </a> or Send a HTTP/GET Request for '.$makefile.'</p>'.
-			'<p> For Help: <a href="/maker" >Maker</p>' ;
+			$makefile = '/maker/file/config:db';
+			print( "File config/db.php not Found!".
+			" Click to Make File or Send a HTTP/GET Request for $makefile \n" ) ;
 			exit; 
 		}
 

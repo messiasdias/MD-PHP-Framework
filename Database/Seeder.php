@@ -8,7 +8,7 @@ class Seeder
 {
 	private $spoon_flag, $seeder_objects, $response = [];		
 
-	function __construct(App $app){
+	function __construct(){
 		if( file_exists($app->config->path.'/config/maker.php' ) ){
 			include $app->config->path.'/config/maker.php';
 		}

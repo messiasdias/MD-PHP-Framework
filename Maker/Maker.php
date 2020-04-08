@@ -122,7 +122,7 @@ class Maker
 					   for($i=0; $i < $count; $i++){
 							$args_name = strtolower(str_replace('Seeder',null,explode('\\', $classes[$i])[count(explode('\\', $classes[$i]))-1]) );
 							if($this->seeder_objects){
-								$response = setresp($this->seed($classes[$i] , $this->seeder_objects->$args_name), $response ) ;
+								$response = setresp($this->seed($classes[$i] , (array) $this->seeder_objects), $response ) ;
 							}else{
 								array_push($response, 'Variable seeder_objects no is set!' );
 							}
@@ -515,7 +515,7 @@ class Maker
 					$response .=  ($this->app->config->mode != 'console' ) ? '<li style="color:green;" >' : '';
 				}
 
-				$response .=  @end( explode('\\', $class . ' ' ) );
+				$response .=  @end( explode('\\', ($obj->exists() && ($this->app->config->mode == 'console' )) ? $class." <-- Created"  : $class  ) );
 				$response .= ($this->app->config->mode != 'console' ) ?'' : "\n ";
 				$response .= ($this->app->config->mode != 'console' ) ? '</li>' : '';
 			}
@@ -530,7 +530,8 @@ class Maker
 				'migrations',
 				'controllers',
 				'config',
-				'viewfilters'
+				'viewfilters',
+				'routers:api|app'
 			];
 
 			foreach($types as $type ){

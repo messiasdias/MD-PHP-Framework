@@ -238,7 +238,7 @@ class App
 	}
 	
 
-	
+
 	public function middleware_verify($list=null) {
 		if( !is_null($list) ) {
 			$middleware = new Middleware($this, $list);
@@ -370,7 +370,7 @@ class App
 
 	
 
-	public function db(string $class = null ){
+	public static function db(string $class = null ){
 		if( !is_null($class) ){
 			$class = (  !App::validate($class, 'startwith:App\\Models\\' ) ) ? 'App\\Models\\'.ucfirst($class) : ucfirst($class) ;
 		}

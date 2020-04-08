@@ -14,8 +14,8 @@ class Console extends App {
     public $config;
     public static $start = true;
 
-    public function __construct(){
-        $this->set_config();
+    public function __construct($config=null){
+        $this->set_config($config);
         if(self::$start){
             $this->log("#### " . $this->config->description." #### \n" );
             self::$start = false;

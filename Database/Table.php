@@ -22,7 +22,7 @@ class Table
 		}
 
 		private function db($class=null){
-			return App::db($class);
+			return  App::db($class);
 		}
 
 		public function getCols(){
