@@ -37,7 +37,6 @@ class Maker
 		$class_name = is_null($class_name) ? 'all' : $class_name;
 
 		switch (strtolower($type) ) {
-			
 			case 'seeds':
 			case 'migrations': 
 				$path = $this->app->config->path.'src/Database/'.ucfirst($type).'/';
@@ -57,7 +56,6 @@ class Maker
 				return false;
 			break;
 		}
-
 
 		foreach (glob($path.'*.php') as $key => $value)
 		{	
@@ -82,35 +80,35 @@ class Maker
 
 
 	public function migrate($command){
+
 		$title = '';
-		$response = '<center style="padding:50px;">'; 
+		$response = [];
+
+		function setresp($resp, $response = []){
+			foreach($resp as $r){
+				array_push($response, $r );
+			}
+			return $response;
+		}
 
 		if ( !is_null($command) && ( count( explode( ':',$command) ) > 1 ) ) {
 
 			$command_exp = explode( ':',$command);
 			$title .= 'Running '.ucfirst($command_exp[0]).' Tables!';
-			//tmp
-			$response .= '<h3 style="color: #3333FF;">' . $title . '</h3>'; 
 
 			switch ($command_exp[0]) {
 				case 'create':
 				case 'drop':
-			
-					//$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
-					$response .= $this->migrator( strtolower($command_exp[0]) ,$this->get_classes('Migrations', $command_exp[1]));
-					
-					break;
+					$response = setresp($this->migrator( strtolower($command_exp[0]) ,$this->get_classes('Migrations', $command_exp[1])) , $response );
+				break;
+
 				case 'reset':
-
-					//$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
-					$response .= $this->migrator('drop',$this->get_classes('Migrations', $command_exp[1]));
-					$response .= $this->migrator('create',$this->get_classes('Migrations', $command_exp[1]));
-
-					break;	
+					$response = setresp($this->migrator('drop' ,$this->get_classes('Migrations', $command_exp[1])), $response );
+					$response = setresp($this->migrator('create' ,$this->get_classes('Migrations', $command_exp[1])) , $response);
+				break;	
 
 				case 'seed':
 
-					//$response .= '<h3 style="color: #3333FF;">Running '.ucfirst($command_exp[0]).' Tables!</h3>';
 					$classes = $this->get_classes('Seeds', $command_exp[1]);
 	
 					if ( $classes ) {
@@ -118,65 +116,55 @@ class Maker
 					   for($i=0; $i < $count; $i++){
 							$args_name = strtolower(str_replace('Seeder',null,explode('\\', $classes[$i])[count(explode('\\', $classes[$i]))-1]) );
 							if($this->seeder_objects){
-								$response .= $this->seed( $classes[$i] , $this->seeder_objects->$args_name);
+								$response = setresp($this->seed($classes[$i] , $this->seeder_objects->$args_name), $response ) ;
 							}else{
-								$response .= '<p style="color: brown;" > Variable <b>seeder_objects</b> no is set! </p>';
+								array_push($response, 'Variable seeder_objects no is set!' );
 							}
 						}
 						
 					}else{
-						
-						$response .= '<p style="color: brown;" >The <b>'.ucfirst($command_exp[1]).
-						'</b> Seeder Class  does not exist in database!</p>';
+						array_push($response, 'The '.ucfirst($command_exp[1]).
+						' Seeder Class  does not exist in database!');
 					}
 
 				break;
 
 				case 'spoon' :
-					 //$response .= '<h3 style="color: #3333FF;">Running Spoon Tables!</h3>';
 					 $classes = $this->get_classes('migrations', $command_exp[1] );
 					
 					 if ($classes) {
-						 $tables = [];
-						 foreach ($classes as $class) {
-							 $class_obj = new $class();
-							 if( $class_obj){
+						$tables = [];
+						foreach ($classes as $class) {
+							$class_obj = new $class();
+							if($class_obj){
 								array_push($tables, $class_obj );
-							 }
-						 } 
+							}
+						} 
 
-						 $response .= $this->spoon($tables, $this->spoon_flag ? $this->spoon_flag : "##teste##" );
+						$response = setresp($this->spoon($tables, $this->spoon_flag ), $response );
 
 					 }else{
-						 $response .= '<p style="color: brown;" >The <b>'.ucfirst($command_exp[1]).
-						 '</b> table does not exist in database!</p>';
+						array_push($response, 'The '.ucfirst($command_exp[1]).
+						 ' table does not exist in database!');
 					 }	
 
 				break;			
 				
 				default:
-
-					$response .= '<h3 style="color: #3333FF;">Help</h3>';
-					$response .= '<p style="color:brown;">'
-					.'Usage:  /maker/migrate/create|drop|reset|seed[:table_name|all]</p>';
-
-				 break;
+					$title = 'Help';
+					array_push($response, 'Usage:  /maker/migrate/create|drop|reset|seed[:table_name|all]');
+				break;
 			}
 
 			
 
 		}
 		else{
-
-			$response .= '<h3 style="color: #3333FF;">Help</h3>';
-			$response .= '<p style="color:brown;"><br>
-	   			Usage:  /maker/migrate/create|drop|reset|seed[:table_name|all]
-	   			</p>';
-		
+			$title = 'Help';
+			array_push($response, 'Usage:  /maker/migrate/create|drop|reset|seed[:table_name|all]');
 		}
 		
-		return $response.'</center>';
-
+		return ['title' => $title, 'subtitle' => $response ];
 
    }
 
@@ -186,7 +174,7 @@ class Maker
 
 	private function migrator($type, $classes){ 
 
-	 $msg=[]; $rs=null; $response='';
+	 $msg=[]; $rs=null; $response=[];
 
 	 if($classes) {	
 
@@ -208,8 +196,6 @@ class Maker
 								}else{
 									$msg = 4;
 								}
-
-								
 								break;
 
 							}else{
@@ -249,31 +235,25 @@ class Maker
 			switch ($msg) {
 
 				case 1:
-					$response .= '<p style="color:green;">'.
-					'Table <b>'.strtolower($table_name).'</b> '.strtolower($type).' Successfully!</p>';
+					array_push($response, 'Table '.strtolower($table_name).' '.strtolower($type).' Successfully!');
 				break;
 
-
 				case 2:
-					 $response .= '<p style="color:brown;">'
-					 .'The <b>'.strtolower($table_name).'</b> Table already exists in the Database!</p>';
+					array_push($response, 'The '.strtolower($table_name).' Table already exists in the Database!');
 				break;
 
 				case 3:
-					 $response .= '<p style="color:brown;">'.
-					 'The Table <b>'.strtolower($table_name).'</b> no exists in the Database or Class Table no is defined in App/Database/'. str_replace(' ' , '_', ucwords( str_replace('_' , ' ', strtolower($table_name) ) ) ) .'Migration.php !</p>';
+					array_push($response,'The Table '.strtolower($table_name).' no exists in the Database or Class Table no is defined in App/Database/'.
+					str_replace(' ' , '_', ucwords( str_replace('_' , ' ', strtolower($table_name) ) ) ) .'Migration.php!');
 				break;
 
 				case 4:
-					$response .= '<p style="color:red;">'.
-					'An error occurred while '.strtolower($type).' table <b>'.strtolower($table_name).'</b>!</p>';	
+					array_push($response, 'An error occurred while '.strtolower($type).' table '.strtolower($table_name).'!');	
 				break;
 
 				case 5:
-					$response .= '<p style="color:brown;"><br>'
-					.'Usage Command: /maker/migrate/[create|drop|reset|seed|spoon:[table_name|all]
-	   			</p>';
-				break;
+					array_push($response, 'Usage Command: /maker/migrate/[create|drop|reset|seed|spoon:[table_name|all]');
+	   			break;
 				
 			}
 
@@ -282,7 +262,7 @@ class Maker
 	}
 	else{
 
-		$response .= '<p style="color:brown;"><br> The Table no exists in the Database! </p>';
+		array_push($response, 'The Table no exists in the Database!');
 	}
 
 	
@@ -294,7 +274,7 @@ class Maker
 
 	public function seed($classes, $args= null){
 
-		$class_obj=null; $response=''; $name='';
+		$class_obj=null; $response=[]; $name='';
 
 		if ($classes) {
 			$count = ( is_array($classes) && (count($classes) > 1) ) ? count($classes) : 1;
@@ -302,13 +282,13 @@ class Maker
 			for ( $i=0; $i < $count; $i++ ) {
 				$class = ( is_array($classes) && (count($classes) > 1) ) ?  $classes[$i] : $classes;
 				$class_obj = class_exists( $class ) ? new $class($args): false ;
-				$response .= $class_obj->get_response();
+				$response = setresp($class_obj->get_response(), $response );
 		   }
 
 			return $response;
+		}else{
+			array_push($response, 'The '.$name.' class does not exist in database!');
 		}
-
-		$response .= '<p style="color: brown;" >The <b>'.$name.'</b> class does not exist in database!</p>';
 		return $response;
 
 	}
@@ -317,35 +297,32 @@ class Maker
 
 
 	public function spoon(array $migrations, $flag = '##teste##' ){
-		$response = '';
+		$response = [];
 
 		if(count($migrations ) >= 1){
 			
 			foreach ($migrations as $migration ) {
 				$class = 'App\\Models\\'.$migration->class;
 				$class_obj = new $class();
-				$search = [];
+				$search = []; 	$results = [];
 				
 				foreach( $migration->table->getCols() as $i => $col ){
 					array_push($search,  $col['name']);
 				}
-				
 				array_push($search, $flag);
-				$results = $class::db()->search($search);
+				array_push($results, $class::db()->search($search));
 
-				if($results) {
+				if($results[0]) {
 					foreach($results as $obj){
-
 						$id = $obj->id;
 						if ($obj->delete() ){
-							$response .=  '<br><p style="color:green;">Deleting '.ucfirst($migration->table->name)." item id:".$id."!</b>";
+							array_push($response, 'Deleting '.ucfirst($migration->table->name)." item id:".$id."!");
 						}
 					}
 				}else{
-					$response .=  '<br><p style="color:brown;">No Found Test Resgisters in the table <b>'.ucfirst($migration->table->name).'</b>!</p> ';
+					array_push($response, 'No Found Test Resgisters in the table '.ucfirst($migration->table->name).'!');
 				}
 
-				$response .= '<br>';
 			}
 		}
 		
@@ -359,19 +336,19 @@ class Maker
 
 	public function file($data,$replace=[[],[]]){
 
-			$usage = '<p style="color:brown;"><br>'
-			.'Usage Command: /maker/file/[controller|model|seeder|migration]:[class_name]|route:[app|api:file_name ]|'.
-			'config:[middlewares|db|key|app]</b><br>';
+			$usage = 'Usage: /maker/file/[controller|model|seeder|migration]:[class_name]|route:[app|api:file_name ]|'.
+			'config:[middlewares|db|key|app]';
 
-			$rs=null; $response = ''; $continue = false; $explode = explode( ':', $data); 
+			$rs=null; $response = []; $continue = false; $explode = explode( ':', $data); 
 			$command = isset($explode[0]) ? $explode[0] : false ;
 			$subcommand= isset($explode[1]) ? $explode[1] : false ;
 			$subcommand2= isset($explode[2]) ? $explode[2] : false ;
+
 			$type_exists = function($this_command ,  $this_subcommand , $this_makefile ){	
 				return  isset( $this_makefile->templates->$this_command->type ) && ( $this_subcommand && isset( $this_makefile->templates->$this_command->type->$this_subcommand )) ;
 			};
 
-			$response .= '<h3>Running Make File '.ucfirst($explode[0]).'!</h3>';	
+			$title = 'Running Make File '.ucfirst($explode[0]).'!';	
 
 			$templates_path =  $this->path.'templates/';
 			$makefile = json_decode(file_get_contents($this->app->config->vendor_path.'Maker/maker.json') );
@@ -424,35 +401,34 @@ class Maker
 
 						if( $filename){
 							$filename .=  str_replace('_' , '', !in_array($command, array('route','config' ) ) ? ucwords($cocat_name , '_') : strtolower($cocat_name) )   .'.php';
-							$rs =  $this->makefile($filename ,$template, $replace);
+							$resp =  $this->makefile($filename ,$template, $replace);
+							if(is_array($resp)) {
+							   foreach($resp as $r){
+								  array_push($response, $r);
+							   }
+						    }else {
+							   array_push($response, $resp);
+							}
 						}
-						else{
-							$rs = [false, "Filename not isset!" ];
+						elseif(is_string($resp)) {
+							array_push($response,"Filename not isset!" );
 						}			
 						
 
 					}else{
-						$rs = [false, "Template for $command <b>'$subcommand'</b> not fount !" ];
-					}
-
-					
-
-					if ( $rs[0] ) {
-						$response .= '<br> <p style="color:green;">'.$rs[1].'</b>';
-					}else{
-						$response .=  '<br><p style="color:brown;">'.$rs[1].'</b>';
+						array_push($response, "Template for $command '$subcommand' not fount !" );
 					}
 
 
 				}else{
-					$response .= $usage;
+					array_push($response, $usage);
 				}	
 			
 			}else{
-				$response .= $usage;
+				array_push($response, $usage);
 			}
 			
-		return $response;	
+		return [ 'title' => $title, 'subtitle' => $response ];	
 	}
 
 
@@ -462,7 +438,7 @@ class Maker
 	private function makefile(string $filename, string $template , $replace=[[],[]] ) {
 
 		if ( file_exists( $filename )  ) {
-			return [false, 'The file <b>"'.$filename.'"</b> already exists!'];
+			return [false, 'The file "'.$filename.'" already exists!'];
 		}else{
 			if( is_writable(dirname($filename)) && $template ){	
 				$tmp = fopen($template, 'r');
@@ -475,14 +451,13 @@ class Maker
 				$chmod = chmod($filename,0775); 
 
 				if (file_exists($filename)) {
-					return [true, "Creating <b>$filename</b> Successfully!" ];
+					return "Creating $filename Successfully!" ;
 				}
 
-				return [false, "An error occurred while creating file  <b>$filename</b> !" ];
+				return "An error occurred while creating file $filename!" ;
 			}else{
-				return [false, "Permission denied for create file <b>$filename</b>! <br><br> ".
-			           'Execute on cli in the root directory: <br>$ <i>sudo chown user:root -R</i> .
-					   '];
+				return [ "Permission denied for create file $filename! ",
+			           'Execute on cli in the root directory: sudo chown user:root -R.' ];
 			} 
 
 		}

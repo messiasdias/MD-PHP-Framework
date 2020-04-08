@@ -6,23 +6,23 @@ namespace App\Database;
  */
 class Seeder 
 {
-	protected $response;		
+	protected $response = [];		
 
 	function __construct(){}
 
 	public function set_response( Object $rs , string $item_name=''){
 	
 		if ( isset( $rs->status) && $rs->status ) {		
-						$this->response .= '<br><b style="color:green;">Create '.$item_name.' Successfully!</b>';
-			}else{
-				    	$this->response .=  '<br><b style="color:brown;">Erros while creating the '.$item_name.'!</b>';
+			array_push($this->response, 'Create '.$item_name.' Successfully!');
+		}else{
+			array_push($this->response, 'Erros while creating the '.$item_name.'!');
 
-				    	if ( isset($rs->errors) && $rs->errors) {
-				    		foreach ($rs->errors as $key => $value) {
-				    			$this->response .= '<p  style="color:brown;" >Error: '.$key.' | '.$value.'</p>' ;
-				    		}
-				    	}	
-			}
+			if ( isset($rs->errors) && $rs->errors) {
+				foreach ($rs->errors as $key => $value) {
+					array_push($this->response, 'Error: '.$key.' | '.$value) ;
+				}
+			}	
+		}
 
 	}
 

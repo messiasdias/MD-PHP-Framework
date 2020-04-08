@@ -66,24 +66,23 @@ class Table
 			}
 
 			return false;
-			
 		}
 		
 
 		
 
 
-		public function addCol($name,$type = 'varchar' ,$size=0,$is_null=false,$ai=false, $default=null){
+		public function addCol($name, $type = 'varchar' ,$size=0,$is_null=false,$ai=false, $default=null){
 			// table cols
 			// $this->table->addCol('col-name','col-type',col-size [100], NULL [false | true], AI [true|false], DEFAULT );
 			 $col = [
 				'name' => strtolower($name),
+				'type' => $type,
 				'size' => $size,
 				'ai' => $ai,
 				'null' => $is_null,
 				'default' => $default,
 			 ];
-
 
 			 $sql = " ".strtolower($name)." ";
 			 $sql .= (isset($type)) ? strtoupper($type) : strtoupper('varchar'); 
@@ -104,6 +103,7 @@ class Table
 
 			 $sql.= ($is_null) ? " NULL " : " NOT NULL " ;
 			 $sql .= ($ai) ? ' AUTO_INCREMENT PRIMARY KEY ' : '' ;
+
 			 array_push($this->cols_sql, $sql);
 			 array_push($this->cols, $col);
 					
