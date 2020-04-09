@@ -16,6 +16,18 @@ class {{name}} extends Controller
 
 	public function index($app, $args=null){
 		
+		return $app->mode_trigger(
+			//function app
+			function ($app, $args, $data) {
+				return $app->view('layout/msg', $data);
+			},
+			//function api
+			function ($app, $args, $data) {
+				return $app->json($data);
+			},
+			//external $data
+			['title' => 'Test', 'subtitle' => 'Teste View OK!'] 
+		);
 	}
 
 

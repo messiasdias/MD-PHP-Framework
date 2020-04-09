@@ -125,7 +125,7 @@ abstract class Model implements ModelInterface {
 						unset($clear->data[$key]);
 					}
 				} 	
-				
+		
 				return  self::db()->save($clear->data, $noexists);
 					
 			}else{
@@ -143,6 +143,7 @@ abstract class Model implements ModelInterface {
 	public function create (){}
 	public function update (){}
 	public abstract function delete();
+
 	
 	
 	//Remove	

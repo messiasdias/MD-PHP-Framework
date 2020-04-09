@@ -135,12 +135,11 @@ class Validator
 	private function exists(array $arg) {
 		
 		if( $this->class ){
-			$obj = $this->class::find($arg[2], $arg[0] );
+			$obj = (object) $this->class::find($arg[2], $arg[0] );
 			$prop = $arg[2];
-			if (  ($obj != false) && ($obj->$prop ==  $arg[0] ) ) {
+			if ( !isset($obj->scalar) ) {
 				return  (object) ['valid' => true] ;
 			}
-
 		}
 					
 		return  (object) [

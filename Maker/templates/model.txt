@@ -10,11 +10,34 @@ class {{name}} extends Model {
 
 	public $table = '<table_name_here>' ;
 
-	public function create (){}
+	public function create (){
+		$validations = [
+			//'name' => 'string|minlen:5|noexists:<table_name_here>',
+			/* outhers input validations */
+		];
 
-	public function update (){}
+		/* outhers codes implementations */
 
-	public function delete(){}
+		return self::save( (array) $this , $validations);
+	}
+
+
+	public function update (){
+		$validations = [
+			//'id' => 'int|exists:<table_name_here>',
+			//'name' => 'string|minlen:5|noexists:<table_name_here>',
+			/* outhers input validations */
+		];
+
+		/* outhers codes implementations */
+
+		return self::save( (array) $this , $validations);
+	}
+
+
+	public function delete(array $validations=null){
+        parent::remove($validations);
+	}
 
 
 }

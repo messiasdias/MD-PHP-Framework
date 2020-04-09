@@ -26,9 +26,6 @@ class Response extends Request
 	}
 
 
-
-
-
 	public function set_http_code($code){
 
 		if ( isset($code) ){
@@ -158,8 +155,8 @@ class Response extends Request
 		if( !isset($data->token) ){	
 			$data->token = isset($this->token) ? $this->app->auth()->token->renew($this->token) : false;
 		}	
-		$data->status = (object) ['code' => $this->get_http_code(), 'msg' => $this->get_http_msg()];
 
+		$data->status = (object) ['code' => $this->get_http_code(), 'msg' => $this->get_http_msg()];
 		$this->view = json_encode($data);
 	}
 
@@ -181,30 +178,24 @@ class Response extends Request
 
 	public function set_log( object $response, $class=null ){
 
-			if( $response->status ){
-				$class = 'success';
-			}else{
-				$class = is_null($class) ? 'warning' : $class ;
+		$log = ['msg' => '', 'class' => ''];	
+		$log['msg'] = $response->msg;
+
+		if( $response->status ){
+			$log['class'] = !is_null($class) ? $class : 'success';		
+		}else{
+			$log['class'] = !is_null($class) ? $class : 'error';	
+		}
+		array_push($this->log, $log);	
+
+		if( isset($response->errors) && $response->errors){
+			$sublog = [];
+			foreach($response->errors as $key => $error){
+				$sublog = ['class' => 'error', 'msg' => ucfirst($key)." | ".ucfirst($error) ];
+				array_push($this->log, $sublog);
 			}
-	
-	
-			if( is_string($response->msg) ) {
+		}
 
-				if( isset($this->log['msg']) ){
-					$this->log['msg'][ count($this->log['msg']) ] = $response->msg;
-				}else{
-					$this->log['msg'][0] = $response->msg;
-				}
-
-			}elseif (is_array($response->msg)) {
-				
-				foreach ($response->$msg as $key => $value) {
-					$this->log['msg'] .= "<br/>".$value;
-				}
-
-			}		
-		
-		$this->log['class'] = $class;
 		return $this->log;
 		
 	}

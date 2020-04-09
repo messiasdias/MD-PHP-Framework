@@ -71,7 +71,6 @@ class App
 		$this->config->timezone = 'America/Recife';
 		$this->config->views = $this->config->path.'assets/private/views/';
 		$this->config->debug = true;
-		$this->config->debug_msg = false;
 		$this->config->theme = '';
 
 		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
@@ -93,20 +92,21 @@ class App
 
 
 	public function run(){
+		$app = $this;
 
 		$result = $this->get_callback($this->request->url, $this->request->method, $this->routers );
 		$this->args = isset($result->route->args) ?  (object) $result->route->args : null;
 		$this->response->set_http_code($result->code);
 
-		 if ( isset($result->msg) ){
-		 	 $this->response->set_http_msg($result->msg);
-		 }
-		 else { 
-		 	$this->response->set_http_msg($this->response->get_http_msg($this->response->get_http_code()) );
-		 }
+		if ( isset($result->msg) ){
+			$this->response->set_http_msg($result->msg);
+		}
+		else { 
+			$this->response->set_http_msg($this->response->get_http_msg($this->response->get_http_code()) );
+		}
 
-		 $app = $this->middlewares( isset($result->route->middlewares) ? $result->route->middlewares : null, true);
-
+		$app = $this->middlewares( isset($result->route->middlewares) ? $result->route->middlewares : null, true);
+		
 		if ( $result->status &&  $app->middleware_auth  ){ 
 			//Exec Callback Function of Route
 		  	$app = $result->route->callback($app, isset($result->route->args )? $result->route->args : null);
@@ -121,53 +121,37 @@ class App
 			
 		}else{
 
-			$file =  $this->config->path."assets/private/views/".$this->config->theme."/http/".$app->response->get_http_code().".html";
-			if( !file_exists($file) ){
-				$file = $this->config->path."assets/private/views/".$this->config->theme."/layout/http.html";	
-			}
+			$text = '<div  style="color:#9e7700 !important; height:100vh; width: 100wh; display:flex; flex-direction:column; justify-content: center; align-content: center; align-items:center;">'.
+			'<h1 style="color:#696969;">Erro: {{code}}</h1><p>{{msg}}</p></div>';
 
-			if ( file_exists($file) && ( $app->response->get_http_code() != '200' ) ){
-				
-				$app =  $this->mode_trigger( 
-						function ($app, $args, $result) {
-							return $this->view('layout/http',
-							[	'page' => $app->request->url,
-								'code' => $app->response->get_http_code(),
-								'msg' => isset($result->msg) ? $result->msg : $app->response->get_http_msg() ]); 
-
-						},function($app, $args, $result){
-
-							return $this->json( array_merge( [ 'status' => (object)
-							[ 'msg' => $app->response->get_http_msg(),
-							'code' =>  $app->response->get_http_code()  ] ] )  );
-
-						}, $result );
+			$file =  $this->config->views.$this->config->theme."/http/".$app->response->get_http_code().".html";
 			
-
-			}else{
-
-				$app = $this->write( 
-					'<div  style="color:#3333FF !important; height:100vh; width: 100wh; display: flex; flex-direction:column; justify-content: center; align-content: center; align-items:center; " >
-					<h1  style="color:brown;" >Erro: '.$app->response->get_http_code().'</h1> '.
-					$app->response->get_http_msg().'</h3></div>', //data writing
-					'html',						 //type
-					$app->response->get_http_code(), //response code
-					$app->response->get_http_msg() //reponse msg
-				);
-
+			if( !file_exists($file) ){
+				$file = $this->config->views.$this->config->theme."/layout/http.html";	
 			}
+
+			$data = [
+					'code' => $app->response->get_http_code(),
+					'msg' =>  $app->response->get_http_msg(),
+					'url' => $app->request->url,
+					'text' => $text,
+					'file' => $file
+			];
+
+			$app =  $this->mode_trigger( 
+				function ($app, $args, $data) {
+					return file_exists($data['file']) ? 
+						$app->view('layout/http', ['code' => $data['code'],'msg' => $data['msg'],]) : 
+						$app->write( str_replace(['{{code}}', '{{msg}}'],[ $data['code'], $data['msg']], $data['text'])) ; 
+				},function($app, $args, $data){
+					return $app->json([]);
+				}, 
+				$data 
+			);
 			
 		}
 
 		$app = $this->put_header($app);
-
-		if( $app->config->debug_msg){
-			echo '<div id="debug" class="log">';
-			echo '<h1>Debug --> $app->view_get_data() </h1>';	
-			print_r($app->view_get_data());
-			echo "</div>";
-		}
-
 		$app->response->view();
 		exit;
 	}
@@ -332,13 +316,11 @@ class App
 			case 'api':
 				$mode = $this->config->path.'src/Routers/api/*.php';
 			break;
-
 			case 'app':
 			default:
 				$mode = $this->config->path.'src/Routers/*.php';
 			break;
 		}
-
 
 		foreach ( glob($mode)  as $router_map ) {
 			if (  file_exists($router_map) )
@@ -445,7 +427,7 @@ class App
 
 
 	private function view_get_data()
-	{
+	{	
 		$data = [
 			'url'  => $this->request->url,
 			'referer'  => $this->request->referer,
@@ -457,7 +439,7 @@ class App
 			'token' => ($this->request->token) ? $this->request->token : false,
 			'input' => ($this->inputs()) ? $this->inputs() : false ,
 			'assets' => '/assets/',
-			'log' => ( isset($this->response) && $this->response->get_log()) ? $this->response->get_log() : false,
+			'log' => isset($this->response) ? (array) $this->response->get_log() : false,
 			'debug' => isset($this->config) ? $this->config->debug: true,
 			'session' =>  ($_SESSION) ? ( (object) $_SESSION ) : false,
 			'cookies' =>  ($this->request->cookies) ? ( (object) $this->request->cookies) : false,

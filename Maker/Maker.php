@@ -462,7 +462,7 @@ class Maker
 
 				return "An error occurred while creating file $filename!" ;
 			}else{
-				return [ "Permission denied for create file $filename! ",
+				return [ "Permission denied for create file $filename!",
 			           'Execute on cli in the root directory: sudo chown user:root -R.' ];
 			} 
 
@@ -477,7 +477,6 @@ class Maker
 
 		switch($subcommand){
 
-			
 			case 'models':
 			case 'seeds':
 			case 'migrations':
@@ -511,11 +510,12 @@ class Maker
 				if( $type == 'Migrations') {
 				 $obj = new $class();
 				 $response .= ($this->app->config->mode != 'console' ) ? '<li style="color:'.(  $obj->exists() ? 'green' : 'brown' ).';" >' : '';
+				 $response .=  @end( explode('\\', ($obj->exists() && ($this->app->config->mode == 'console' )) ? $class." <--"  : $class  ) );
 				}else{
 					$response .=  ($this->app->config->mode != 'console' ) ? '<li style="color:green;" >' : '';
+					$response .=  @end( explode('\\', $class) );
 				}
 
-				$response .=  @end( explode('\\', ($obj->exists() && ($this->app->config->mode == 'console' )) ? $class." <-- Created"  : $class  ) );
 				$response .= ($this->app->config->mode != 'console' ) ?'' : "\n ";
 				$response .= ($this->app->config->mode != 'console' ) ? '</li>' : '';
 			}
@@ -531,7 +531,7 @@ class Maker
 				'controllers',
 				'config',
 				'viewfilters',
-				'routers:api|app'
+				'routers[:api|:app]'
 			];
 
 			foreach($types as $type ){
