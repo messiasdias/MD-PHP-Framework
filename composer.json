@@ -1,6 +1,6 @@
 {
-    "name": "messiasdias/md-php-framework-lib",
-    "description": "PHP Framework Libray - Messias Dias",
+    "name": "messiasdias/php-library",
+    "description": "PHP Library - Messias Dias",
     "type": "library",
     "version": "1.0",
     "minimum-stability": "stable",

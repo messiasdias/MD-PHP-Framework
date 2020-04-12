@@ -25,91 +25,93 @@ use App\Maker\Maker;
 
 class App
 {
-	public $config, $maker_config, $request, $response, $routers=[], $args , $user;
+	public $config, $maker_config, $request, $response, $routes=[], $args, $user;
 	public $middleware_obj, $middleware_auth;
-	private $root_dir;
 
 
 	function __construct($config=null)
 	{		
 		@session_start();
+		$this->set_paths();
 		$this->request = new Request();
-		$this->config = (object) [];
+		$this->response = new Response($this);
 		$this->set_config($config);
+		return $this;
+	}
 
-		if( file_exists( getcwd().'/../config/app.php' ) ){
-			include getcwd().'/../config/app.php'; //Load AppConfigs
+
+	private function set_paths(){
+		$this->config = (object) [];
+		$this->config->path = getcwd()."/../";
+		$this->config->vendor_path   = $this->config->path.'vendor/messiasdias/md-php-framework-lib/';
+	}
+
+
+	private function set_config($config=null)
+	{	
+		$this->config->mode = 'app';
+		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
+		
+		foreach($config_array as $key => $value ){
+			if($key !== 'debug' ) $this->config->$key = $value;
+		}
+
+		if( file_exists( $this->config->path.'config/app.php' ) ){
+			include $this->config->path.'config/app.php'; //Load AppConfigs
+		}else{
+			$this->config->debug = true;
+			$this->config->timezone = 'America/Recife';
+			$this->config->views = $this->config->path.'assets/private/views/';
+			$this->response->set_log((object)[ 
+					  'msg' => "File /config/app.php Not Found!",
+					  'status' => false
+					], 'error'); 
 		}
 		
 		date_default_timezone_set($this->config->timezone);
 		$this->load_assets();  //Creting Sym link for ../assetes/public
-
-		if( explode('/', $this->request->url )[1] == 'api'  ){
-			$this->config->mode = 'api';
-			$this->request->url = str_replace('/api/' , '/', $this->request->url );
-		}
-
-		$this->response = new Response($this);
-
-		if( !file_exists( getcwd().'/../config/app.php' ) ){
-			$this->response->set_log((object)[ 
-				  'msg' => "/config/app.php Not Found!",
-				  'status' => false
-				], 'error'); 
-		} 
-
-		return $this->load_router($this); //loading Routers files 
-	}
-
-
-
-	public function set_config($config=null){
-		
-		$this->config->path = getcwd()."/../";
-		$this->config->vendor_path   = $this->config->path.'vendor/messiasdias/md-php-framework-lib/';
-		$this->config->mode = 'app';
-		$this->config->timezone = 'America/Recife';
-		$this->config->views = $this->config->path.'assets/private/views/';
-		$this->config->debug = true;
-		$this->config->theme = '';
-
-		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
-		foreach($config_array as $key => $value ){
-			if($key !== 'debug' ) $this->config->$key = $value;
-		}
-		
 	}
 	
 	
 
 	private function load_assets(){
 		if (!file_exists($this->config->path.'public/assets')) {
+			$this->response->set_log((object)[ 
+				'msg' => "Shortcut 'assets/' not found in /public/ !",
+				'status' => false
+			  ], 'error'); 
+
 			@symlink ($this->config->path.'assets/public', $this->config->path.'public/assets' );
+			
+			if (file_exists($this->config->path.'public/assets')){
+				$this->response->set_log((object)[ 
+					'msg' => "Shortcut 'assets/' in /public/ created successfully!",
+					'status' => false
+				  ], 'success'); 
+			}
 		}
-		return;
 	}
 
 
 
 	public function run(){
 		$app = $this;
+		$routing = $this->routing();
+		$this->args = isset($routing->route->args) ?  (object) $routing->route->args : null;
+		$this->response->set_http_code($routing->code);
 
-		$result = $this->get_callback($this->request->url, $this->request->method, $this->routers );
-		$this->args = isset($result->route->args) ?  (object) $result->route->args : null;
-		$this->response->set_http_code($result->code);
-
-		if ( isset($result->msg) ){
-			$this->response->set_http_msg($result->msg);
+		if ( isset($routing->msg) ){
+			$this->response->set_http_msg($routing->msg);
 		}
 		else { 
 			$this->response->set_http_msg($this->response->get_http_msg($this->response->get_http_code()) );
 		}
 
-		$app = $this->middlewares( isset($result->route->middlewares) ? $result->route->middlewares : null, true);
+		$app = $this->middlewares( isset($routing->route->middlewares) ? $routing->route->middlewares : null, true);
 		
-		if ( $result->status &&  $app->middleware_auth  ){ 
+		if ( $routing->status &&  $app->middleware_auth  ){ 
 			//Exec Callback Function of Route
-		  	$app = $result->route->callback($app, isset($result->route->args )? $result->route->args : null);
+		  	$app = $routing->route->callback($app, isset($routing->route->args )? $routing->route->args : null);
 
 			if( !$app instanceof App ){
 				$app = $this->view('layout/msg',[
@@ -259,7 +261,24 @@ class App
 
 
 
+	public function group(array $url, $callback=null, $middlewares=null){
+		return $this->router_group($url, $callback, $middlewares);
+	}
+
+	public function route_group(array $url, $callback=null, $middlewares=null){
+		return $this->router_group($url, $callback, $middlewares);
+	}
+
 	public function router_group(array $url, $callback=null, $middlewares=null){
+
+		if( is_null($callback) ){
+			$callback = function ($app, $args){
+				$this->response->set_http_code(500);
+				return $this->view('layout/msg', ['title' => 'Callback no is Defined',
+				 'subtitle' => "Function callback no is Defined on route ".$app->request->url."!" ]);
+			};
+		}
+
 		foreach( $url as $url_key => $url_value ){
 			if( isset($url_value['url'] )  ){
 				if( is_array( $url_value['url'] ) ){
@@ -277,14 +296,44 @@ class App
 
 
 
-	private function set_route($url, $callback, $middlewares, $method){
+	private function load_routes(){
+		//load routes app or api
+		$app = $this;
+		switch ( strtolower($this->config->mode) ) {
+			case 'api':
+				$mode = $this->config->path.'src/Routers/api/*.php';
+			break;
+			case 'app':
+			default:
+				$mode = $this->config->path.'src/Routers/*.php';
+			break;
+		}
+
+		foreach ( glob($mode)  as $map ) {
+			
+			if (  file_exists($map) )
+			{
+				include $map;
+			}
+		}
+
+		if ( $this->config->debug && file_exists($this->config->vendor_path.'/Maker/Routers.php') ){
+			//Maker Routes
+			include $this->config->vendor_path.'/Maker/Routers.php';
+		}
+
+		return $app;
+	}
+
+
+	private function set_route(string $url, $callback, $middlewares, string $method){
 
 			if( is_array($url) ){
 				foreach( $url as $url_key => $url_value ){
-				 array_push($this->routers, new Route($url_value ,$method ? $method : 'GET' ,$callback,$middlewares) );
+				 array_push($this->routes, new Route($url_value ,$method ? $method : 'GET' ,$callback,$middlewares) );
 				}
 			}elseif( is_string($url) ){
-				array_push($this->routers, new Route($url,$method,$callback,$middlewares) );
+				array_push($this->routes, new Route($url,$method,$callback,$middlewares) );
 			}else{
 				return $this->response->set_http_code(500);
 			}
@@ -292,10 +341,17 @@ class App
 	}	
 
 
+	private function routing(string $url=null, string $method=null){
 
-	private function get_callback(string $url, $method, array $routers){		
-		$router = new Router($routers);
-		return $router->url($url, $method);
+		if( explode('/', $this->request->url )[1] == 'api'  ){
+			$this->config->mode = 'api';
+			$this->request->url = str_replace('/api/' , '/', $this->request->url );
+		}
+
+		$this->load_routes();
+		$router = new Router($this->routes);
+		return $router->url(!is_null($url) ? $url : $this->request->url,
+		 !is_null($method) ? $method : $this->request->method);
 	}
 
 
@@ -308,34 +364,6 @@ class App
 		}
 	}
 
-
-
-	private function load_router($app){
-		//load routers app or api
-		switch ( strtolower($app->config->mode) ) {
-			case 'api':
-				$mode = $this->config->path.'src/Routers/api/*.php';
-			break;
-			case 'app':
-			default:
-				$mode = $this->config->path.'src/Routers/*.php';
-			break;
-		}
-
-		foreach ( glob($mode)  as $router_map ) {
-			if (  file_exists($router_map) )
-			{
-				include $router_map;
-			}
-		}
-
-		if ( $this->config->debug && file_exists($this->config->vendor_path.'/Maker/Routers.php') ){
-			//Maker Routers
-			include $this->config->vendor_path.'/Maker/Routers.php';
-		}
-
-		return $app;
-	}
 
 
 	public function auth(){
@@ -356,7 +384,6 @@ class App
 		if( !is_null($class) ){
 			$class = (  !App::validate($class, 'startwith:App\\Models\\' ) ) ? 'App\\Models\\'.ucfirst($class) : ucfirst($class) ;
 		}
-
 		return new DB($class);
 	}
 
@@ -364,14 +391,14 @@ class App
 
 	public function controller($name,$args=null)
 	{
-
 		$method = ( count(explode('@', $name)) == 2 ) ? strtolower(explode('@', $name)[1]) : 'index';
 		$class = 'App\Controllers\\'.ucfirst(explode('@', $name)[0] ); 
+		//var_dump($this->args); exit;
 
 		if ( class_exists($class)) {
 			$obj = new $class($this);
 			if (method_exists($obj, $method)){
-				return $obj->$method($this, $args);
+				return $obj->$method($this, !is_null($args)? $args : $this->args);
 			}else{
 				$this->response->set_http_msg("Method '$method' not Found!");
 			}

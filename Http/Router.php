@@ -8,12 +8,12 @@ use App\App;
 
 class Router 
 {    
-	private $routers, $method;
+	private $routes, $method;
 	
-	function __construct(array $routers)
+	function __construct(array $routes)
 	{	
-		//Set $routers
-		$this->routers = $routers;
+		//Set $routes
+		$this->routes = $routes;
 	}
 
 
@@ -24,16 +24,16 @@ class Router
 		$this->url = $url;
 		//set method
 		$this->method = $method;	
-		$routers = $this->find_by_regex($this->url);
-		$routers =  ($routers) ? $routers : $this->find_by_name($this->url);
+		$routes = $this->find_by_regex($this->url);
+		$routes =  ($routes) ? $routes : $this->find_by_name($this->url);
 
-		if ( $routers &&  ( count($routers) > 1) )
+		if ( $routes &&  ( count($routes) > 1) )
 		{
-			return (object) [ 'status' => false, 'code' => 500, 'route' => null, 'msg' => 'Replicate routes, '.count($routers).' Routes with the same name or signature for '.$this->url.'.' ];
+			return (object) [ 'status' => false, 'code' => 500, 'route' => null, 'msg' => 'Replicate routes, '.count($routes).' Routes with the same name or signature for '.$this->url.'.' ];
 		}
-		elseif( $routers &&  ( count($routers) == 1) )
+		elseif( $routes &&  ( count($routes) == 1) )
 		{
-			return (object) [ 'status' => true, 'code' => 200, 'route' => $routers[0] ];
+			return (object) [ 'status' => true, 'code' => 200, 'route' => $routes[0] ];
 		}
 		else{
 			return (object) [ 'status' => false, 'code' => 404, 'route' => null ];
@@ -48,7 +48,7 @@ class Router
 
 		$url = is_null($url) ? $this->url : $url;
 		$url_exp = array_filter(explode('/',$url )) ;
-		$routers=null; $i=0;
+		$routes=null; $i=0;
 		$data=[]; $continue=false;
 		$url_start_with ='';
 
@@ -61,7 +61,7 @@ class Router
 			
 				if( isset($url_exp[$route_name_exp_key]) && ( $route_name_exp_value ===  $url_exp[$route_name_exp_key] ) ) {
 					
-					$routers[$i]= $route;
+					$routes[$i]= $route;
 					$url_start_with .= '/'.$route_name_exp_value;
 					
 					if( ($route_name_exp_key === count($url_exp) ) && ( $url === $url_start_with) ){
@@ -81,7 +81,7 @@ class Router
 							
 							$url_start_with .= '/'.$url_exp[$route_name_exp_key];
 							$route->args[$arg_id] = $url_exp[$route_name_exp_key];
-							$routers[$i]= $route;
+							$routes[$i]= $route;
 
 							if( ($route_name_exp_key === count($url_exp)) && ( $url === $url_start_with) ){
 								return [$route];
@@ -120,27 +120,27 @@ class Router
 			$url = substr($url,0, strlen($url)-1 );
 		}
 
-		$routers=[]; $i=0;
+		$routes=[]; $i=0;
 		foreach ( $this->find_by_method( $url, $this->find_by_count() ) as $route) {
 			if( ((count( array_filter( explode('/', $url ) ) ) == count( array_filter(explode('/', $route->name ) ) )) && ($this->method == $route->method )) && ($url == $route->name) ){
-				$routers[$i] = $route;
+				$routes[$i] = $route;
 			 	$i++;
 			}
 		}	
 
-		return $routers;
+		return $routes;
 
 	}
 
 
 
 
-	private function find_by_method($url=null,$routers=null){
+	private function find_by_method($url=null,$routes=null){
 
-		$routers = is_null($routers) ? (array) $this->routers : $routers;
+		$routes = is_null($routes) ? (array) $this->routes : $routes;
 		$i=0; $return=[];
-		if ($routers) {
-			foreach ($routers as $route) 
+		if ($routes) {
+			foreach ($routes as $route) 
 			{	
 				if( $route->method === $this->method ){
 					$return[$i] = $route;
@@ -155,14 +155,14 @@ class Router
 
 
 
-	private function find_by_count($url=null,$routers=null){
+	private function find_by_count($url=null,$routes=null){
 		
 		$url = preg_replace('/^\/\s*/', '',  is_null($url) ? $this->url : $url );
-		$routers = is_null($routers) ? $this->routers : $routers;
+		$routes = is_null($routes) ? $this->routes : $routes;
 		$i=0; $return=[];
 
-		if ($routers) {	
-			foreach ($routers as $route) 
+		if ($routes) {	
+			foreach ($routes as $route) 
 			{	
 				if( ( count( array_filter(explode('/', $route->name)) ) === count( array_filter(explode('/',$url )) )) ){
 					$return[$i] = $route;

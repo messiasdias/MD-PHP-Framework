@@ -23,9 +23,9 @@ class Console extends App {
     }
 
 
-    public function set_config($config=null){
+    public function set_config($config=null)
+    {
         $this->config = (object) [];
-
         $this->config->path = getcwd().'/';
         $this->config->vendor_path   = $this->config->path.'/vendor/messiasdias/md-php-framework-lib/';
         $this->config->mode = 'console';
@@ -45,29 +45,29 @@ class Console extends App {
     }
 
 
-    public static function log($msg, $class = 0){
-
+    public static function log($msg, $class = 0)
+    {
         $class_name = '';
         switch($class){
             case 1:
-                $class_name = 'Success:';
+                $class_name = 'Success: ';
             break; 
             case 2:
-                $class_name = 'Warnnig:';
+                $class_name = 'Warnnig: ';
             break;
             case 3:
-                $class_name = 'Error:';
+                $class_name = 'Error: ';
             break;
             case 4:
-                $class_name = 'Info:';
+                $class_name = 'Info: ';
             break;
             case 5:
-                $class_name = 'Usage:';
+                $class_name = 'Usage: ';
             break;
             default:
             break;
         }
-        echo $class_name.' '.$msg."\n";
+        echo $class_name.$msg."\n";
     }
 
 

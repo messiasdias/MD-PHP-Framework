@@ -6,7 +6,7 @@ use App\App;
  */
 class Route
 {	
-	public $name, $method, $middlewares;
+	public $name, $method, $middlewares, $args;
 	private $callback;
 	
 	function __construct($name,$method,$callback,$middlewares)
@@ -19,6 +19,7 @@ class Route
 
 	public function callback(App $app, array $args=null){
 		 $function = $this->callback;
+		 //$this->args = $args;
 		 return $function($app, (object) $args);
 	}	
 }
