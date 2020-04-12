@@ -43,7 +43,7 @@ class App
 	private function set_paths(){
 		$this->config = (object) [];
 		$this->config->path = getcwd()."/../";
-		$this->config->vendor_path   = $this->config->path.'vendor/messiasdias/md-php-framework-lib/';
+		$this->config->vendor_path = __DIR__.'/';
 	}
 
 
@@ -62,7 +62,7 @@ class App
 			$this->config->debug = true;
 			$this->config->timezone = 'America/Recife';
 			$this->config->views = $this->config->path.'assets/private/views/';
-			$this->response->set_log((object)[ 
+			$this->response->setLog((object)[ 
 					  'msg' => "File /config/app.php Not Found!",
 					  'status' => false
 					], 'error'); 
@@ -76,7 +76,7 @@ class App
 
 	private function load_assets(){
 		if (!file_exists($this->config->path.'public/assets')) {
-			$this->response->set_log((object)[ 
+			$this->response->setLog((object)[ 
 				'msg' => "Shortcut 'assets/' not found in /public/ !",
 				'status' => false
 			  ], 'error'); 
@@ -84,7 +84,7 @@ class App
 			@symlink ($this->config->path.'assets/public', $this->config->path.'public/assets' );
 			
 			if (file_exists($this->config->path.'public/assets')){
-				$this->response->set_log((object)[ 
+				$this->response->setLog((object)[ 
 					'msg' => "Shortcut 'assets/' in /public/ created successfully!",
 					'status' => false
 				  ], 'success'); 
@@ -98,13 +98,13 @@ class App
 		$app = $this;
 		$routing = $this->routing();
 		$this->args = isset($routing->route->args) ?  (object) $routing->route->args : null;
-		$this->response->set_http_code($routing->code);
+		$this->response->setCode($routing->code);
 
 		if ( isset($routing->msg) ){
-			$this->response->set_http_msg($routing->msg);
+			$this->response->setMsg($routing->msg);
 		}
 		else { 
-			$this->response->set_http_msg($this->response->get_http_msg($this->response->get_http_code()) );
+			$this->response->setMsg($this->response->getMsg($this->response->getCode()) );
 		}
 
 		$app = $this->middlewares( isset($routing->route->middlewares) ? $routing->route->middlewares : null, true);
@@ -126,15 +126,15 @@ class App
 			$text = '<div  style="color:#9e7700 !important; height:100vh; width: 100wh; display:flex; flex-direction:column; justify-content: center; align-content: center; align-items:center;">'.
 			'<h1 style="color:#696969;">Erro: {{code}}</h1><p>{{msg}}</p></div>';
 
-			$file =  $this->config->views.$this->config->theme."/http/".$app->response->get_http_code().".html";
+			$file =  $this->config->views."/http/".$app->response->getCode().".html";
 			
 			if( !file_exists($file) ){
-				$file = $this->config->views.$this->config->theme."/layout/http.html";	
+				$file = $this->config->views."/layout/http.html";	
 			}
 
 			$data = [
-					'code' => $app->response->get_http_code(),
-					'msg' =>  $app->response->get_http_msg(),
+					'code' => $app->response->getCode(),
+					'msg' =>  $app->response->getMsg(),
 					'url' => $app->request->url,
 					'text' => $text,
 					'file' => $file
@@ -164,17 +164,16 @@ class App
 	private function put_header(App $app ,$display_erro=false ){
 		$response = $app->response;
 
-		@header( $response->protocol.' '.$response->get_http_code().' '.$response->get_http_msg() );
+		@header( $response->protocol.' '.$response->getCode().' '.$response->getMsg() );
 
 		if (  $response->cookies  ) {
 			foreach ($response->cookies as $key => $value) {
 				@setcookie( trim($key), trim($value) );
 			}
 		}
-
-		
+	
 		if ($display_erro){
-			echo $response->get_http_msg();
+			echo $response->getMsg();
 		}
 
 		if(isset($response->token)){
@@ -210,8 +209,8 @@ class App
 				$this->middleware_auth = true;
 			}else{
 				$this->middleware_auth = false;
-				$this->response->set_http_code(401);
-				$this->response->set_http_msg('Access Denied!');
+				$this->response->setCode(401);
+				$this->response->setMsg('Access Denied!');
 			}
 		}
 
@@ -273,7 +272,7 @@ class App
 
 		if( is_null($callback) ){
 			$callback = function ($app, $args){
-				$this->response->set_http_code(500);
+				$this->response->setCode(500);
 				return $this->view('layout/msg', ['title' => 'Callback no is Defined',
 				 'subtitle' => "Function callback no is Defined on route ".$app->request->url."!" ]);
 			};
@@ -335,7 +334,7 @@ class App
 			}elseif( is_string($url) ){
 				array_push($this->routes, new Route($url,$method,$callback,$middlewares) );
 			}else{
-				return $this->response->set_http_code(500);
+				return $this->response->setCode(500);
 			}
 
 	}	
@@ -356,12 +355,23 @@ class App
 
 
 
-	public function mode_trigger($app,$api,$data=null){
-		if( $this->config->mode === 'app' ){
-			return $app($this, $this->args, $data);
-		}elseif( $this->config->mode === 'api' ){
-			return $api($this, $this->args,$data);	
+	public function redirect_header($url)
+	{
+		header('location:'.$url);
+	}
+
+
+
+	public function redirect($url, $method = "GET", $data=null)
+	{
+		$this->request->url = strtolower( $url );
+		$this->request->method = strtoupper($method);
+		
+		if(!is_null($data)){
+			$this->inputs($data);
 		}
+
+		$this->run();
 	}
 
 
@@ -388,33 +398,6 @@ class App
 	}
 
 
-
-	public function controller($name,$args=null)
-	{
-		$method = ( count(explode('@', $name)) == 2 ) ? strtolower(explode('@', $name)[1]) : 'index';
-		$class = 'App\Controllers\\'.ucfirst(explode('@', $name)[0] ); 
-		//var_dump($this->args); exit;
-
-		if ( class_exists($class)) {
-			$obj = new $class($this);
-			if (method_exists($obj, $method)){
-				return $obj->$method($this, !is_null($args)? $args : $this->args);
-			}else{
-				$this->response->set_http_msg("Method '$method' not Found!");
-			}
-		}else {
-			$this->response->set_http_msg("Class '$class'  not Found!" );
-		}
-
-		$this->response->set_http_code(500);
-		return $this->view('layout/msg', ['title' => $this->request->url,
-				 'subtitle' => $this->response->get_http_msg() ]);
-
-	}
-
-
-
-
 	public static function validate($data,$validations,$class='')
 	{
 		$validator = new Validator( $class );
@@ -430,18 +413,32 @@ class App
 
 
 
-	public function view(string $name, array $data=null, string $path=null)
-	{	
-		$data = ((!is_null($data))) ? array_merge($data, (array) $this->view_get_data()) : (array) $this->view_get_data();
-		$path = is_null($path) ? $this->config->views : $path;
-		$view = new View($this, $path , $name, $data );
-		$this->response->write( $view->show(), 'html' );
-		return $this;
+	public function controller($name,$args=null)
+	{
+		$method = ( count(explode('@', $name)) == 2 ) ? strtolower(explode('@', $name)[1]) : 'index';
+		$class = 'App\Controllers\\'.ucfirst(explode('@', $name)[0] ); 
+
+		if ( class_exists($class)) {
+			$obj = new $class($this);
+			if (method_exists($obj, $method)){
+				return $obj->$method($this, !is_null($args)? $args : $this->args);
+			}else{
+				$this->response->setMsg("Method '$method' not Found!");
+			}
+		}else {
+			$this->response->setMsg("Class '$class'  not Found!" );
+		}
+
+		$this->response->setCode(500);
+		return $this->view('layout/msg', ['title' => $this->request->url,
+				 'subtitle' => $this->response->getMsg() ]);
+
 	}
 
 
 
-	public function inputs($inputs=null)
+
+	public function inputs(array $inputs=null)
 	{
 		if( is_null($inputs) ){
 			return isset($this->request->data) ? $this->request->data : false;
@@ -466,17 +463,16 @@ class App
 			'token' => ($this->request->token) ? $this->request->token : false,
 			'input' => ($this->inputs()) ? $this->inputs() : false ,
 			'assets' => '/assets/',
-			'log' => isset($this->response) ? (array) $this->response->get_log() : false,
+			'log' => isset($this->response) ? (array) $this->response->getLog() : false,
 			'debug' => isset($this->config) ? $this->config->debug: true,
 			'session' =>  ($_SESSION) ? ( (object) $_SESSION ) : false,
 			'cookies' =>  ($this->request->cookies) ? ( (object) $this->request->cookies) : false,
 		]; 
 
-		$data =  array_merge($data, $this->response ?  (array) $this->response->get_data() : [] );
+		$data =  array_merge($data, $this->response ?  (array) $this->response->getData() : [] );
 		$data = (object) array_merge($data, [ 'view_data' => json_encode($data) ] ) ;
 		return (object) $data;
 	}
-
 
 
 	public function write(String $data , $type = 'html', $code=200, $msg = 'OK!')
@@ -486,6 +482,14 @@ class App
 	}
 
 
+	public function view(string $name, array $data=null, string $path=null)
+	{	
+		$data = ((!is_null($data))) ? array_merge($data, (array) $this->view_get_data()) : (array) $this->view_get_data();
+		$path = is_null($path) ? $this->config->views : $path;
+		$view = new View($this, $path , $name, $data );
+		$this->response->write( $view->show(), 'html' );
+		return $this;
+	}
 
 
 	public function json($data, $code=200, $msg = 'Success!')
@@ -496,26 +500,14 @@ class App
 
 
 
-
-	public function redirect_header($url)
-	{
-		header('location:'.$url);
-	}
-
-
-
-	public function redirect($url, $method = "GET", $data=null)
-	{
-
-		$this->request->url = strtolower( $url );
-		$this->request->method = $method;
-		
-		if(!is_null($data)){
-			$this->response->set_data($data);
+	public function mode_trigger($app,$api,$data=null){
+		if( $this->config->mode === 'app' ){
+			return $app($this, $this->args, $data);
+		}elseif( $this->config->mode === 'api' ){
+			return $api($this, $this->args,$data);	
 		}
-		
-		$this->run();
 	}
+
 
 
 
@@ -543,7 +535,7 @@ class App
 
 			$file = new File($data);
 			$response = $file->upload() ;
-			$this->response->set_log($response);
+			$this->response->setLog($response);
 			$i++;
 		}
 
@@ -555,7 +547,7 @@ class App
 		$data = ['name' => pathinfo($filename)['basename'], 'path' =>  pathinfo($filename)['dirname'].'/' ];	
 		$file = new File($data);
 		$response = $file->download();
-		$this->response->set_log($response);
+		$this->response->setLog($response);
 		return $this;
 	}
 

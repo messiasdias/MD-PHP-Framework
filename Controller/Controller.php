@@ -20,17 +20,17 @@ class Controller implements ControllerInterface
 	}
 
 	public function notfound(App $app, $args=null){
-		$app->response->set_http_code(404);
+		$app->response->setCode(404);
 		return $app->view('http/404', $args) ;
 	}
 
 	public function denied(App $app, $args=null){
-		$app->response->set_http_code(401);
+		$app->response->setCode(401);
 		return $app->view('http/401', $args) ;
 	}
 
 	public function error(App $app, $args=null){
-		$app->response->set_http_code(500);
+		$app->response->setCode(500);
 		return $app->view('http/500', $args) ;
 	}
 

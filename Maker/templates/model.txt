@@ -8,34 +8,40 @@ use App\Database\DB;
 
 class {{name}} extends Model {
 
-	public $table = '<table_name_here>' ;
+	public $table = '<table_name_here>' ; //table/migration name
 
 	public function create (){
+
+		/* optional code implementation here */
+
 		$validations = [
 			//'name' => 'string|minlen:5|noexists:<table_name_here>',
-			/* outhers input validations */
+			/* optional input validations */
 		];
-
-		/* outhers codes implementations */
-
 		return self::save( (array) $this , $validations);
 	}
 
 
 	public function update (){
+
+		/* optional code implementation here */
+
 		$validations = [
-			//'id' => 'int|exists:<table_name_here>',
+			'id' => 'int|exists:<table_name_here>',
 			//'name' => 'string|minlen:5|noexists:<table_name_here>',
-			/* outhers input validations */
+			/* optional input validations */
 		];
-
-		/* outhers codes implementations */
-
 		return self::save( (array) $this , $validations);
 	}
 
 
 	public function delete(array $validations=null){
+		/* optional code implementation here */
+
+		/* 
+			In remove() function, $validations = ['id' => 'int|mincount:1|exists:test]
+			by default if this argument is null 
+		*/
         parent::remove($validations);
 	}
 

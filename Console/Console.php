@@ -27,7 +27,7 @@ class Console extends App {
     {
         $this->config = (object) [];
         $this->config->path = getcwd().'/';
-        $this->config->vendor_path   = $this->config->path.'/vendor/messiasdias/md-php-framework-lib/';
+        $this->config->vendor_path   =  __DIR__.'/../';
         $this->config->mode = 'console';
 
         if( file_exists( $this->config->path.'/config/app.php' ) ){

@@ -17,26 +17,26 @@ class Response extends Request
 				$this->$key = $value;
 
 			if ( (!is_null($key) && !is_null($value)) && !is_Array($value) ){
-				$this->set_header_line($key, $value);
+				$this->setHeaderLine($key, $value);
 			}
 
 		}
 		$this->app = $app;
-		$this->http_codes = $this->get_http_code_list();
+		$this->http_codes = $this->getCodeList();
 	}
 
 
-	public function set_http_code($code){
+	public function setCode($code){
 
 		if ( isset($code) ){
 			 	$this->http_code = $code;
 			  	$set_name=null;
 
 			 	if ( is_null($this->http_msg) ){
-			 		$set_name = $this->set_http_msg($this->http_codes[$code]);
+			 		$set_name = $this->setMsg($this->http_codes[$code]);
 			 	}
 
-			 	if ($set_name && $this->get_http_code() ){
+			 	if ($set_name && $this->getCode() ){
 			 		return true;
 			 	}
 		} 
@@ -46,19 +46,19 @@ class Response extends Request
 
 
 
-	public function get_http_code(){
+	public function getCode(){
 		return (isset($this->http_code)) ? $this->http_code : false;
 	}
 
 
 
-	public function get_http_code_list(){
+	public function getCodeList(){
 		return (array) json_decode( file_get_contents($this->app->config->vendor_path.'Http/http_codes.json') );
 	}
 
 
 
-	public function set_http_msg($msg){
+	public function setMsg($msg){
 
 		if ((isset($msg) && is_string($msg) ) ){
 			$this->http_msg = ucwords($msg );
@@ -70,14 +70,14 @@ class Response extends Request
 
 
 
-	public function get_http_msg($code=null){
+	public function getMsg($code=null){
 
 		if ( !isset($this->http_msg) && is_null($code) ){
 			return $this->http_msg;
 		}else{
 			
-			if( $this->get_http_code() && is_null($code) ){
-				return $this->http_codes[$this->get_http_code()];
+			if( $this->getCode() && is_null($code) ){
+				return $this->http_codes[$this->getCode()];
 			}elseif( !is_null($code) ){
 				return $this->http_codes[$code];
 			}
@@ -90,13 +90,13 @@ class Response extends Request
 
 
 
-	public function get_content_type(){
-		isset($this->get_headers()['Content-Type'] )? $this->get_headers()['Content-Type'] : false;
+	public function getContentType(){
+		isset($this->getHeaders()['Content-Type'] )? $this->getHeaders()['Content-Type'] : false;
 	}
 
 
 
-	public function set_content_type($content_type = 'html'){
+	public function setContentType($content_type = 'html'){
 
 		switch (strtolower($content_type) ) {
 			
@@ -115,12 +115,12 @@ class Response extends Request
 			
 		}
 
-		return $this->set_header_line('content_type', $content_type);
+		return $this->setHeaderLine('content_type', $content_type);
 	}
 
 
 
-	public function set_header_line(String $key, String $value){
+	public function setHeaderLine(String $key, String $value){
 		
 		$key = str_replace(' ','-' ,ucwords(str_replace(['-', '_'],' ' , $key ))  ) ;
 
@@ -139,7 +139,7 @@ class Response extends Request
 
 
 
-	public function get_headers(){
+	public function getHeaders(){
 		if( isset($this->headers)){
 			return $this->headers;
 		}
@@ -150,22 +150,22 @@ class Response extends Request
 
 	public function json($data, $code=null, $msg=null ){
 		$data = (object) $data;
-		$this->set_content_type('json');
+		$this->setContentType('json');
 		
 		if( !isset($data->token) ){	
 			$data->token = isset($this->token) ? $this->app->auth()->token->renew($this->token) : false;
 		}	
 
-		$data->status = (object) ['code' => $this->get_http_code(), 'msg' => $this->get_http_msg()];
+		$data->status = (object) ['code' => $this->getCode(), 'msg' => $this->getMsg()];
 		$this->view = json_encode($data);
 	}
 
 
 
 	public function write(String $data , $content_type = 'html', $code=null, $msg=null ){
-		$this->set_content_type($content_type);
-		$this->set_http_code( !is_null($code) ? $code : $this->get_http_code() );
-		$this->set_http_msg( !is_null($msg) ? $msg :  $this->get_http_msg($this->get_http_code()) );
+		$this->setContentType($content_type);
+		$this->setCode( !is_null($code) ? $code : $this->getCode() );
+		$this->setMsg( !is_null($msg) ? $msg :  $this->getMsg($this->getCode()) );
 		$this->view = $data;
 	}
 
@@ -176,7 +176,7 @@ class Response extends Request
 	}
 
 
-	public function set_log( object $response, $class=null ){
+	public function setLog( object $response, $class=null ){
 
 		$log = ['msg' => '', 'class' => ''];	
 		$log['msg'] = $response->msg;
@@ -201,19 +201,19 @@ class Response extends Request
 	}
 
 
-	public function get_log(){
+	public function getLog(){
 		return (!is_null($this->log)) ? (object) $this->log : false;
 	}
 
 
 
-	public function set_data($data){
+	public function setData($data){
 		$this->data = $data;
 	}
 
 
 
-	public function get_data(){
+	public function getData(){
 		return (!is_null($this->data)) ? $this->data : false;
 	}
 

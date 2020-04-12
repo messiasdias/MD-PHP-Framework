@@ -11,7 +11,7 @@ use App\Database\Table;
 
 class DB {
 
-	protected $path, $host, $port, $database, $user, $pass, $table, $class;
+	private $path, $host, $port, $database, $user, $pass, $table, $class;
 
 
 	public function __construct($class=null){
@@ -177,8 +177,8 @@ class DB {
 
 
 
-	public function exists($id,$value){
-
+	public function exists($id,$value)
+	{
 		if ( $this->select([$id,$value]) ){
 			return true;
 		}else{
@@ -189,7 +189,8 @@ class DB {
 
 
 
-	public function count(){
+	public function count()
+	{
 		if( $this->table ){
 
 			$rs = $this->conection()->query('SELECT COUNT(*) FROM '.$this->table);
@@ -315,16 +316,12 @@ class DB {
 				}elseif( is_string($data) ) {
 			
 					if( ($data == "*") | (strtolower($data) == "all") ){
-						$sql .= "  WHERE 1";
+						$sql .= "  WHERE 1 ";
 					}elseif( count(explode(',', $data )) == 2 ){
 						$sql .= " WHERE ".explode(',',$data)[0]."='".explode(',',$data)[1]."' ";
 					}
 				}
-
-
 			
-			
-				//$sql .= ';';
 
 			break;
 			
@@ -336,34 +333,31 @@ class DB {
 				foreach ($data as $i => $value) {
 					array_push($values, $value);
 				}
-				$sql = "INSERT INTO ".$this->table." (".implode($keys,", ").") VALUES ('".mb_convert_encoding(implode($values,"', '"), 'UTF-8')." ');";
+				$sql = "INSERT INTO ".$this->table.
+				" (".implode($keys,", ").") VALUES ('".mb_convert_encoding(implode($values,"', '"), 'UTF-8')." ')";
 				
-				break;
-
+			break;
 
 
 
 			case 'update':
 			//UPDATE teste SET key1 = ?, key2 = ?, key3 = ?, key4 = ? WHERE id = ?
-					foreach ($data as $key => $value) {
-						if ($key != 'id') {
-							array_push($values, $key." = '".$value);
-							}
-					}	
+				foreach ($data as $key => $value) {
+					if ($key != 'id') {
+						array_push($values, $key." = '".$value);
+						}
+				}	
 
-					$sql = "UPDATE ".$this->table." SET ".mb_convert_encoding(implode($values, "', "), 'UTF-8')."' WHERE id = '".mb_convert_encoding($data['id'], 'UTF-8')."';";
-
-				break;
-
+				$sql = "UPDATE ".$this->table." SET ".mb_convert_encoding(implode($values, "', "), 'UTF-8').
+				"' WHERE id = '".mb_convert_encoding($data['id'], 'UTF-8');
+			break;
 
 
 
 			case 'delete':
 			//DELETE FROM table WHERE id = ?
-					$sql = "DELETE FROM ".$this->table."  WHERE id='".$data['id']."';";
-				break;
-
-
+				$sql = "DELETE FROM ".$this->table."  WHERE id='".$data['id'] ;
+			break;
 
 
 			case 'paginate_and_search':
@@ -397,25 +391,22 @@ class DB {
 				}
 
 				break;
+		} //end switch
 
-		}
 
-
+		// $orderby
 		if( 
 			(( strtolower($type) == 'paginate_and_search') | ( strtolower($type) == 'select')) &&
 			(isset($orderby) && ( (count($orderby) >= 1) | (count($orderby) == 2 )  ))
 		){
-
-			$sql .= 'ORDER BY ' .$orderby[0].' ';
-			$sql .=  count($orderby) == 2  ? strtoupper($orderby[1]) : ' DESC' ;
-			$sql .= ';';
+			$sql .= 'ORDER BY ' .$orderby[0]." ";
+			$sql .=  count($orderby) == 2  ? strtoupper($orderby[1]) : ' DESC ' ;
 		}	
 
 
-
+		$sql .= ';';
 		return $sql;
 			
-
 	}
 
 

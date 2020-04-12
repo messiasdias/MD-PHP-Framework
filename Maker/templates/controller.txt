@@ -2,9 +2,11 @@
 namespace App\Controllers;
 use App\Controller\Controller;
 use App\App;
+
 /**
  * {{name}}Controller Class
  */
+
 class {{name}} extends Controller
 {	public $app;
 	
@@ -26,7 +28,7 @@ class {{name}} extends Controller
 				return $app->json($data);
 			},
 			//external $data
-			['title' => 'Test', 'subtitle' => 'Teste View OK!'] 
+			['title' => '{{name}}', 'subtitle' => '{{name}} View OK!'] 
 		);
 	}
 

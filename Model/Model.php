@@ -27,7 +27,7 @@ abstract class Model implements ModelInterface {
 
 
 	//DataBase
-	public function db($class = null){
+	private function db($class = null){
 		return  new DB( is_null($class) ? get_called_class(): $class );
 	}
 

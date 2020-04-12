@@ -7,7 +7,7 @@ use App\Maker\Maker;
 $app->get('/maker',  function($app,$args) {  
 	//Maker index|help
 	$maker = new Maker($app);
-	return $app->view('help' , [ 'commands' => $maker->commands() ] , $app->config->vendor_path .'Maker/views/'  ) ;
+	return $app->view('help' , [ 'commands' => $maker->commands() ] , __DIR__.'/views/'  ) ;
  }, 'debug');
 
 
@@ -25,11 +25,10 @@ $app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{comman
 	$method = $args->command;
 
 	if($continue && ( isset($args->subcommand) && ( strtolower($args->subcommand) != 'help'))  ){
-		return $app->view('error', (array) $maker->$method($args->subcommand), $app->config->vendor_path .'Maker/views/' );
+		return $app->view('error', (array) $maker->$method($args->subcommand), __DIR__.'/views/' );
 	}else{
 		return $app->redirect('/maker');
 	}
-
 
  }, 'debug' );
 
@@ -47,7 +46,7 @@ $app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{comman
 		case 'view' : 
 		case 'app' :
 		case 'html' :  
-			return $app->view('map' , [ 'routers' => $app->routers] , $app->config->vendor_path .'Maker/views/' ) ;
+			return $app->view('map' , [ 'routers' => $app->routers] ,  __DIR__. '/views/' ) ;
 		break;
 		
 		case 'api' : 
