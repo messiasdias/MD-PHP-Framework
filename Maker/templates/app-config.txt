@@ -10,7 +10,8 @@
  $value = $app->key | $this->key (on App Instânce); 
 
  */
-
+ 
+$this->config->api = true; 
 $this->config->debug = true;
 $this->config->timezone = 'America/Recife';
 $this->config->description = 'Messias Dias | PHP Framework - Project';

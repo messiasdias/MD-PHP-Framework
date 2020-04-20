@@ -38,12 +38,9 @@ class Validator
 
 		foreach ($datav as $key => $value){
 			foreach($value as $key2 => $value2 ){
-				if( isset($value2->valid)  && !$value2->valid){
-					if(!isset($errors[$key]) ) {
-						$errors[$key] = $value2->error;
-					}else{
-						$errors[$key] .= ' | '.$value2->error;
-					}
+				if( isset($value2->valid) && !$value2->valid){
+					$errors[$key] = [];
+					array_push($errors[$key],$value2->error);
 				}
 			}
 			
@@ -144,10 +141,8 @@ class Validator
 					
 		return  (object) [
 				'valid' => false, 
-				'error' => ucfirst($arg[2]).':'.$arg[0] ." no exists in the database !"
-			] ;
-		
-		 
+				'error' => ucfirst($arg[2])." '".$arg[0] ."' no exists in the database !"
+		] ;
 	}
 
 	private function noexists(array $arg) {
@@ -167,7 +162,7 @@ class Validator
 	private function minlen($arg){
 		$value = (int) is_array($arg) ? $arg[0] : $arg ;
 		$min = (int) is_array($arg) ? $arg[1] : 1;
-	
+
 		if ( $this->str((string) $value)->valid && ( strlen($value) >= $min) ){
 			return  (object)  ['valid' => true];
 		}else {

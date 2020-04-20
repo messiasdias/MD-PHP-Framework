@@ -186,18 +186,13 @@ class Response extends Request
 		}else{
 			$log['class'] = !is_null($class) ? $class : 'error';	
 		}
-		array_push($this->log, $log);	
 
 		if( isset($response->errors) && $response->errors){
-			$sublog = [];
-			foreach($response->errors as $key => $error){
-				$sublog = ['class' => 'error', 'msg' => ucfirst($key)." | ".ucfirst($error) ];
-				array_push($this->log, $sublog);
-			}
+			$log['errors'] = $response->errors;
 		}
 
+		$this->log =  $log;	
 		return $this->log;
-		
 	}
 
 

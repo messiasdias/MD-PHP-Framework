@@ -227,7 +227,7 @@ class DB {
 			
 	
 		}
-
+	
 		if ( !is_null($sql) ){
 		  $rs = $this->conection()->exec($sql);
 		}
@@ -254,17 +254,12 @@ class DB {
 		  return (object) ['status' => false, 'msg' => 'Registration not exists on '.ucfirst($this->table).' !', 'data' => $data ];
 		}
 		else{
-
 			$sql = $this->sql_generator('delete',$data);
-
 			if  ( !is_null($sql) && ( $this->conection()->exec($sql) >= 1)){
 				 return (object) ['status' => true, 'msg' => 'Registration deleted successfully in the '.ucfirst($this->table).'!', 'data' => $data ];
-
 			}else{
 				 return (object) ['status' => false, 'msg' =>  'An error occurred while deleting data in the '.ucfirst($this->table).' !', 'data' => $data ];
 			}
-
-
 		}
 	}
 
@@ -349,14 +344,14 @@ class DB {
 				}	
 
 				$sql = "UPDATE ".$this->table." SET ".mb_convert_encoding(implode($values, "', "), 'UTF-8').
-				"' WHERE id = '".mb_convert_encoding($data['id'], 'UTF-8');
+				"' WHERE id = '".mb_convert_encoding($data['id'], 'UTF-8')."'";
 			break;
 
 
 
 			case 'delete':
 			//DELETE FROM table WHERE id = ?
-				$sql = "DELETE FROM ".$this->table."  WHERE id='".$data['id'] ;
+				$sql = "DELETE FROM ".$this->table."  WHERE id='".$data['id']."'" ;
 			break;
 
 
@@ -403,10 +398,8 @@ class DB {
 			$sql .=  count($orderby) == 2  ? strtoupper($orderby[1]) : ' DESC ' ;
 		}	
 
-
 		$sql .= ';';
-		return $sql;
-			
+		return $sql;	
 	}
 
 

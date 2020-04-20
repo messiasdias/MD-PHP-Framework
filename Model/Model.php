@@ -27,7 +27,7 @@ abstract class Model implements ModelInterface {
 
 
 	//DataBase
-	private function db($class = null){
+	private static function db($class = null){
 		return  new DB( is_null($class) ? get_called_class(): $class );
 	}
 
@@ -154,7 +154,7 @@ abstract class Model implements ModelInterface {
 				'id' => 'int|mincount:1|exists:'.@end( explode("\\", get_called_class()) ),
 			];
 		}
-
+		
 		$clear = self::clear($validations, (array) $this );	
 		$validate = App::validate($clear->data, $clear->validations, get_called_class() );
 

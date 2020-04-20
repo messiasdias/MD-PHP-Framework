@@ -46,12 +46,12 @@ $app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{comman
 		case 'view' : 
 		case 'app' :
 		case 'html' :  
-			return $app->view('map' , [ 'routers' => $app->routers] ,  __DIR__. '/views/' ) ;
+			return $app->view('map' , [ 'routers' => $app->routes] ,  __DIR__. '/views/' ) ;
 		break;
 		
 		case 'api' : 
 		case 'json' : 
-			return $app->json(  [ 'routers' => $app->routers] );
+			return $app->json(  [ 'routers' => $app->routes] );
 		break;
 	}
 

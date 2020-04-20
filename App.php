@@ -50,6 +50,10 @@ class App
 	private function set_config($config=null)
 	{	
 		$this->config->mode = 'app';
+		$this->config->api = true;
+		$this->config->debug = true;
+		$this->config->timezone = "America/Recife";
+		$this->config->views = $this->config->path.'assets/private/views/';
 		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
 		
 		foreach($config_array as $key => $value ){
@@ -59,9 +63,6 @@ class App
 		if( file_exists( $this->config->path.'config/app.php' ) ){
 			include $this->config->path.'config/app.php'; //Load AppConfigs
 		}else{
-			$this->config->debug = true;
-			$this->config->timezone = 'America/Recife';
-			$this->config->views = $this->config->path.'assets/private/views/';
 			$this->response->setLog((object)[ 
 					  'msg' => "File /config/app.php Not Found!",
 					  'status' => false
@@ -95,7 +96,8 @@ class App
 
 
 	public function run(){
-		$app = $this;
+		$app = null;
+
 		$routing = $this->routing();
 		$this->args = isset($routing->route->args) ?  (object) $routing->route->args : null;
 		$this->response->setCode($routing->code);
@@ -107,35 +109,26 @@ class App
 			$this->response->setMsg($this->response->getMsg($this->response->getCode()) );
 		}
 
-		$app = $this->middlewares( isset($routing->route->middlewares) ? $routing->route->middlewares : null, true);
+		$this->middlewares( isset($routing->route->middlewares) ? $routing->route->middlewares : null,null,true);
 		
-		if ( $routing->status &&  $app->middleware_auth  ){ 
+		if ( $routing->status &&  $this->middleware_auth  ){ 
 			//Exec Callback Function of Route
-		  	$app = $routing->route->callback($app, isset($routing->route->args )? $routing->route->args : null);
-
-			if( !$app instanceof App ){
-				$app = $this->view('layout/msg',[
-					'title' => 'Return the variable "App $app" end of router method!',
-					'subtitle' =>  '$app->get("/url/:param", function($app, $args)'.
-					'{ return $app; } , < <[array|string]$middlewares> | null] > );' 
-				]);
-			}
-			
+		  	$routing->route->callback($this, isset($routing->route->args )? $routing->route->args : null);
 		}else{
 
 			$text = '<div  style="color:#9e7700 !important; height:100vh; width: 100wh; display:flex; flex-direction:column; justify-content: center; align-content: center; align-items:center;">'.
 			'<h1 style="color:#696969;">Erro: {{code}}</h1><p>{{msg}}</p></div>';
 
-			$file =  $this->config->views."/http/".$app->response->getCode().".html";
+			$file =  $this->config->views."/http/".$this->response->getCode().".html";
 			
 			if( !file_exists($file) ){
 				$file = $this->config->views."/layout/http.html";	
 			}
 
 			$data = [
-					'code' => $app->response->getCode(),
-					'msg' =>  $app->response->getMsg(),
-					'url' => $app->request->url,
+					'code' => $this->response->getCode(),
+					'msg' =>  $this->response->getMsg(),
+					'url' => $this->request->url,
 					'text' => $text,
 					'file' => $file
 			];
@@ -145,7 +138,8 @@ class App
 					return file_exists($data['file']) ? 
 						$app->view('layout/http', ['code' => $data['code'],'msg' => $data['msg'],]) : 
 						$app->write( str_replace(['{{code}}', '{{msg}}'],[ $data['code'], $data['msg']], $data['text'])) ; 
-				},function($app, $args, $data){
+				},
+				function($app, $args, $data){
 					return $app->json([]);
 				}, 
 				$data 
@@ -153,15 +147,15 @@ class App
 			
 		}
 
-		$app = $this->put_header($app);
-		$app->response->view();
+		$this->put_header($this);
+		$this->response->view();
 		exit;
 	}
 
 
 
 
-	private function put_header(App $app ,$display_erro=false ){
+	private function put_header(App &$app ,$display_erro=false ){
 		$response = $app->response;
 
 		@header( $response->protocol.' '.$response->getCode().' '.$response->getMsg() );
@@ -189,49 +183,31 @@ class App
 		}
 
 		@header("Access-Control-Allow-Origin: *");
-		@header("Access-Control-Allow-Headers: Content-Type");
-	
-		return $app;		
+		@header("Access-Control-Allow-Headers: Content-Type");	
 
 	}
 
 
 
 
-	public function middlewares($list=null, $return_app=false){
+	public function middlewares($list=null, object $obj=null, $denyAcess=false){
 
 		$this->middleware_auth = true;
-
 		if (!is_null($list)) {
+			$this->middleware_obj = !is_null($obj) ? $obj : null;
 			$middleware = new Middleware($this, $list);
+			$this->middleware_auth = $middleware->verify();
 
-			if( $middleware->verify() ){
-				$this->middleware_auth = true;
-			}else{
-				$this->middleware_auth = false;
+			if($denyAcess) {
 				$this->response->setCode(401);
 				$this->response->setMsg('Access Denied!');
 			}
-		}
-
-		if($return_app){
-			return $this; 
-		}else{
-			return $this->middleware_auth;
+		
 		}
 		
+		return $this->middleware_auth;
 	}
 	
-
-
-	public function middleware_verify($list=null) {
-		if( !is_null($list) ) {
-			$middleware = new Middleware($this, $list);
-			return $middleware->verify();
-		}
-		return false;
-	}
-
 
 
 	public function get($url, $callback, $middlewares=null){
@@ -239,26 +215,18 @@ class App
 	}
 
 
-
 	public function post($url, $callback, $middlewares=null){
 		$this->set_route($url, $callback, $middlewares,'POST');
 	}
-
-
 
 
 	public function put($url, $callback, $middlewares=null){
 		$this->set_route($url, $callback, $middlewares,'PUT');
 	}
 
-
-
-
 	public function delete($url,$callback, $middlewares=null){
 		$this->set_route($url, $callback, $middlewares,'DELETE');
 	}
-
-
 
 	public function group(array $url, $callback=null, $middlewares=null){
 		return $this->router_group($url, $callback, $middlewares);
@@ -300,11 +268,11 @@ class App
 		$app = $this;
 		switch ( strtolower($this->config->mode) ) {
 			case 'api':
-				$mode = $this->config->path.'src/Routers/api/*.php';
+				$mode = $this->config->path.'src/Routes/api/*.php';
 			break;
 			case 'app':
 			default:
-				$mode = $this->config->path.'src/Routers/*.php';
+				$mode = $this->config->path.'src/Routes/*.php';
 			break;
 		}
 
@@ -316,9 +284,9 @@ class App
 			}
 		}
 
-		if ( $this->config->debug && file_exists($this->config->vendor_path.'/Maker/Routers.php') ){
+		if ( $this->config->debug && file_exists($this->config->vendor_path.'/Maker/Routes.php') ){
 			//Maker Routes
-			include $this->config->vendor_path.'/Maker/Routers.php';
+			include $this->config->vendor_path.'/Maker/Routes.php';
 		}
 
 		return $app;
@@ -340,9 +308,9 @@ class App
 	}	
 
 
-	private function routing(string $url=null, string $method=null){
+	public function routing(string $url=null, string $method=null){
 
-		if( explode('/', $this->request->url )[1] == 'api'  ){
+		if( $this->config->api && explode('/', $this->request->url )[1] == 'api'  ){
 			$this->config->mode = 'api';
 			$this->request->url = str_replace('/api/' , '/', $this->request->url );
 		}
@@ -357,7 +325,8 @@ class App
 
 	public function redirect_header($url)
 	{
-		header('location:'.$url);
+		header('Location:'.$url, true, 301);
+		exit;
 	}
 
 
@@ -453,6 +422,8 @@ class App
 	private function view_get_data()
 	{	
 		$data = [
+			'description' => (  $this->config &&  $this->config->description) ? 
+			 $this->config->description : '',
 			'url'  => $this->request->url,
 			'referer'  => $this->request->referer,
 			'host'  => $this->request->host,

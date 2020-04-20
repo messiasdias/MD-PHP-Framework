@@ -28,7 +28,7 @@ class Auth  {
 			$validations = [
 				'username' => 'username|minlen:4|exists:user',
 				'pass' => 'string|minlen:8'
-				];
+			];
 
 			$result = App::validate($data, $validations,'App\Models\User' );
 
@@ -43,9 +43,12 @@ class Auth  {
 							if( $this->user->status == 1 ) {
 
 									$_SESSION['token'] = $this->token->create($this->user);
-									return (object) [ 'status' =>  ['msg' => 'Login Successfully!', 
-										'code' => 202 ] , 'token' => $_SESSION['token'], 
-										'user' => $this->user($_SESSION['token']) ] ;
+									return (object) [
+										'status' => true, 
+										'msg' => 'Login Successfully!', 
+										'token' => $_SESSION['token'], 
+										'user' => $this->user($_SESSION['token'])
+									 ] ;
 
 							}else{
 
@@ -67,7 +70,7 @@ class Auth  {
 			
 			} else{
 
-				return (object) ['status' => false, 'msg' => implode(',', (array) $result->errors),'data' => NULL];
+				return (object) ['status' => false, 'msg' => 'Login error!' , 'errors' => (array) $result->errors,'data' => NULL];
 			}
 
 		}
@@ -82,7 +85,7 @@ class Auth  {
 
 	public function logout(){
 		session_unset();
-		return session_destroy() ? true : false;
+		return session_destroy();
 	}
 
 

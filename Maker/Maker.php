@@ -121,8 +121,9 @@ class Maker
 						$count = (count($classes) > 1 ) ? count($classes) : 1  ;
 					   for($i=0; $i < $count; $i++){
 							$args_name = strtolower(str_replace('Seeder',null,explode('\\', $classes[$i])[count(explode('\\', $classes[$i]))-1]) );
-							if($this->seeder_objects){
-								$response = setresp($this->seed($classes[$i] , (array) $this->seeder_objects), $response ) ;
+
+							if($this->seeder_objects && isset($this->seeder_objects->$args_name) ){
+								$response = setresp($this->seed($classes[$i] , (array) $this->seeder_objects->$args_name ), $response ) ;
 							}else{
 								array_push($response, 'Variable seeder_objects no is set!' );
 							}

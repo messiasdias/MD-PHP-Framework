@@ -35,14 +35,14 @@ class {{name}} extends Model {
 	}
 
 
-	public function delete(array $validations=null){
+	public function delete(){
 		/* optional code implementation here */
 
 		/* 
 			In remove() function, $validations = ['id' => 'int|mincount:1|exists:test]
 			by default if this argument is null 
 		*/
-        parent::remove($validations);
+        return parent::remove(); //arg: array $validations or null
 	}
 
 
