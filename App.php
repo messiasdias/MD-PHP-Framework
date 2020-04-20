@@ -109,7 +109,7 @@ class App
 			$this->response->setMsg($this->response->getMsg($this->response->getCode()) );
 		}
 
-		$this->middlewares( isset($routing->route->middlewares) ? $routing->route->middlewares : null,null,true);
+		$this->middlewares( isset($routing->route->middlewares) ? $routing->route->middlewares : null, null, true);
 		
 		if ( $routing->status &&  $this->middleware_auth  ){ 
 			//Exec Callback Function of Route
@@ -196,13 +196,13 @@ class App
 		if (!is_null($list)) {
 			$this->middleware_obj = !is_null($obj) ? $obj : null;
 			$middleware = new Middleware($this, $list);
-			$this->middleware_auth = $middleware->verify();
+			$this->middleware_auth = $middleware->verify();		
+		}
 
-			if($denyAcess) {
-				$this->response->setCode(401);
-				$this->response->setMsg('Access Denied!');
-			}
-		
+		if( !$this->middleware_auth && $denyAcess) {
+			$this->response->setCode(401);
+			$this->response->setMsg('Access Denied!');
+			$this->middleware_auth = false;
 		}
 		
 		return $this->middleware_auth;
