@@ -48,6 +48,16 @@
                     "src" : "maker-config.txt"
                 }
             }
+        },
+
+        "viewfilter": {
+            "src" : "filter-view.txt",
+            "path": "src/Viewfilters/"
+        },
+
+        "filter": {
+            "src" : "filter-view.txt",
+            "path": "src/Viewfilters/"
         }
 
     }

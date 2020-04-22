@@ -15,7 +15,7 @@ class View
 		$this->app = $app;	
 		$template = $this->extractTemplate($name, $path, $data);
 		$view = new  \Twig\Environment(new \Twig\Loader\FilesystemLoader($path));
-		$this->set_filters($this->app, $view);
+		$this->setFilters($this->app, $view);
 
 		if( file_exists($path.$template) ){
 			$this->view = $view->render($template , $data);
@@ -92,21 +92,19 @@ class View
 	}
 	
 
-	private function set_filters(App $app, &$view ){
 
-		$view->addFunction( 
-			new \Twig\TwigFunction('middlewares', function (string $list, $obj=null, $denyAcess=false) {
-				$this->app->middlewares($list, $obj ?? $this->app->middleware_obj, $denyAcess);
-				return $this->app->middleware_auth;
-			})
-		);
+	private function setFilters(App &$app, &$view ){
 		
-		if( file_exists($this->app->config->vendor_path.'View/Filters.php') ){
-			include $this->app->config->vendor_path.'View/Filters.php'; //Load Custom Filters Functions
+		if( file_exists(__DIR__.'/Filters.php') ){
+			include __DIR__.'/Filters.php'; 
+			foreach( $defaults as $key => $filter){
+				$view->addFunction( 
+					new \Twig\TwigFunction($key, $filter )
+				);
+			}
 		}else{
-			echo "File ".$this->app->config->vendor_path."View/Filters.php not Found!";
+			echo "File ".__DIR__."/Filters.php not Found!";
 		}
-
 	}
 
 

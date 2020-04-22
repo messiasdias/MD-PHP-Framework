@@ -162,10 +162,10 @@ class Response extends Request
 
 
 
-	public function write(String $data , $content_type = 'html', $code=null, $msg=null ){
+	public function write(String $data , $content_type = 'html', $code=false, $msg=false ){
 		$this->setContentType($content_type);
-		$this->setCode( !is_null($code) ? $code : $this->getCode() );
-		$this->setMsg( !is_null($msg) ? $msg :  $this->getMsg($this->getCode()) );
+		$this->setCode( $code ?? $this->getCode() );
+		$this->setMsg(  $msg ??  $this->getMsg($this->getCode()) );
 		$this->view = $data;
 	}
 

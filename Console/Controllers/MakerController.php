@@ -16,41 +16,45 @@ use App\Maker\Maker ;
 
 class MakerController  {
 
+    public static $console, $maker;
 
-    public static function PostCreateProject(Event $event){
-        $console = new Console();
-        $console->log('Project successfully created!', 1);
+    private static function setConsole(){
+        self::$console = new Console();
+        self::$maker = new Maker(self::$console);
     }
 
 
     public static function maker(Event $event){
-        $console = new Console();
+        self::setConsole();
 
         if( count( $event->getArguments() ) >= 1  ){
-            $maker = new Maker($console);
             $command = false;
 
-            foreach ($maker->commands() as $i => $com ) {
+            foreach (self::$maker->commands() as $i => $com ) {
                 if($com->name == $event->getArguments()[0] ){
                     $command = $event->getArguments()[0];
                 }
             } 
             
-            $subcommand = isset($event->getArguments()[1]) ? $event->getArguments()[1] : false;
-            $subcommand .= isset($event->getArguments()[2]) ? $event->getArguments()[2] : '';
+            $subcommand = $event->getArguments()[1] ?? false;
+            $subcommand .= $event->getArguments()[2] ?? '';
            
             if($command && $subcommand){
-                $response = (object)  $maker->$command($subcommand);
-                 $console->log($response->title);
+                $response = (object) self::$maker->$command($subcommand);
+                 self::$console->log($response->title);
 
                 if( is_array($response->subtitle)){
                     foreach( $response->subtitle as $subtitle ){
-                         $console->log($subtitle);
+                        if( is_array($subtitle)){
+                            self::$console->log($subtitle[0], $subtitle[1]);
+                        }else{
+                            self::$console->log($subtitle);
+                        }
                     }
                  }else{
-                     $console->log($response->$subtitle);  
+                     self::$console->log($response->$subtitle);  
                  }
-                 $console->log("\n");
+                 self::$console->log("\n");
                 return;
             }
 
@@ -64,18 +68,20 @@ class MakerController  {
 
 
     public static function maker_help(){
-        $console = new Console();
-        $maker = new Maker($console);
-        $console->log('Maker requires 2 arguments!', 2);
-        $console->log('$ composer run maker {command} {subcommand}!', 5);
-        $console->log("Maker | Help \n", 4 );
+        self::setConsole();
 
-       foreach ( $maker->commands() as $i => $command ) {
-            $console->log( $command->name.' : '.$command->options );
-            $console->log( $command->description."\n" );
+        self::$console->log('Maker requires 2 arguments!', 2);
+        self::$console->log('$ composer run maker {command} {subcommand}!', 5);
+        self::$console->log("Maker | Help \n", 4 );
+
+       foreach ( self::$maker->commands() as $i => $command ) {
+            self::$console->log($command->name.' : '.$command->options);
+            self::$console->log($command->description);
         }
 
     }
 
+    
 
 }
+

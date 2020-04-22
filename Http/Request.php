@@ -5,34 +5,50 @@ namespace App\Http;
  */
 class Request 
 {	
-	public $host, $remote, $url, $cookies, $protocol, $scheme, $method, $content_type, $data, $files, $connection, $cache_control;
+	public $host, $remote, $url, $cookies, $sessions, $protocol, $scheme, $method, $content_type, $data, $files, $connection, $cache_control;
 	public $upgrade_insecure_requests, $user_agent, $accept, $accept_encoding, $accept_language, $token;
 	
 	function __construct()
-	{
-		$this->url = strtolower(isset($_SERVER['REQUEST_URI']) ?  $_SERVER['REQUEST_URI'] : '');
-		$this->protocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP' ; // HTTP 1.0 | HTTPS
-		$this->scheme = isset($_SERVER ["REQUEST_SCHEME"]) ? $_SERVER ["REQUEST_SCHEME"] : 'http'; //http | https
-		$this->method =  isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
-		$this->host =  isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '' ; //localhost.local
-		$this->origin = isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : false; //localhost.local
-		$this->referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : false ; //page with source request
-		$this->content_type = isset($_SERVER["CONTENT_TYPE"])? $_SERVER["CONTENT_TYPE"]: 'text/html';
-		$this->remote = isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : ''; //remote IP - 127.0.0.1
-		
+	{	
+		//get request properties
+		$this->getProps();
+		//get request auth token
+		$this->getToken();
+		//Get All post/get Form data, files and sessions/cookies
+		$this->getData();
+	}
 
+
+
+	private function getProps(){
+		$this->url = $_SERVER['REQUEST_URI'] ?? '';
+		$this->protocol = strtolower($_SERVER['SERVER_PROTOCOL'] ?? 'HTTP') ; // HTTP 1.0 | HTTPS
+		$this->scheme = strtolower($_SERVER ["REQUEST_SCHEME"] ?? 'http' ); //http | https
+		$this->method =  strtolower($_SERVER['REQUEST_METHOD'] ?? 'GET' );
+		$this->host = strtolower($_SERVER['HTTP_HOST'] ?? '' ); //localhost.local
+		$this->origin = strtolower($_SERVER["HTTP_ORIGIN"] ?? '' ); //localhost.local
+		$this->referer = strtolower($_SERVER["HTTP_REFERER"] ?? '') ; //page with source request
+		$this->content_type = strtolower($_SERVER["CONTENT_TYPE"] ?? 'text/html');
+		$this->remote = strtolower($_SERVER["REMOTE_ADDR"] ?? ''); //remote IP - 127.0.0.1
+	}
+
+
+	private function getToken(){
+		//Get User Auth Token 
+		if(isset( $this->data['token'] )) {
+			$this->token =  $this->data['token'];
+			unset($this->data['token']);
+		}
+		elseif(isset( $_SESSION['token'] )){
+			$this->token = $_SESSION['token'];
+		}
+	}
+
+
+	private function getData(){
 		//Get All Form data posts
 		parse_str(file_get_contents('php://input'), $this->data );
 		$this->data = $_POST;
-		
-   		//Get User Auth Token 
-   		if(isset( $this->data['token'] )) {
-   			$this->token =  $this->data['token'];
-   			unset($this->data['token']);
-   		}
-   		elseif(isset( $_SESSION['token'] )){
-   			$this->token = $_SESSION['token'];
-   		}
 
    		if ( isset($_FILES['file'] )  ){
 
@@ -48,20 +64,26 @@ class Request
 				$this->files = $_FILES;
 			}
 	
-
-   		}
-
-		foreach (apache_request_headers() as $key => $value) {
-			$param = strtolower( str_replace('-', '_', $key) );
-
-				if ($param == 'cookie'){
-					$this->cookies = $this->cookie_to_array($value);
-				}elseif( property_exists($this, $param) ) {
-					$this->$key = $value;
-				}
-
 		}
 
+		if( count($_SESSION) >= 1 ){
+			$this->sessions = [];
+			foreach($_SESSION as $session){
+				array_push($this->sessions, $session);
+			}
+			$this->sessions = (object) $this->sessions;
+		}else{
+			$this->sessions = false;
+		}
+		   
+		foreach (apache_request_headers() as $key => $value) {
+			$param = strtolower( str_replace('-', '_', $key) );
+			if ($param == 'cookie'){
+				$this->cookies = $this->cookie_to_array($value);
+			}elseif( property_exists($this, $param) ) {
+				$this->$key = $value;
+			}
+		}
 	}
 
 

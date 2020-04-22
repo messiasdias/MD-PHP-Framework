@@ -17,7 +17,8 @@ class Console extends App {
     public function __construct($config=null){
         $this->set_config($config);
         if(self::$start){
-            $this->log("#### " . $this->config->description." #### \n" );
+            $this->log("#### Maker | " . $this->config->description." ####" );
+            $this->log("by: Messias Dias | github.com/messiasdias \n" );
             self::$start = false;
         }
     }
@@ -42,32 +43,55 @@ class Console extends App {
 		foreach($config_array as $key => $value ){
 			if($key !== 'debug' ) $this->config->$key = $value;
 		}
-    }
+    } 
 
 
-    public static function log($msg, $class = 0)
+    public static function log($msg, $class = null)
     {
+        /*
+            Color refs: 
+            https://stackoverflow.com/questions/34034730/how-to-enable-color-for-php-cli/34034922
+        */
         $class_name = '';
+        $color = "";
+
         switch($class){
             case 1:
-                $class_name = 'Success: ';
+            case 'success':
+                //$class_name = 'Success: ';
+                $color = "92";
             break; 
             case 2:
-                $class_name = 'Warnnig: ';
+            case 'warning':    
+                //$class_name = 'Warnnig: ';
+                $color = "33";
             break;
+
             case 3:
-                $class_name = 'Error: ';
+            case 'error':    
+                //$class_name = 'Error: ';
+                $color = "91";
             break;
+
             case 4:
-                $class_name = 'Info: ';
+            case 'info':
+                //$class_name = 'Info: ';
+                $color = "94";
             break;
+
             case 5:
+            case 'help':
+            case 'usage':    
                 $class_name = 'Usage: ';
+                $color = "96";
             break;
+
             default:
+                $color = "97";
             break;
         }
-        echo $class_name.$msg."\n";
+
+        echo "\e[".$color."m".$class_name.$msg."\n";
     }
 
 

@@ -11,15 +11,15 @@ class Route
 	
 	function __construct($name,$method,$callback,$middlewares)
 	{
-		$this->name = $name;
-		$this->method = strtoupper($method);
+		$this->name = strtolower($name);
+		$this->method = strtolower($method);
 		$this->callback = $callback;
 		$this->middlewares = $middlewares;
 	}
 
-	public function callback(App &$app, array $args=null){
-		 $function = $this->callback;
-		 return $function($app, (object) $args);
+	public function getCallback(App &$app, array $args=null){
+		$args = !is_null($args) ? (object) $args : false;
+		return $this->callback->bindTo((object) ['app' => &$app, 'args' =>  $args ?? false] )();
 	}	
 }
 

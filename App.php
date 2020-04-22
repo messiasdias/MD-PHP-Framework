@@ -96,7 +96,6 @@ class App
 
 
 	public function run(){
-		$app = null;
 
 		$routing = $this->routing();
 		$this->args = isset($routing->route->args) ?  (object) $routing->route->args : null;
@@ -113,7 +112,7 @@ class App
 		
 		if ( $routing->status &&  $this->middleware_auth  ){ 
 			//Exec Callback Function of Route
-		  	$routing->route->callback($this, isset($routing->route->args )? $routing->route->args : null);
+		  	$routing->route->getCallback($this, $routing->route->args ?? null );
 		}else{
 
 			$text = '<div  style="color:#9e7700 !important; height:100vh; width: 100wh; display:flex; flex-direction:column; justify-content: center; align-content: center; align-items:center;">'.
@@ -133,7 +132,7 @@ class App
 					'file' => $file
 			];
 
-			$app =  $this->mode_trigger( 
+			$this->mode_trigger( 
 				function ($app, $args, $data) {
 					return file_exists($data['file']) ? 
 						$app->view('layout/http', ['code' => $data['code'],'msg' => $data['msg'],]) : 
@@ -147,7 +146,7 @@ class App
 			
 		}
 
-		$this->put_header($this);
+		$this->setHeader();
 		$this->response->view();
 		exit;
 	}
@@ -155,30 +154,25 @@ class App
 
 
 
-	private function put_header(App &$app ,$display_erro=false ){
-		$response = $app->response;
+	private function setHeader(){
 
-		@header( $response->protocol.' '.$response->getCode().' '.$response->getMsg() );
+		@header( $this->response->protocol.' '.$this->response->getCode().' '.$this->response->getMsg() );
 
-		if (  $response->cookies  ) {
-			foreach ($response->cookies as $key => $value) {
+		if (  $this->response->cookies  ) {
+			foreach ($this->response->cookies as $key => $value) {
 				@setcookie( trim($key), trim($value) );
 			}
 		}
-	
-		if ($display_erro){
-			echo $response->getMsg();
-		}
 
-		if(isset($response->token)){
+		if(isset($this->response->token)){
 			 //Renews Token
 			 $token = new Token($this);
-			 $renew_token = $token->renew($response->token);
-			 if(isset($_SESSION['token']) && $app->user() ){
+			 $renew_token = $token->renew($this->response->token);
+			 if(isset($_SESSION['token']) && $this->user() ){
 				 $_SESSION['token'] = $renew_token;
-				 $response->token = $renew_token;
+				 $this->response->token = $renew_token;
 			 }
-			$response->token = $renew_token; 
+			$this->response->token = $renew_token; 
 			@header('token: '.$renew_token );
 		}
 
@@ -262,6 +256,20 @@ class App
 	}
 
 
+	private function set_route(string $url, $callback, $middlewares, string $method){
+
+		if( is_array($url) ){
+			foreach( $url as $url_key => $url_value ){
+			 array_push($this->routes, new Route($url_value ,$method ? $method : 'GET' ,$callback,$middlewares) );
+			}
+		}elseif( is_string($url) ){
+			array_push($this->routes, new Route($url,$method,$callback,$middlewares) );
+		}else{
+			return $this->response->setCode(500);
+		}
+	}
+
+
 
 	private function load_routes(){
 		//load routes app or api
@@ -290,21 +298,6 @@ class App
 		}
 
 		return $app;
-	}
-
-
-	private function set_route(string $url, $callback, $middlewares, string $method){
-
-			if( is_array($url) ){
-				foreach( $url as $url_key => $url_value ){
-				 array_push($this->routes, new Route($url_value ,$method ? $method : 'GET' ,$callback,$middlewares) );
-				}
-			}elseif( is_string($url) ){
-				array_push($this->routes, new Route($url,$method,$callback,$middlewares) );
-			}else{
-				return $this->response->setCode(500);
-			}
-
 	}	
 
 
@@ -317,8 +310,7 @@ class App
 
 		$this->load_routes();
 		$router = new Router($this->routes);
-		return $router->url(!is_null($url) ? $url : $this->request->url,
-		 !is_null($method) ? $method : $this->request->method);
+		return $router->url( $url ?? $this->request->url, $method ?? $this->request->method);
 	}
 
 
@@ -367,6 +359,7 @@ class App
 	}
 
 
+
 	public static function validate($data,$validations,$class='')
 	{
 		$validator = new Validator( $class );
@@ -378,8 +371,6 @@ class App
 			return false;
 		}
 	}
-
-
 
 
 	public function controller($name,$args=null)
@@ -481,15 +472,23 @@ class App
 
 
 
-
 	public function api(string $url, string $method='GET', array $data=[])
-	{
+	{	
+		//config no verbose http fatal errors
+		$data['http_errors'] = false;
+
 		$client = new \GuzzleHttp\Client();
-		$response = $client->request( strtoupper($method) , $url, $data);
-		$status =  $response->getStatusCode(); # 200
-		$content_type = $response->getHeaderLine('content-type'); # 'application/json; charset=utf8'
-		$data = (object) json_decode($response->getBody() ) ; # '{"id": 1420053, "name": "guzzle", ...}'
-		return (object) ['status' => $status, 'content_type' => $content_type, 'data' => $data ];
+		//@ temporario
+		$response = @$client->request(
+			strtoupper($method),
+			$url,
+			$data,
+		);
+
+		return (object) [
+		'status' => $response->getStatusCode() ,
+		'content_type' => $response->getHeaderLine('content-type') , 
+		'data' => json_decode($response->getBody()) ];
 	}	
 
 

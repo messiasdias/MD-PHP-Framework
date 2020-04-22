@@ -23,7 +23,7 @@ class Router
 		//set url
 		$this->url = $url;
 		//set method
-		$this->method = $method;	
+		$this->method = strtolower($method);	
 		$routes = $this->find_by_regex($this->url);
 		$routes =  ($routes) ? $routes : $this->find_by_name($this->url);
 

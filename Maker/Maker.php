@@ -26,6 +26,7 @@ class Maker
 		}
 	}
 	
+
 	public function commands(){
 		return json_decode( file_get_contents($this->path.'commands.json') );
 	}
@@ -90,28 +91,30 @@ class Maker
 		$title = '';
 		$response = [];
 
-		function setresp($resp, $response = []){
+		function setresp($resp, array &$response = []){
 			foreach($resp as $r){
 				array_push($response, $r );
 			}
-			return $response;
 		}
 
 		if ( !is_null($command) && ( count( explode( ':',$command) ) > 1 ) ) {
 
 			$command_exp = explode( ':',$command);
-			$title .= 'Running '.ucfirst($command_exp[0]).' Tables!';
+			$title .= "Running ".ucfirst($command_exp[0]).' Tables!';
 
 			switch ($command_exp[0]) {
+				
 				case 'create':
 				case 'drop':
-					$response = setresp($this->migrator( strtolower($command_exp[0]) ,$this->get_classes('Migrations', $command_exp[1])) , $response );
+				case 'reset':	
+					if( $command_exp[0] == 'reset'){
+						setresp($this->migrator('drop' , $this->get_classes('Migrations', $command_exp[1])), $response );
+						$command_exp[0] = 'create';
+					}
+					
+					setresp($this->migrator(strtolower($command_exp[0]) , $this->get_classes('Migrations', $command_exp[1])) , $response );
 				break;
 
-				case 'reset':
-					$response = setresp($this->migrator('drop' ,$this->get_classes('Migrations', $command_exp[1])), $response );
-					$response = setresp($this->migrator('create' ,$this->get_classes('Migrations', $command_exp[1])) , $response);
-				break;	
 
 				case 'seed':
 
@@ -123,15 +126,15 @@ class Maker
 							$args_name = strtolower(str_replace('Seeder',null,explode('\\', $classes[$i])[count(explode('\\', $classes[$i]))-1]) );
 
 							if($this->seeder_objects && isset($this->seeder_objects->$args_name) ){
-								$response = setresp($this->seed($classes[$i] , (array) $this->seeder_objects->$args_name ), $response ) ;
+								setresp($this->seed($classes[$i] , (array) $this->seeder_objects->$args_name ), $response ) ;
 							}else{
-								array_push($response, 'Variable seeder_objects no is set!' );
+								array_push($response, ['Variable seeder_objects no is set!', 'error'] );
 							}
 						}
 						
 					}else{
-						array_push($response, 'The '.ucfirst($command_exp[1]).
-						' Seeder Class  does not exist in database!');
+						array_push($response, ['The '.ucfirst($command_exp[1]).
+						' Seeder Class  does not exist in src/Database/Seeds/', 'warning']);
 					}
 
 				break;
@@ -148,18 +151,18 @@ class Maker
 							}
 						} 
 
-						$response = setresp($this->spoon($tables, $this->spoon_flag ), $response );
+						setresp($this->spoon($tables, $this->spoon_flag), $response );
 
 					 }else{
-						array_push($response, 'The '.ucfirst($command_exp[1]).
-						 ' table does not exist in database!');
+						array_push($response, ['The '.ucfirst($command_exp[1]).
+						 ' table does not exist in database!', 'warning' ]);
 					 }	
 
 				break;			
 				
 				default:
 					$title = 'Help';
-					array_push($response, 'Usage:  /maker/migrate/create|drop|reset|seed[:table_name|all]');
+					array_push($response, ['Usage:  /maker/migrate/create|drop|reset|seed[:table_name|all]', 'info' ]);
 				break;
 			}
 
@@ -168,14 +171,11 @@ class Maker
 		}
 		else{
 			$title = 'Help';
-			array_push($response, 'Usage:  /maker/migrate/create|drop|reset|seed[:table_name|all]');
+			array_push($response, ['Usage:  /maker/migrate/create|drop|reset|seed[:table_name|all', 'info']);
 		}
 		
-		return ['title' => $title, 'subtitle' => $response ];
-
+		return [ 'title' => $title, 'subtitle' => $response ];
    }
-
-
 
 
 
@@ -189,87 +189,61 @@ class Maker
 		  $table_name = strtolower( str_replace( 'Migration', '', array_slice(explode('\\', $class) , -1 )[0]  ) );
 		  $table = new Table($table_name);
 
-			switch (strtolower($type)) {
-				case 'create':
-			
-					    if ( !$table->exists() ) {
-							unset($table);
-							$migration = class_exists($class) ?  new $class() : false;
-
-							if ($migration) {
-
-								if($migration->create()){
-									$msg = 1;
-								}else{
-									$msg = 4;
-								}
-								break;
-
-							}else{
-								$msg = 4;
-							} 
-
-						}else{
-							$msg = 2;
-						}
-					
-					break;
-
-				case 'drop':
-						
-						if ($table->exists()) {
-								$rs = $table->drop(); 
-
-								if ($rs){
-									$msg =1;
-								}else{	
-									$msg = 4;
-								}		
-								break;
-
-						}else{
-							$msg = 3;
-						}
-
-				 break;
-								
-				default:
-					$msg = 5;
-				break;
+			if( $table->exists() && ($type == 'create' ) ){
+				$msg = 2;
+			}
+			elseif( !$table->exists() && ($type == 'create' ) ){
+				$migration = new $class() ?? false;
+				$rs = $migration->create() ?? false;
+				if($rs){
+					$msg = 1;
+				}else{
+					$msg = 4;
+				}
+			}
+			elseif( $table->exists() && ($type == 'drop' ) ){
+				$rs = $table->drop() ?? false;
+				if($rs){
+					$msg = 1;
+				}else{
+					$msg = 4;
+				}
+			}
+			elseif( !$table->exists() && ($type == 'drop' ) ){
+				$msg = 3;
+			}
+			else{
+				$msg = 5;
 			}
 
-		
 			switch ($msg) {
 
 				case 1:
-					array_push($response, 'Table '.strtolower($table_name).' '.strtolower($type).' Successfully!');
+					array_push($response, ['Table "'.strtolower($table_name).'" '.strtolower($type).' Successfully!', 'success']);
 				break;
 
 				case 2:
-					array_push($response, 'The '.strtolower($table_name).' Table already exists in the Database!');
+					array_push($response, ['The "'.strtolower($table_name).'" Table already exists in the Database!','warning' ]);
 				break;
 
 				case 3:
-					array_push($response,'The Table '.strtolower($table_name).' no exists in the Database or Class Table no is defined in App/Database/'.
-					str_replace(' ' , '_', ucwords( str_replace('_' , ' ', strtolower($table_name) ) ) ) .'Migration.php!');
+					array_push($response,['The Table "'.strtolower($table_name).'" no exists in the Database!', 'error']);
 				break;
 
 				case 4:
-					array_push($response, 'An error occurred while '.strtolower($type).' table '.strtolower($table_name).'!');	
+					array_push($response, ['An error occurred while '.strtolower($type).' table "'.strtolower($table_name).'"!','error']);	
 				break;
 
 				case 5:
-					array_push($response, 'Usage Command: /maker/migrate/[create|drop|reset|seed|spoon:[table_name|all]');
+					array_push($response, ['Usage Command: /maker/migrate/[create|drop|reset|seed|spoon:[table_name|all]', 'info']);
 	   			break;
-				
 			}
 
 		}
 
 	}
 	else{
-
-		array_push($response, 'The Table no exists in the Database!');
+		array_push($response,['The Class no is defined in src/Database/Migrations/' , 'error']);
 	}
 
 	
@@ -281,7 +255,7 @@ class Maker
 
 	public function seed($classes, $args= null){
 
-		$class_obj=null; $response=[]; $name='';
+		$class_obj=null; $response=[];
 
 		if ($classes) {
 			$count = ( is_array($classes) && (count($classes) > 1) ) ? count($classes) : 1;
@@ -292,12 +266,9 @@ class Maker
 				$response = setresp($class_obj->get_response(), $response );
 		   }
 
-			return $response;
-		}else{
-			array_push($response, 'The '.$name.' class does not exist in database!');
 		}
-		return $response;
 
+		return $response;
 	}
 
 
@@ -344,12 +315,13 @@ class Maker
 	public function file($data,$replace=[[],[]]){
 
 			$usage = 'Usage: /maker/file/[controller|model|seeder|migration]:[class_name]|route:[app|api:file_name ]|'.
-			'config:[middlewares|db|key|app]';
+			'config:[middlewares|db|key|app] | (viewfilter|filters)';
 
-			$rs=null; $response = []; $continue = false; $explode = explode( ':', $data); 
-			$command = isset($explode[0]) ? $explode[0] : false ;
-			$subcommand= isset($explode[1]) ? $explode[1] : false ;
-			$subcommand2= isset($explode[2]) ? $explode[2] : false ;
+			$rs=null; $response = []; $continue = false; 
+			$explode = explode( ':', $data); 
+			$command =  $explode[0] ?? false ;
+			$subcommand = $explode[1] ?? false ;
+			$subcommand2 = $explode[2] ?? false ;
 
 			$type_exists = function($this_command ,  $this_subcommand , $this_makefile ){	
 				return  isset( $this_makefile->templates->$this_command->type ) && ( $this_subcommand && isset( $this_makefile->templates->$this_command->type->$this_subcommand )) ;
@@ -411,28 +383,28 @@ class Maker
 							$resp =  $this->makefile($filename ,$template, $replace);
 							if(is_array($resp)) {
 							   foreach($resp as $r){
-								  array_push($response, $r);
+								  array_push($response, [$r, 'warning']);
 							   }
 						    }else {
-							   array_push($response, $resp);
+							   array_push($response, [$resp, 'success']);
 							}
 						}
 						elseif(is_string($resp)) {
-							array_push($response,"Filename not isset!" );
+							array_push($response, ["Filename not isset!", 'error'] );
 						}			
 						
 
 					}else{
-						array_push($response, "Template for $command '$subcommand' not fount !" );
+						array_push($response, ["Template for $command '$subcommand' not fount !", 'error'] );
 					}
 
 
 				}else{
-					array_push($response, $usage);
+					array_push($response, [$usage, 'info']);
 				}	
 			
 			}else{
-				array_push($response, $usage);
+				array_push($response,[$usage, 'info']);
 			}
 			
 		return [ 'title' => $title, 'subtitle' => $response ];	
@@ -472,11 +444,28 @@ class Maker
 	}	
 
 
-	
+	private function listComposerScripts(){
+		$scripts = json_decode( file_get_contents($this->app->config->path.'composer.json') )->scripts ?? false;
+		$title = 'Running List Composer Scripts';
+		$response = [];
 
-	public function show(String $subcommand){
+		foreach( $scripts as $key => $script ){
+			array_push($response, ["composer run ".$key, 'info']) ;
+			$script = (array)  $script;
+			foreach( $script as $item){
+				array_push($response, [$item]);
+			}
+		}
 
-		switch($subcommand){
+		return [ 'title' => $title, 'subtitle' =>  $response];
+	}
+
+
+
+
+	public function show(String $command){
+		$response = [];
+		switch($command){
 
 			case 'models':
 			case 'seeds':
@@ -484,14 +473,23 @@ class Maker
 			case 'controllers':
 			case 'config':
 			case 'viewfilters':
-			case 'routers':	
-			case 'routers:app':		
-			case 'routers:api':
-				$type = ucfirst(str_replace([':api', ':app'], ['/api',''], $subcommand) );
+			case 'routes:app':		
+			case 'routes:api':
+			case 'routes':	
+				$type = ucfirst(str_replace([':api', ':app'], ['/api',''], $command) );
+			break;
+
+			case 'filters':
+				return $this->show('viewfilters');
 			break;
 
 			case 'tables':
 				$type = ucfirst('migrations');
+			break;
+
+			case 'scripts':
+			case 'composerscripts':
+				return $this->listComposerScripts();
 			break;
 
 			default:
@@ -503,49 +501,87 @@ class Maker
 
 		if ( $type != false ) {
 			
-			$title = 'Running List '.ucfirst($subcommand);
-			$title .= ($this->app->config->mode != 'console' ) ? '' : "\n";	
-			$response = ($this->app->config->mode != 'console' ) ? '<ul>' : '';
+			$title = 'Running List '.ucfirst($command);
 
-			foreach( $this->get_classes($type, 'all') as $class ){
-				if( $type == 'Migrations') {
-				 $obj = new $class();
-				 $response .= ($this->app->config->mode != 'console' ) ? '<li style="color:'.(  $obj->exists() ? 'green' : 'brown' ).';" >' : '';
-				 $response .=  @end( explode('\\', ($obj->exists() && ($this->app->config->mode == 'console' )) ? $class." <--"  : $class  ) );
-				}else{
-					$response .=  ($this->app->config->mode != 'console' ) ? '<li style="color:green;" >' : '';
-					$response .=  @end( explode('\\', $class) );
+			if( in_array($type,  ['Migrations', 'Models', 'Seeds'] ) ) {
+				foreach( $this->get_classes($type, 'all') as $class ){
+					if( $type == 'Migrations') {
+						$obj = new $class();
+						array_push($response, [ ($obj->exists() ) ? $class." *" : $class." **" , $obj->exists() ? "success"  : 'warning'   ] );
+					}else{
+						array_push($response, [$class]);
+					}
+
 				}
-
-				$response .= ($this->app->config->mode != 'console' ) ?'' : "\n ";
-				$response .= ($this->app->config->mode != 'console' ) ? '</li>' : '';
 			}
+
+			if( in_array($type,  ['Config', 'Routes', 'Viewfilters'] ) ) {
+				
+				$path = $this->app->config->path;
+				switch( strtolower($type) ){
+
+					case 'config':
+						$path .= "config"; 
+					break;
+
+					case 'routes:app':
+					case 'routes:api':	
+					case 'routes':
+						$path .= "src/Routes"; 
+						if( isset(explode(':', $type)[1]) && (explode(':', $type)[1] == 'api') ){
+							$path .= "/api"; 
+						}
+					break;
+
+					case 'viewfilters':
+					case 'filters':
+						$path .= "src/Viewfilters"; 
+					break;
+				}
+				$path .= "/*.php";
+
+				foreach( glob($path) as $file ){
+					switch( strtolower($type) ){
+						case 'config':
+							$name = str_replace($this->app->config->path,'', $file);
+							if(!App::validate($name, 'endWith:example.php')) {
+								array_push($response, [$name]);
+							}
+						break;
+
+						case 'filters':
+						case 'viewfilters':
+						case 'routes':
+							$name = str_replace($this->app->config->path,'', $file);
+							array_push($response, [ $name ]);
+						break;
+					}
+				}
+			}
+			
+			if( ($type == 'Migrations') && ($this->app->config->mode == 'console' ) ) {
+				array_push($response, [ "\n\n* - migrations Created on database", 'success']);
+				array_push($response, [ "** - migrations no is Created on database", 'warning']);
+			}
+
 		}else{
-
 			$title = "Running Show List | Help \n";	
-			$response =  ($this->app->config->mode != 'console' ) ? '<ul>' : '';
-
 			$types = [
 				'models',
 				'seeds',
 				'migrations',
 				'controllers',
 				'config',
-				'viewfilters',
+				'viewfilters|filters',
 				'routers[:api|:app]'
 			];
 
 			foreach($types as $type ){
-				$response .= ($this->app->config->mode != 'console' ) ? '<li style="color:green;" > <a href="/maker/show/'.$type.'">' : ''; 
-				$response .= $type ;
-				$response .= ($this->app->config->mode != 'console' ) ?'' : "\n ";
-				$response .= ($this->app->config->mode != 'console' ) ? '</li>' : '';
-			}	
-
+				array_push($response, $type);
+			}
 		}
 		
-		$response .=  ($this->app->config->mode != 'console' ) ? '</ul>':'' ;
-		return [ 'title' => $title, 'subtitle' =>  [$response]];
+		return [ 'title' => $title, 'subtitle' =>  $response];
 
 	}
 

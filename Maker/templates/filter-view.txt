@@ -1,0 +1,21 @@
+
+/*
+
+    Example:
+    //array
+    $filters = [
+        //optional '$arg' and 'use (&$app)'
+        'function_name' => function ($arg) use (&$app) {
+            echo $text;
+        },
+    ];
+
+
+*/
+
+
+$filters = [
+   'getUrl' => function($arg=null) use (&$app) {
+        return $app->request->url;
+    },
+];
