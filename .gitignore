@@ -1,4 +1,2 @@
-vendor
-public
-composer.lock
+vendor/
 .vscode
