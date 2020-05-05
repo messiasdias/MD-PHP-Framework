@@ -188,7 +188,10 @@ class Response extends Request
 		}
 
 		if( isset($response->errors) && $response->errors){
-			$log['errors'] = $response->errors;
+			$log['errors'] = [];
+			foreach( $response->errors as $key =>  $error){
+				$log['errors'][$key] = (object) [ "msg" => $error[0], "class" => isset($error[1]) ?  $error[1] : "error"  ] ;
+			}
 		}
 
 		$this->log =  $log;	

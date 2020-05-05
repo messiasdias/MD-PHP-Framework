@@ -25,7 +25,7 @@ $app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{comman
 	$method = $args->command;
 
 	if($continue && ( isset($args->subcommand) && ( strtolower($args->subcommand) != 'help'))  ){
-		return $app->view('error', (array) $maker->$method($args->subcommand), __DIR__.'/views/' );
+		return $app->view('error', (array) $maker->$method($args->subcommand) , __DIR__.'/views/' );
 	}else{
 		return $app->redirect('/maker');
 	}

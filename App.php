@@ -426,6 +426,7 @@ class App
 			'input' => ($this->inputs()) ? $this->inputs() : false ,
 			'assets' => '/assets/',
 			'log' => isset($this->response) ? (array) $this->response->getLog() : false,
+			'errors' => isset( $this->response->getLog()->errors) ? (array) $this->response->getLog()->errors : false,
 			'debug' => isset($this->config) ? $this->config->debug: true,
 			'session' =>  ($_SESSION) ? ( (object) $_SESSION ) : false,
 			'cookies' =>  ($this->request->cookies) ? ( (object) $this->request->cookies) : false,

@@ -65,17 +65,7 @@ class Request
 			}
 	
 		}
-
-		if( count($_SESSION) >= 1 ){
-			$this->sessions = [];
-			foreach($_SESSION as $session){
-				array_push($this->sessions, $session);
-			}
-			$this->sessions = (object) $this->sessions;
-		}else{
-			$this->sessions = false;
-		}
-		   
+	
 		foreach (apache_request_headers() as $key => $value) {
 			$param = strtolower( str_replace('-', '_', $key) );
 			if ($param == 'cookie'){

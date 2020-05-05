@@ -19,7 +19,7 @@ class Route
 
 	public function getCallback(App &$app, array $args=null){
 		$args = !is_null($args) ? (object) $args : false;
-		return $this->callback->bindTo((object) ['app' => &$app, 'args' =>  $args ?? false] )();
+		return $this->callback->bindTo((object) ['app' => &$app, 'args' =>  $args ] )($app, $args);
 	}	
 }
 

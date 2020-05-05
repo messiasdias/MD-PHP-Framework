@@ -12,7 +12,7 @@ class Auth  {
 
 	public $app, $token;
 
-	public function __construct(App $app){
+	public function __construct(App &$app){
 		$this->app = $app;
 		$this->token = new Token($app);
 	}
@@ -51,8 +51,8 @@ class Auth  {
 									 ] ;
 
 							}else{
-
-									return (object) ['status' => false, 'msg' => 'Inactive User, contact system support.', 'data' => NULL];
+									
+								return (object) ['status' => false, 'msg' => 'Inactive User, contact system support.', 'data' => NULL];
 						
 							}
 
@@ -70,14 +70,13 @@ class Auth  {
 			
 			} else{
 
-				return (object) ['status' => false, 'msg' => 'Login error!' , 'errors' => (array) $result->errors,'data' => NULL];
+				return (object) ['status' => false, 'msg' => 'Login error!' , 'errors' => (array) $result->errors, 'data' => NULL];
 			}
 
 		}
 		else{
 			return (object) ['status' => false, 'msg' => 'Invalid values ​​for username and/or pass!', 'data' => $data ];
-		}	
-
+		}		
 				
 	}
 
@@ -112,8 +111,5 @@ class Auth  {
 		return false;
 
 	}
-
-
-	
 
 }
