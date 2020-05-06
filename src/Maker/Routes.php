@@ -4,14 +4,14 @@
 use App\Maker\Maker;
 
 
-$app->get('/maker',  function($app,$args) {  
+$this->get('/maker',  function($app,$args) {  
 	//Maker index|help
 	$maker = new Maker($app);
 	return $app->view('help' , [ 'commands' => $maker->commands() ] , __DIR__.'/views/'  ) ;
  }, 'debug');
 
 
-$app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{command}string' ], function($app,$args) {  
+$this->group(['/maker/{command}string/{subcommand}string', '/maker/{command}string' ], function($app,$args) {  
 	//Maker File | Migrate	
 	$maker = new Maker($app);
 	$continue = false;
@@ -33,7 +33,7 @@ $app->router_group(['/maker/{command}string/{subcommand}string', '/maker/{comman
  }, 'debug' );
 
 
- $app->router_group(['/map', '/map/{mode}string'], function($app,$args) {  
+ $this->group(['/map', '/map/{mode}string'], function($app,$args) {  
 	//Router Map	
 	if( isset($args->mode ) ){
 		$app->mode = $args->mode;
