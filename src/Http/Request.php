@@ -65,15 +65,17 @@ class Request
 			}
 	
 		}
-	
-		foreach (apache_request_headers() as $key => $value) {
-			$param = strtolower( str_replace('-', '_', $key) );
-			if ($param == 'cookie'){
-				$this->cookies = $this->cookie_to_array($value);
-			}elseif( property_exists($this, $param) ) {
-				$this->$key = $value;
+		
+		if( !empty($this->url) ) {
+			foreach (apache_request_headers() as $key => $value) {
+				$param = strtolower( str_replace('-', '_', $key) );
+				if ($param == 'cookie'){
+					$this->cookies = $this->cookie_to_array($value);
+				}elseif( property_exists($this, $param) ) {
+					$this->$key = $value;
+				}
 			}
-		}
+		}	
 	}
 
 

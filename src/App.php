@@ -273,7 +273,6 @@ class App
 
 	private function load_routes(){
 		//load routes app or api
-		$app = $this;
 		switch ( strtolower($this->config->mode) ) {
 			case 'api':
 				$mode = $this->config->path.'src/Routes/api/*.php';
@@ -296,8 +295,6 @@ class App
 			//Maker Routes
 			include $this->config->vendor_path.'/Maker/Routes.php';
 		}
-
-		return $app;
 	}	
 
 
