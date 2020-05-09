@@ -59,8 +59,7 @@ abstract class  Model implements ModelInterface {
      */
     public function setCreated($created=null)
     { 
-        $now = new \DateTime("now");
-        $this->created = !is_null($created) ? $created : $now->date;
+        $this->created = !is_null($created) ? $created : new \DateTime("now");
         return $this;
     }
 
@@ -83,8 +82,8 @@ abstract class  Model implements ModelInterface {
      * @return User
      */
     public function setUpdated($updated=null)
-    {   $now = new \DateTime("now");
-        $this->updated = !is_null($updated)? $updated :  $now->date ;
+    {
+        $this->updated = !is_null($updated)? $updated :  new \DateTime("now") ;
         return $this;
     }
 
@@ -120,8 +119,14 @@ abstract class  Model implements ModelInterface {
 
     public function delete(){
       $manager = self::getManager();
-      $manager->remove($this);
-      $manager->flush();
+
+
+      try {  
+        $manager->remove($this);
+        $manager->flush();
+      }catch(Exception $e){
+        throw new Exception('Detached entity cannot be removed !');
+      }
     }
 
 
