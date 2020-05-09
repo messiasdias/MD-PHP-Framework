@@ -1,6 +1,6 @@
 <?php 
 
-namespace Tests\Auth;
+namespace Test\Auth;
 use PHPUnit\Framework\TestCase;
 use App\Auth\Auth;
 use App\App;
