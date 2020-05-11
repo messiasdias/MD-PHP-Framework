@@ -8,6 +8,29 @@ use Psr\Http\Message\UriInterface;
 
 class Uri implements UriInterface {
 
+    private $validSchemes = ['', 'http','https'];
+    private $scheme, $authority, $user_info, $host, $port, $path, $query, $fragment;
+
+    public function __construct()
+    {
+        $this->scheme = isset( $_SERVER['SERVER_PROTOCOL'] ) ? explode('/', strtolower($_SERVER['SERVER_PROTOCOL'] ))[0]  : 'http';
+        $this->user_info = $_SERVER['PHP_AUTH_USER'] ?? '' ;
+        $this->user_info .= isset($_SERVER['PHP_AUTH_PW']) ? ':'.$_SERVER['PHP_AUTH_PW'] : '';
+        $this->host = isset($_SERVER['HTTP_HOST']) ? strtolower( explode(':', $_SERVER['HTTP_HOST'])[0]) : 'localhost';
+        $this->port = $_SERVER['SERVER_PORT'] ?? null;
+        $this->path = $_SERVER['PATH_INFO'] ?? '/';
+        $this->query = $_SERVER['QUERY_STRING'] ?? '';
+        $this->fragment = '';
+    }
+
+
+    private function returnThisWithException($trying, string $exception){
+        try {
+            return $trying();
+        }catch( \InvalidArgumentException $e){
+            throw new \InvalidArgumentException($exception);
+        }
+    }
 
      /**
      * Retrieve the scheme component of the URI.
@@ -25,7 +48,7 @@ class Uri implements UriInterface {
      */
     public function getScheme()
     {
-        return !is_null( $_SERVER['SERVER_PROTOCOL'] ) ? explode('/',  $_SERVER['SERVER_PROTOCOL'] )[0] : 'HTTP';
+        return $this->scheme;
     }
 
     /**
@@ -46,9 +69,12 @@ class Uri implements UriInterface {
      * @see https://tools.ietf.org/html/rfc3986#section-3.2
      * @return string The URI authority, in "[user-info@]host[:port]" format.
      */
-    public function getAuthority()
-    {
-        return !is_null($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+    public function getAuthority(bool $returnDefaultsPorts = false)
+    {  
+        $authority = !empty($this->getUserInfo()) ? $this->getUserInfo().'@' : '';
+        $authority .= $this->getHost();
+        $authority .= !is_null( $this->getPort($returnDefaultsPorts) ) ? ':'.$this->getPort($returnDefaultsPorts) : '';
+        return $authority ;
     }
 
     /**
@@ -68,7 +94,7 @@ class Uri implements UriInterface {
      */
     public function getUserInfo()
     {
-        return !is_null($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] : '';
+        return $this->user_info;
     }
 
     /**
@@ -83,8 +109,8 @@ class Uri implements UriInterface {
      * @return string The URI host.
      */
     public function getHost()
-    {
-        return !is_null($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : '';
+    { 
+        return strtolower($this->host);
     }
 
     /**
@@ -102,9 +128,16 @@ class Uri implements UriInterface {
      *
      * @return null|int The URI port.
      */
-    public function getPort()
-    {
-        return !is_null($_SERVER['SERVER_PORT']) ? (int) $_SERVER['SERVER_PORT'] : null;
+    public function getPort(bool $returnDefaultsPorts = false)
+    {   
+        if(in_array((int)$this->port,[80,443]) && in_array($this->getScheme(), ['http', 'https']) ){
+          return $returnDefaultsPorts ? $this->port : null;
+        }elseif( empty($this->getScheme()) | !in_array((int)$this->port,[80,443]) ){
+            return $this->port;
+        }
+        else{
+            return null;
+        }
     }
 
     /**
@@ -134,7 +167,7 @@ class Uri implements UriInterface {
      */
     public function getPath()
     {
-        return !is_null($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+        return $this->path;
     }
 
     /**
@@ -159,7 +192,7 @@ class Uri implements UriInterface {
      */
     public function getQuery()
     {
-        return !is_null($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        return $this->query;
     }
 
 
@@ -181,7 +214,253 @@ class Uri implements UriInterface {
      */
     public function getFragment()
     {
-        
+        return $this->fragment;
+    }
+
+    /**
+     * Return an instance with the specified scheme.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified scheme.
+     *
+     * Implementations MUST support the schemes "http" and "https" case
+     * insensitively, and MAY accommodate other schemes if required.
+     *
+     * An empty scheme is equivalent to removing the scheme.
+     *
+     * @param string $scheme The scheme to use with the new instance.
+     * @return static A new instance with the specified scheme.
+     * @throws \InvalidArgumentException for invalid or unsupported schemes.
+     */
+    public function withScheme($scheme)
+    {       
+        try{
+            if( in_array( strtolower($scheme), $this->validSchemes ) ){
+                $this->scheme = strtolower($scheme);  
+                return $this;
+            }else{
+                throw new \InvalidArgumentException("Invalid or unsupported schemes. Try http or https.");
+            }
+        }catch(\InvalidArgumentException $e){
+           return $e;
+        }
+    }
+
+    /**
+     * Return an instance with the specified user information.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified user information.
+     *
+     * Password is optional, but the user information MUST include the
+     * user; an empty string for the user is equivalent to removing user
+     * information.
+     *
+     * @param string $user The user name to use for authority.
+     * @param null|string $password The password associated with $user.
+     * @return static A new instance with the specified user information.
+     */
+    public function withUserInfo($user, $password = null)
+    {
+        $this->user_info = $user; 
+        $this->user_info .= !is_null($password) ? ':'.$password : '';
+        return $this;
+    }
+
+    /**
+     * Return an instance with the specified host.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified host.
+     *
+     * An empty host value is equivalent to removing the host.
+     *
+     * @param string $host The hostname to use with the new instance.
+     * @return static A new instance with the specified host.
+     * @throws \InvalidArgumentException for invalid hostnames.
+     */
+    public function withHost($host)
+    {
+        try{
+            if(is_string($host)){
+                $this->host = strtolower($host);
+                return $this;
+            }else{
+                throw new \InvalidArgumentException('Invalid hostname!'); 
+            }
+        }catch(\InvalidArgumentException $e){
+           return $e;
+        }
+    }
+
+
+
+    /**
+     * Return an instance with the specified port.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified port.
+     *
+     * Implementations MUST raise an exception for ports outside the
+     * established TCP and UDP port ranges.
+     *
+     * A null value provided for the port is equivalent to removing the port
+     * information.
+     *
+     * @param null|int $port The port to use with the new instance; a null value
+     *     removes the port information.
+     * @return static A new instance with the specified port.
+     * @throws \InvalidArgumentException for invalid ports.
+     */
+    public function withPort($port)
+    {
+        try{
+            if((int) $port == 443){
+                $this->port = 443;
+                return $this->withScheme('https');
+            }
+            elseif(is_int($port) && ((int) $port != 443)){
+                $this->port = $port;
+                return $this->withScheme('http');
+            }else{
+                throw new \InvalidArgumentException('Invalid Host Port!'); 
+            }
+        }catch(\InvalidArgumentException $e){
+             return $e;
+        }
+    }
+
+
+    /**
+     * Return an instance with the specified path.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified path.
+     *
+     * The path can either be empty or absolute (starting with a slash) or
+     * rootless (not starting with a slash). Implementations MUST support all
+     * three syntaxes.
+     *
+     * If the path is intended to be domain-relative rather than path relative then
+     * it must begin with a slash ("/"). Paths not starting with a slash ("/")
+     * are assumed to be relative to some base path known to the application or
+     * consumer.
+     *
+     * Users can provide both encoded and decoded path characters.
+     * Implementations ensure the correct encoding as outlined in getPath().
+     *
+     * @param string $path The path to use with the new instance.
+     * @return static A new instance with the specified path.
+     * @throws \InvalidArgumentException for invalid paths.
+     */
+    public function withPath($path)
+    {
+        try{
+
+            if( substr($path,0,1) == '/' ){
+                $this->path = $path;
+            }
+            elseif( (substr($path,0,1) != '/') && !empty($path) ){
+               $this->path = '/'.$path;
+            }else{
+                throw new \InvalidArgumentException('Invalid path!'); 
+            }
+
+            return $this;
+        }catch(\InvalidArgumentException $e){
+             return $e;
+        }
+    }
+
+
+
+    /**
+     * Return an instance with the specified query string.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified query string.
+     *
+     * Users can provide both encoded and decoded query characters.
+     * Implementations ensure the correct encoding as outlined in getQuery().
+     *
+     * An empty query string value is equivalent to removing the query string.
+     *
+     * @param string $query The query string to use with the new instance.
+     * @return static A new instance with the specified query string.
+     * @throws \InvalidArgumentException for invalid query strings.
+     */
+    public function withQuery($query)
+    {
+        try {
+            if( preg_match('/[0-9A-Za-z]=[0-9A-Za-z]&{0,}/' , $query) ){
+                $this->query = $query;
+                if( strrpos($query,'&') >= (strlen($query) - 1 ) ) {
+                    $this->query = substr($query,0,strrpos($query,'&'));
+                }
+                return $this;
+            }else{
+                return new \InvalidArgumentException('Invalid query strings!');
+            }
+
+        }catch(\InvalidArgumentException $e){
+            return $e;
+        }
+    }
+
+
+    /**
+     * Return an instance with the specified URI fragment.
+     *
+     * This method MUST retain the state of the current instance, and return
+     * an instance that contains the specified URI fragment.
+     *
+     * Users can provide both encoded and decoded fragment characters.
+     * Implementations ensure the correct encoding as outlined in getFragment().
+     *
+     * An empty fragment value is equivalent to removing the fragment.
+     *
+     * @param string $fragment The fragment to use with the new instance.
+     * @return static A new instance with the specified fragment.
+     */
+    public function withFragment($fragment)
+    {
+        $this->fragment = $fragment ?? '';
+        return $this; 
+    }
+
+
+
+    /**
+     * Return the string representation as a URI reference.
+     *
+     * Depending on which components of the URI are present, the resulting
+     * string is either a full URI or relative reference according to RFC 3986,
+     * Section 4.1. The method concatenates the various components of the URI,
+     * using the appropriate delimiters:
+     *
+     * - If a scheme is present, it MUST be suffixed by ":".
+     * - If an authority is present, it MUST be prefixed by "//".
+     * - The path can be concatenated without delimiters. But there are two
+     *   cases where the path has to be adjusted to make the URI reference
+     *   valid as PHP does not allow to throw an exception in __toString():
+     *     - If the path is rootless and an authority is present, the path MUST
+     *       be prefixed by "/".
+     *     - If the path is starting with more than one "/" and no authority is
+     *       present, the starting slashes MUST be reduced to one.
+     * - If a query is present, it MUST be prefixed by "?".
+     * - If a fragment is present, it MUST be prefixed by "#".
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-4.1
+     * @return string
+     */
+    public function __toString()
+    {
+        $uri = $this->getScheme().'://';
+        $uri .= $this->getAuthority();
+        $uri .= $this->getPath();
+        $uri .= !empty($this->getQuery()) ? '?'.$this->getQuery() : '' ;
+        $uri .= !empty($this->getFragment()) ? '#'.$this->getFragment() : '' ;
+        return $uri;
     }
 
 }

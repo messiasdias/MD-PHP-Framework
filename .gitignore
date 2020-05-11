@@ -2,3 +2,4 @@ _bkp/
 vendor/
 .vscode
 index.php
+.htaccess
