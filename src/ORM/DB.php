@@ -1,30 +1,39 @@
 <?php
 
-/**
- *  Model Class
- */
 namespace App\ORM;
 use \Doctrine\ORM\Tools\Setup;
 use \Doctrine\ORM\EntityManager;
 
-class ORM{
+/**
+ *   DB Class
+ */
+
+class DB {
 
     private $config = [], $host, $port, $database, $user, $pass, $driver, $path;
 
     public function __construct($entityPath = null, $configFile = null, $isDevMode = false){
         
-        $this->config['orm'] = Setup::createAnnotationMetadataConfiguration(array($entityPath ?? __DIR__."/src"),$isDevMode);
+        if( is_null($configFile) ){
+            $configFile = getcwd()."/../config/db.php";
+        }
+
+        if( is_null($entityPath) ){
+            $entityPath = getcwd()."/../src/Models/";
+        }
+        
+        $this->config['orm'] = Setup::createAnnotationMetadataConfiguration(array($entityPath ?? __DIR__."/src"),$isDevMode, null,null, false);
 
         if( !is_null( $configFile ) && file_exists($configFile)  ){
             //Load DBConfigs
             include  $configFile;  
 
             $this->config['db'] = array(
-                'driver' => $this->driver ?? 'mysql',
+                'driver' => $this->driver ?? "pdo_mysql",
                 'host' => $this->host ?? 'localhost',
                 'port' => $this->port ?? 3306,
-                'user'     => $this->user,
-                'password' => $this->pass ,
+                'user'     => $this->user ?? "root",
+                'password' => $this->pass ?? "" ,
                 'dbname'   => $this->database,
             );
 
