@@ -131,19 +131,19 @@ abstract class  Model implements ModelInterface {
 
 
     public static function findBy(array $findBy= []){
-      return self::getManager()->getRepository( get_called_class() )->findBy($findBy);
+      return self::getManager()->getRepository(get_called_class())->findBy($findBy);
     }
 
     public static function findOneBy(array $findOneBy = []){
-      return self::getManager()->getRepository( get_called_class() )->findOneBy($findOneBy);
+      return self::getManager()->getRepository(get_called_class())->findOneBy($findOneBy);
     }
 
     public static function find(int $id){
-      return self::getManager()->find( get_called_class() , $id);
+      return self::getManager()->find(get_called_class(), $id);
     }
 
     public static function all(){
-      return self::getManager()->getRepository( get_called_class() )->findAll();
+      return self::getManager()->getRepository(get_called_class())->findAll();
     }
 
 

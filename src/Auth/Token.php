@@ -37,8 +37,8 @@ class Token
 		    "iat" =>(int) date( 'mdHis' , strtotime('now')),
 		    "nbf" => (int) date( 'mdHis' , strtotime('+1 day') ),
 		    "usr" => [
-		    "id"=> $user->id,
-		    "rol" => $user->rol
+		    "id"=> $user->getId(),
+		    "rol" => $user->getRol()
 			]
 		); 
 
