@@ -130,19 +130,17 @@ class Validator
 
 
 	private function exists(array $arg) {
-		
-		if( $this->class ){
-			$obj = (object) $this->class::find($arg[2], $arg[0] );
-			$prop = $arg[2];
-			if ( !isset($obj->scalar) ) {
-				return  (object) ['valid' => true] ;
-			}
+		$key = $arg[2];
+		$value = $arg[0];
+
+		if( $this->class::findOneBy([$key => $value]) instanceof $this->class ){
+			return  (object) ['valid' => true] ;
+		}else{
+			return  (object) [
+					'valid' => false, 
+					'error' => ucfirst($arg[2])." '".$arg[0] ."' no exists in the database !"
+			] ;
 		}
-					
-		return  (object) [
-				'valid' => false, 
-				'error' => ucfirst($arg[2])." '".$arg[0] ."' no exists in the database !"
-		] ;
 	}
 
 	private function noexists(array $arg) {

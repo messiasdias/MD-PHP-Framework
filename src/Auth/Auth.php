@@ -22,8 +22,8 @@ class Auth  {
 
 		if( isset($data['username']) && isset($data['pass'])  ) {
 			
-			$data['username'] = !App::validate($data['username'], 'startwith:@','App\Models\User' ) ? 
-			'@'.$data['username'] : $data['username'];
+			/*$data['username'] = !App::validate($data['username'], 'startwith:@','App\Models\User' ) ? 
+			'@'.$data['username'] : $data['username']; */
 			
 			$validations = [
 				'username' => 'username|minlen:4|exists:user',
@@ -34,13 +34,14 @@ class Auth  {
 
 			if ( !$result->errors ){
 				$data = (object) $result->data;
-				$this->user = User::find('username', $data->username );
+				$this->user = User::findOneBy(['username' => $data->username] );
+				var_dump( $this->user ); 
 
 				if( $this->user ){
 
-					if ( password_verify( $data->pass , $this->user->pass )  ) {
+					if ( password_verify( $data->pass , $this->user->getPass() )  ) {
 							
-							if( $this->user->status == 1 ) {
+							if( $this->user->getStatus() == 1 ) {
 
 									$_SESSION['token'] = $this->token->create($this->user);
 									return (object) [
@@ -92,17 +93,17 @@ class Auth  {
 	public function user(string $token){
 		if ($this->token->check( $token ) && $this->token->decode($token) ) {
 
-			$user =  User::find('id', $this->token->decode($token)->usr->id );
+			$user =  User::find( (int) $this->token->decode($token)->usr->id );
 			if ($user) {		
 				return (object) [ 
-					'id' => $user->id,
-					'name', 'full_name' =>  $user->first_name.' '.$user->last_name,
-					'first_name' => $user->first_name, 
-					'last_name' => $user->last_name,
-					'username' => $user->username,
-					'email' => $user->email,
-					'img' => ($user->img) ? $user->img : '/img/default/avatar.png',
-					'rol' => $user->rol,
+					'id' => $user->getId(),
+					'name', 'full_name' =>  $user->getFirstName().' '.$user->getLastName(),
+					'first_name' => $user->getFirstName(), 
+					'last_name' => $user->getLastName(),
+					'username' => $user->getUsername(),
+					'email' => $user->getEmail(),
+					'img' => ($user->getImg()) ? $user->getImg() : '/img/default/avatar.png',
+					'rol' => $user->getRol(),
 				];
 			}		 
 
