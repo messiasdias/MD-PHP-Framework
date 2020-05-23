@@ -35,8 +35,7 @@ class Auth  {
 			if ( !$result->errors ){
 				$data = (object) $result->data;
 				$this->user = User::findOneBy(['username' => $data->username] );
-				var_dump( $this->user ); 
-
+				
 				if( $this->user ){
 
 					if ( password_verify( $data->pass , $this->user->getPass() )  ) {
