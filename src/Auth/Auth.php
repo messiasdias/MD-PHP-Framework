@@ -21,10 +21,7 @@ class Auth  {
 	public function login(array $data){
 
 		if( isset($data['username']) && isset($data['pass'])  ) {
-			
-			/*$data['username'] = !App::validate($data['username'], 'startwith:@','App\Models\User' ) ? 
-			'@'.$data['username'] : $data['username']; */
-			
+	
 			$validations = [
 				'username' => 'username|minlen:4|exists:user',
 				'pass' => 'string|minlen:8'
@@ -35,7 +32,7 @@ class Auth  {
 			if ( !$result->errors ){
 				$data = (object) $result->data;
 				$this->user = User::findOneBy(['username' => $data->username] );
-				
+
 				if( $this->user ){
 
 					if ( password_verify( $data->pass , $this->user->getPass() )  ) {
