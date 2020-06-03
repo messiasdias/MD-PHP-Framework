@@ -237,6 +237,10 @@ class App
 		$this->set_route($url, $callback, $middlewares,'PUT');
 	}
 
+	public function path($url, $callback, $middlewares=null){
+		$this->set_route($url, $callback, $middlewares,'PATCH');
+	}
+
 	public function delete($url,$callback, $middlewares=null){
 		$this->set_route($url, $callback, $middlewares,'DELETE');
 	}
