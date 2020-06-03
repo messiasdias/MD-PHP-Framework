@@ -16,10 +16,10 @@ class Maker
 
 	public function __construct(App $app) {
 		$this->app = $app;
-		$this->path = $this->app->config->vendor_path.'Maker/';
+		$this->path = $this->app->config->path->vendor.'Maker/';
 
-		if( file_exists($this->app->config->path.'/config/maker.php' ) ){
-			include $this->app->config->path.'/config/maker.php';
+		if( file_exists($this->app->config->path->root.'/config/maker.php' ) ){
+			include $this->app->config->path->root.'/config/maker.php';
 		}else{
 			$this->seeder_objects = false;
 			$this->spoon_flag = '##test##';
@@ -40,7 +40,7 @@ class Maker
 		switch (strtolower($type) ) {
 			case 'seeds':
 			case 'migrations': 
-				$path = $this->app->config->path.'src/Database/'.ucfirst($type).'/';
+				$path = $this->app->config->path->root.'src/Database/'.ucfirst($type).'/';
 			break;
 
 			case 'controllers':
@@ -48,11 +48,11 @@ class Maker
 			case 'viewfilters':
 			case 'routers':
 			case 'routers/api':
-				$path = $this->app->config->path.'src/'.ucfirst( str_replace(':', '/', $type) ).'/';
+				$path = $this->app->config->path->root.'src/'.ucfirst( str_replace(':', '/', $type) ).'/';
 			break;
 
 			case 'config':
-				$path = $this->app->config->path.strtolower($type).'/';
+				$path = $this->app->config->path->root.strtolower($type).'/';
 			break;		
 			
 			default:
@@ -330,7 +330,7 @@ class Maker
 			$title = 'Running Make File '.ucfirst($explode[0]).'!';	
 
 			$templates_path =  $this->path.'templates/';
-			$makefile = json_decode(file_get_contents($this->app->config->vendor_path.'Maker/maker.json') );
+			$makefile = json_decode(file_get_contents($this->app->config->path->vendor.'Maker/maker.json') );
 			$template = $templates_path;
 			$filename = $this->app->config->path;
 			
@@ -445,7 +445,7 @@ class Maker
 
 
 	private function listComposerScripts(){
-		$scripts = json_decode( file_get_contents($this->app->config->path.'composer.json') )->scripts ?? false;
+		$scripts = json_decode( file_get_contents($this->app->config->path->root.'composer.json') )->scripts ?? false;
 		$title = 'Running List Composer Scripts';
 		$response = [];
 

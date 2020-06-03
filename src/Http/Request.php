@@ -6,13 +6,13 @@ namespace App\Http;
 class Request 
 {	
 	public $host, $remote, $url, $cookies, $sessions, $protocol, $scheme, $method, $content_type, $data, $files, $connection, $cache_control;
-	public $upgrade_insecure_requests, $user_agent, $accept, $accept_encoding, $accept_language, $token;
+	public $upgrade_insecure_requests, $user_agent, $accept, $accept_encoding, $accept_language, $access_token;
 	
 	function __construct()
 	{	
 		//get request properties
 		$this->getProps();
-		//get request auth token
+		//get request auth access_token
 		$this->getToken();
 		//Get All post/get Form data, files and sessions/cookies
 		$this->getData();
@@ -35,12 +35,12 @@ class Request
 
 	private function getToken(){
 		//Get User Auth Token 
-		if(isset( $this->data['token'] )) {
-			$this->token =  $this->data['token'];
-			unset($this->data['token']);
+		if(isset( $this->data['access_token'] )) {
+			$this->access_token =  $this->data['access_token'];
+			unset($this->data['access_token']);
 		}
-		elseif(isset( $_SESSION['token'] )){
-			$this->token = $_SESSION['token'];
+		elseif(isset( $_SESSION['access_token'] )){
+			$this->access_token = $_SESSION['access_token'];
 		}
 	}
 

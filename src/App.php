@@ -20,6 +20,7 @@ use App\Others\File;
 use App\Database\DB;
 use App\Database\Table;
 use App\Maker\Maker;
+use Symfony\Component\Dotenv\Dotenv;
 
 
 
@@ -27,6 +28,7 @@ class App
 {
 	public $config, $maker_config, $request, $response, $routes=[], $args, $user;
 	public $middleware_obj, $middleware_auth;
+
 
 
 	function __construct($config=null)
@@ -41,11 +43,25 @@ class App
 
 
 	private function set_paths(){
-		$this->config = (object) [];
-		$this->config->path = getcwd()."/../";
-		$this->config->vendor_path = __DIR__.'/';
+		@$this->config->path = (object) [
+			'root' => getcwd()."/../",
+			'vendor' => __DIR__.'/'
+		];
 	}
 
+	public function env(){
+		$dotenv = new Dotenv();
+		$env_file = $this->config->path->root.'.env';
+
+		if( file_exists($env_file.'.local' ) ) {
+			$this->config->debug = true;
+			$env_file .= '.local';
+		}elseif( file_exists($env_file.'.local' ) ){
+			$this->config->debug = false;
+		}
+
+		return $dotenv->load($env_file, $env_file.'.local');
+	}
 
 	private function set_config($config=null)
 	{	
@@ -53,15 +69,15 @@ class App
 		$this->config->api = true;
 		$this->config->debug = true;
 		$this->config->timezone = "America/Recife";
-		$this->config->views = $this->config->path.'assets/private/views/';
+		$this->config->views = $this->config->path->root.'assets/private/views/';
 		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
 		
 		foreach($config_array as $key => $value ){
 			if($key !== 'debug' ) $this->config->$key = $value;
 		}
 
-		if( file_exists( $this->config->path.'config/app.php' ) ){
-			include $this->config->path.'config/app.php'; //Load AppConfigs
+		if( file_exists( $this->config->path->root.'config/app.php' ) ){
+			include $this->config->path->root.'config/app.php'; //Load AppConfigs
 		}else{
 			$this->response->setLog((object)[ 
 					  'msg' => "File /config/app.php Not Found!",
@@ -76,15 +92,15 @@ class App
 	
 
 	private function load_assets(){
-		if (!file_exists($this->config->path.'public/assets')) {
+		if (!file_exists($this->config->path->root.'public/assets')) {
 			$this->response->setLog((object)[ 
 				'msg' => "Shortcut 'assets/' not found in /public/ !",
 				'status' => false
 			  ], 'error'); 
 
-			@symlink ($this->config->path.'assets/public', $this->config->path.'public/assets' );
+			@symlink ($this->config->path->root.'assets/public', $this->config->path->root.'public/assets' );
 			
-			if (file_exists($this->config->path.'public/assets')){
+			if (file_exists($this->config->path->root.'public/assets')){
 				$this->response->setLog((object)[ 
 					'msg' => "Shortcut 'assets/' in /public/ created successfully!",
 					'status' => false
@@ -122,6 +138,10 @@ class App
 			
 			if( !file_exists($file) ){
 				$file = $this->config->views."/layout/http.html";	
+			}
+
+			if( !file_exists($file) ){
+				$file = $this->config->views."/http.html";	
 			}
 
 			$data = [
@@ -164,16 +184,16 @@ class App
 			}
 		}
 
-		if(isset($this->response->token)){
+		if(isset($this->response->access_token)){
 			 //Renews Token
 			 $token = new Token($this);
-			 $renew_token = $token->renew($this->response->token);
-			 if(isset($_SESSION['token']) && $this->user() ){
-				 $_SESSION['token'] = $renew_token;
+			 $renew_token = $token->renew($this->response->access_token);
+			 if(isset($_SESSION['access_token']) && $this->user() ){
+				 $_SESSION['access_token'] = $renew_token;
 				 $this->response->token = $renew_token;
 			 }
-			$this->response->token = $renew_token; 
-			@header('token: '.$renew_token );
+			$this->response->access_token = $renew_token; 
+			@header('access_token: '.$renew_token );
 		}
 
 		@header("Access-Control-Allow-Origin: *");
@@ -195,7 +215,6 @@ class App
 
 		if( !$this->middleware_auth && $denyAcess) {
 			$this->response->setCode(401);
-			$this->response->setMsg('Access Denied!');
 			$this->middleware_auth = false;
 		}
 		
@@ -271,15 +290,15 @@ class App
 
 
 
-	private function load_routes(){
+	private function load_routes(App &$app){
 		//load routes app or api
 		switch ( strtolower($this->config->mode) ) {
 			case 'api':
-				$mode = $this->config->path.'src/Routes/api/*.php';
+				$mode = $this->config->path->root.'src/Routes/api/*.php';
 			break;
 			case 'app':
 			default:
-				$mode = $this->config->path.'src/Routes/*.php';
+				$mode = $this->config->path->root.'src/Routes/*.php';
 			break;
 		}
 
@@ -291,9 +310,9 @@ class App
 			}
 		}
 
-		if ( $this->config->debug && file_exists($this->config->vendor_path.'/Maker/Routes.php') ){
-			//Maker Routes
-			include $this->config->vendor_path.'/Maker/Routes.php';
+		//Maker Routes
+		if ( $this->config->debug && file_exists($this->config->path->vendor.'/Maker/Routes.php') ){
+			include $this->config->path->vendor.'/Maker/Routes.php';
 		}
 	}	
 
@@ -305,7 +324,7 @@ class App
 			$this->request->url = str_replace('/api/' , '/', $this->request->url );
 		}
 
-		$this->load_routes();
+		$this->load_routes($this);
 		$router = new Router($this->routes);
 		return $router->url( $url ?? $this->request->url, $method ?? $this->request->method);
 	}
@@ -340,8 +359,8 @@ class App
 
 
 	public function user(){
-		if( isset($this->request->token) ) {	
-			return $this->auth()->user($this->request->token);
+		if( isset($this->request->access_token) ) {	
+			return $this->auth()->user($this->request->access_token);
 		}
 		return false;
 	}
@@ -383,7 +402,7 @@ class App
 				$this->response->setMsg("Method '$method' not Found!");
 			}
 		}else {
-			$this->response->setMsg("Class '$class'  not Found!" );
+			$this->response->setMsg("Class '$class' not Found!" );
 		}
 
 		$this->response->setCode(500);
@@ -418,8 +437,8 @@ class App
 			'scheme'  => $this->request->scheme,
 			'request'  => $this->request,
 			'response'  => $this->response,
-			'user' => $this->user($this->request->token),
-			'token' => ($this->request->token) ? $this->request->token : false,
+			'user' => $this->user($this->request->access_token),
+			'access_token' => ($this->request->access_token) ? $this->request->access_token : false,
 			'input' => ($this->inputs()) ? $this->inputs() : false ,
 			'assets' => '/assets/',
 			'log' => isset($this->response) ? (array) $this->response->getLog() : false,

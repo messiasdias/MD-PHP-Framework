@@ -53,7 +53,7 @@ class Response extends Request
 
 
 	public function getCodeList(){
-		return (array) json_decode( file_get_contents($this->app->config->vendor_path.'Http/http_codes.json') );
+		return (array) json_decode( file_get_contents($this->app->config->path->vendor.'Http/http_codes.json') );
 	}
 
 
@@ -148,15 +148,16 @@ class Response extends Request
 
 
 
-	public function json($data, $code=null, $msg=null ){
-		$data = (object) $data;
+	public function json($array_data, $code=null, $msg=null ){
 		$this->setContentType('json');
-		
-		if( !isset($data->token) ){	
-			$data->token = isset($this->token) ? $this->app->auth()->token->renew($this->token) : false;
-		}	
 
-		$data->status = (object) ['code' => $this->getCode(), 'msg' => $this->getMsg()];
+		$data = (object) [];
+		$data->_meta = (object) [
+			'code' => $this->getCode(),
+			'msg' => $this->getMsg(),
+		];
+
+		$data->_result = $array_data;
 		$this->view = json_encode($data);
 	}
 

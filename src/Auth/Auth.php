@@ -5,6 +5,7 @@
 namespace App\Auth;
 use App\App;
 use App\Auth\Token;
+use App\Auth\Rules;
 use App\Models\User;
 
 
@@ -20,61 +21,46 @@ class Auth  {
 
 	public function login(array $data){
 
-		if( isset($data['username']) && isset($data['pass'])  ) {
-	
-			$validations = [
-				'username' => 'username|minlen:4|exists:user',
-				'pass' => 'string|minlen:8'
-			];
+		$response = (object) [
+			'status' => false, 
+			'msg' => 'Login error!', 
+		];
 
-			$result = App::validate($data, $validations,'App\Models\User' );
+		$validations = [
+			'username' => 'username|minlen:4|exists:user',
+			'pass' => 'string|minlen:8'
+		];
 
-			if ( !$result->errors ){
-				$data = (object) $result->data;
-				$this->user = User::findOneBy(['username' => $data->username] );
+		$result = App::validate($data, $validations,'App\Models\User' );
 
-				if( $this->user ){
+		if ( !$result->errors ){
+			$data = (object) $result->data;
+			$user = User::findOneBy(['username' => $data->username] );
 
-					if ( password_verify( $data->pass , $this->user->getPass() )  ) {
+			if ( password_verify( $data->pass , $user->getPass() )  ) {
 							
-							if( $this->user->getStatus() == 1 ) {
+				if( $user->getStatus() == 1 ) {
 
-									$_SESSION['token'] = $this->token->create($this->user);
-									return (object) [
-										'status' => true, 
-										'msg' => 'Login Successfully!', 
-										'token' => $_SESSION['token'], 
-										'user' => $this->user($_SESSION['token'])
-									 ] ;
+					$_SESSION['access_token'] = $this->token->create($user);
+					$response->status = true;
+					$response->msg = 'Login Successfully!' ;
+					$response->access_token = $_SESSION['access_token'];
+					$response->user =  $this->user($response->access_token);
 
-							}else{
-									
-								return (object) ['status' => false, 'msg' => 'Inactive User, contact system support.', 'data' => NULL];
-						
-							}
-
-						}else{
-
-							return (object) ['status' => false, 'msg' => 'Username or Password is Incorrect!', 
-								'data' => NULL  ];
-						}
-
-				}else {
-						
-					return (object) ['status' => false, 'msg' => 'The User '. $data->username.' does not exist in the Database!', 'data' => NULL];
-						
+				}else{
+					$response->errors = [ 'username' => ['Inactive User, contact system support.']]; 
 				}
-			
-			} else{
 
-				return (object) ['status' => false, 'msg' => 'Login error!' , 'errors' => (array) $result->errors, 'data' => NULL];
+			}else{
+				$response->errors = [ 'pass' => ['The password does not match!']];
 			}
 
+			
+		} else{
+			$response->errors = (array) $result->errors;
 		}
-		else{
-			return (object) ['status' => false, 'msg' => 'Invalid values ​​for username and/or pass!', 'data' => $data ];
-		}		
-				
+
+		return $response;		
 	}
 
 
@@ -93,13 +79,13 @@ class Auth  {
 			if ($user) {		
 				return (object) [ 
 					'id' => $user->getId(),
-					'name', 'full_name' =>  $user->getFirstName().' '.$user->getLastName(),
+					'name' =>  $user->getName(),
 					'first_name' => $user->getFirstName(), 
 					'last_name' => $user->getLastName(),
 					'username' => $user->getUsername(),
 					'email' => $user->getEmail(),
 					'img' => ($user->getImg()) ? $user->getImg() : '/img/default/avatar.png',
-					'rol' => $user->getRol(),
+					'rol' => Rules::getById((int) $user->getRol()),
 				];
 			}		 
 

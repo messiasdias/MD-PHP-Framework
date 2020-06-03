@@ -5,7 +5,7 @@
 "101" : "Switching Protocols",
 
 
-"200" : "OK",
+"200" : "OK, Working as expected.",
 "201" : "Created",
 "202" : "Accepted",
 "203" : "Non-Authoritative Information",
@@ -16,7 +16,7 @@
 
 "300" : "Multiple Choices",
 "301" : "Moved Permanently",
-"302" : "Found",
+"302" : "Found!",
 "303" : "See Other",
 "304" : "Not Modified",
 "305" : "Use Proxy",
@@ -24,10 +24,10 @@
 
 
 "400" : "Bad Request",
-"401" : "Unauthorized",
+"401" : "Access Unauthorized!",
 "402" : "Payment Required",
 "403" : "Forbidden",
-"404" : "Not Found",
+"404" : "Page Not Found!",
 "405" : "Method Not Allowed",
 "406" : "Not Acceptable",
 "407" : "Proxy",
@@ -43,8 +43,8 @@
 "417" : "Expectation Failed",
 
 
-"500" : "Internal Server Error",
-"501" : "Not Implemented",
+"500" : "Sorry, A server error has occurred!",
+"501" : "Feature Not Implemented!",
 "502" : "Bad Gateway",
 "503" : "Service Unavailable",
 "504" : "Gateway Timeout",

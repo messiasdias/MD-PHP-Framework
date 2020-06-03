@@ -16,7 +16,8 @@
         "twig/twig": "2.5",
         "guzzlehttp/guzzle": "^6.3.0",
         "firebase/php-jwt": "5.0",
-        "doctrine/orm": "*"
+        "doctrine/orm": "*",
+        "symfony/dotenv": "^5.1"
     },
 
     "require-dev": {

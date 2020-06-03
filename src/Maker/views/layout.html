@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <title>MD PHP Framework</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="DESCRIPTION" content="My PHP Framework">
+    <meta name="ABSTRACT" content="Messias Dias | My PHP Framework">
+    <meta name="KEYWORDS" content="HTML,CSS,Sass,Bootstrap,PHP,Twig,Framework,JavaScript,JQuery,VueJs,Mysql,Apache2,Git">
+    <meta name="ROBOT" content="All">
+    <meta name="RATING" content="general">
+    <meta name="DISTRIBUTION" content="global">
+    <meta name="LANGUAGE" content="PT">
+    <link rel="icon" href="/assets/img/default/favicon.ico" type="image/x-icon"/>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+          }
+          
+          .page{
+            width: 100vw;
+            min-height: 100vh !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #eee;
+            font-family: sans-serif !important;
+            padding: 40px 0px;
+          }
+          
+          
+          .page > .code, .page > .msg{
+            font-weight: lighter;
+            font-size: 2em;
+          }
+          
+          .page > .code{
+            color: white;
+            opacity: .7;
+            font-family:  sans-serif, monospace !important;
+            background:  blueviolet;
+            padding: 5px 20px;
+            margin-bottom: 20px;
+            border-radius: 50px;
+          }
+          
+          
+          .page > .msg{
+            color:#909090!important;
+            font-family:  Verdana, Tahoma, sans-serif !important;
+          }
+          
+          .page > .msg::before{
+            content: '';
+            position: relative !important;
+            width: 100%;
+            height: 2px;
+            background: blueviolet;
+          }
+          
+          h1, h2, h3{
+            color: blueviolet !important;
+            font-family:  Verdana, Tahoma, sans-serif !important;
+          }
+
+          p , small, strong ,a {
+            color:#909090!important;
+            font-family:  Verdana, Tahoma, sans-serif !important; 
+            margin: 10px; 
+          }
+
+          .table  td{
+            padding: 5px;
+          }
+    </style>
+</head>
+<body>
+<div class="page">
+    {% block home %}{% endblock %}
+</div>
+</body>
+   

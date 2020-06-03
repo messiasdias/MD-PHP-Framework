@@ -35,7 +35,7 @@ class Token
 		$token = array(
 		    "iss" => $this->app->config->description,
 		    "iat" =>(int) date( 'mdHis' , strtotime('now')),
-		    "nbf" => (int) date( 'mdHis' , strtotime('+1 day') ),
+		    "nbf" => (int) date( 'mdHis' , strtotime('now +30 min') ),
 		    "usr" => [
 		    "id"=> $user->getId(),
 		    "rol" => $user->getRol()

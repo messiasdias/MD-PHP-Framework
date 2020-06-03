@@ -11,7 +11,7 @@ $this->get('/maker',  function($app,$args) {
  }, 'debug');
 
 
-$this->group(['/maker/{command}string/{subcommand}string', '/maker/{command}string' ], function($app,$args) {  
+$this->group(['/maker/{command}string' , '/maker/{command}string/{subcommand}string'], function($app,$args) {  
 	//Maker File | Migrate	
 	$maker = new Maker($app);
 	$continue = false;
@@ -33,11 +33,10 @@ $this->group(['/maker/{command}string/{subcommand}string', '/maker/{command}stri
  }, 'debug' );
 
 
- $this->group(['/map', '/map/{mode}string'], function($app,$args) {  
-	//Router Map	
-	if( isset($args->mode ) ){
-		$app->mode = $args->mode;
-	}else{
+ $this->group(['/map', '/api/map', '/map/{mode}string', '/api/map/{mode}string'], function($app,$args) {  
+	
+	if( !isset($args->mode ) ){
+		$args = (object) [];
 		$args->mode = 'app';
 	}
 
@@ -46,12 +45,12 @@ $this->group(['/maker/{command}string/{subcommand}string', '/maker/{command}stri
 		case 'view' : 
 		case 'app' :
 		case 'html' :  
-			return $app->view('map' , [ 'routers' => $app->routes] ,  __DIR__. '/views/' ) ;
+			return $app->view('map' , [ 'routers' => $app->routes ] ,  __DIR__. '/views/' ) ;
 		break;
 		
 		case 'api' : 
 		case 'json' : 
-			return $app->json(  [ 'routers' => $app->routes] );
+			return $app->json( [ 'routers' => $app->routes] );
 		break;
 	}
 
