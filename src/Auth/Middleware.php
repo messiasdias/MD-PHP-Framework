@@ -14,8 +14,8 @@ class Middleware
 	public function __construct(App $app, $list = 'guest'){
 		$this->app = $app;
 		
-		if( file_exists($this->app->config->path.'config/middlewares.php') ){
-			include $this->app->config->path.'config/middlewares.php'; //Load middlewares
+		if( file_exists($this->app->config->path->root.'config/middlewares.php') ){
+			include $this->app->config->path->root.'config/middlewares.php'; //Load middlewares
 		}else{
 			$maker = new Maker($app);
 			$maker->file('config:middlewares');

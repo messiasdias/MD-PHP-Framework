@@ -85,7 +85,7 @@ class Auth  {
 					'username' => $user->getUsername(),
 					'email' => $user->getEmail(),
 					'img' => ($user->getImg()) ? $user->getImg() : '/img/default/avatar.png',
-					'rol' => Rules::getById((int) $user->getRol()),
+					'guard' => $user->getGuard(),
 				];
 			}		 
 

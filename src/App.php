@@ -52,14 +52,6 @@ class App
 	public function env(){
 		$dotenv = new Dotenv();
 		$env_file = $this->config->path->root.'.env';
-
-		if( file_exists($env_file.'.local' ) ) {
-			$this->config->debug = true;
-			$env_file .= '.local';
-		}elseif( file_exists($env_file.'.local' ) ){
-			$this->config->debug = false;
-		}
-
 		return $dotenv->load($env_file, $env_file.'.local');
 	}
 
@@ -69,7 +61,7 @@ class App
 		$this->config->api = true;
 		$this->config->debug = true;
 		$this->config->timezone = "America/Recife";
-		$this->config->views = $this->config->path->root.'assets/private/views/';
+		$this->config->views = $this->config->path->root.'src/Views/templates/';
 		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
 		
 		foreach($config_array as $key => $value ){
@@ -464,12 +456,12 @@ class App
 		return $this;
 	}
 
-
+	//view
 	public function view(string $name, array $data=null, string $path=null)
 	{	
 		$data = ((!is_null($data))) ? array_merge($data, (array) $this->view_get_data()) : (array) $this->view_get_data();
 		$path = is_null($path) ? $this->config->views : $path;
-		$view = new View($this, $path , $name, $data );
+		$view = new View($this, $path, $name, $data );
 		$this->response->write( $view->show(), 'html' );
 		return $this;
 	}

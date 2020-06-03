@@ -165,11 +165,11 @@ class Token
 	*/
 	private function setKey(){
 		
-		if( !file_exists( $this->app->config->path.'config/key.php')  ){
+		if( !file_exists( $this->app->config->path->root.'config/key.php')  ){
 			$maker = new Maker($this->app);
 			$maker->file('config:key', [ ['{your_key_here}'], [$this->generateKey()]] );
 		}
-		include  $this->app->config->path.'config/key.php'; //Load key
+		include  $this->app->config->path->root.'config/key.php'; //Load key
 		return $key;
 	}
 	
@@ -183,8 +183,8 @@ class Token
 	*/
 	private function getKey(){
 		
-		if( file_exists( $this->app->config->path.'config/key.php')  ){
-			include $this->app->config->path.'config/key.php'; //Load key
+		if( file_exists( $this->app->config->path->root.'config/key.php')  ){
+			include $this->app->config->path->root.'config/key.php'; //Load key
 		}else{
 			$key = $this->setKey()();
 		}

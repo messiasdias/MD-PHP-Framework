@@ -120,7 +120,6 @@ abstract class  Model implements ModelInterface {
     public function delete(){
       $manager = self::getManager();
 
-
       try {  
         $manager->remove($this);
         $manager->flush();
@@ -129,22 +128,35 @@ abstract class  Model implements ModelInterface {
       }
     }
 
+    public abstract function extract();
 
     public static function findBy(array $findBy= []){
       return self::getManager()->getRepository(get_called_class())->findBy($findBy);
     }
 
-    public static function findOneBy(array $findOneBy = []){
-      return self::getManager()->getRepository(get_called_class())->findOneBy($findOneBy);
+    public static function findOneBy(array $findOneBy = [], $extract =false){
+      $model =  self::getManager()->getRepository(get_called_class())->findOneBy($findOneBy);
+      return $extract ? $model->extract() : $model ;
     }
 
-    public static function find(int $id){
-      return self::getManager()->find(get_called_class(), $id);
+    public static function find(int $id, $extract =false ){
+      $model = self::getManager()->find(get_called_class(), $id);
+      return $extract ? $model->extract() : $model ;
     }
 
-    public static function all(){
-      return self::getManager()->getRepository(get_called_class())->findAll();
+    public static function all($extract=false){
+      $all = self::getManager()->getRepository(get_called_class())->findAll();
+      $models = [];
+
+      if($extract){
+        foreach( $all as $model) array_push($models, $model->extract());
+      }else{
+        $models = $all;
+      }
+
+      return  $models;
     }
+
 
 
 }

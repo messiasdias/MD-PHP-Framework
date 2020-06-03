@@ -1,6 +1,4 @@
-
 <?php
-
 /* ViewFiltes 
     ex: 
     
@@ -45,7 +43,7 @@ $defaults = [
 
 
 
-foreach ( glob( $this->app->config->path.'src/Viewfilters/*.php' )  as $filterfile ) {
+foreach ( glob( $path.'../filters/*.php' )  as $filterfile ) {
     include_once $filterfile ; 
     $defaults = array_merge($defaults, $filters);
 }

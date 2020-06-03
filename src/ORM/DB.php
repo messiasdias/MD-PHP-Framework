@@ -12,7 +12,7 @@ class DB {
 
     private $config = [], $host, $port, $database, $user, $pass, $driver, $path;
 
-    public function __construct($entityPath = null, $configFile = null, $isDevMode = false){
+    public function __construct($entityPath = null, $configFile = null, $isDevMode = true){
         
         if( is_null($configFile) ){
             $configFile = getcwd()."/../config/db.php";
