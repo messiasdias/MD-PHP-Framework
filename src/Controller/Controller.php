@@ -5,7 +5,7 @@ use App\Controller\ControllerInterface;
 /**
  * Controller Class
  */
-class Controller implements ControllerInterface
+abstract class  Controller implements ControllerInterface
 {	
 	public $app;
 	
@@ -15,9 +15,7 @@ class Controller implements ControllerInterface
 	}
 
 
-	public function index(App $app, $args=null){
-		
-	}
+	public abstract function index(App $app, $args=null);
 
 	public function notfound(App $app, $args=null){
 		$app->response->setCode(404);

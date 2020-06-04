@@ -51,28 +51,40 @@ class App
 		];
 	}
 
-
-	private function setEnv(){
-		$dotenv = new Dotenv();
-		$env_file = $this->config->path->root.'.env';
+	public static function getEnvFile(){
+		$env_file = getcwd().'/../.env';
 
 		if( file_exists($env_file) ){
-			$dotenv->load($env_file);
+			return $env_file;
 		}
 		elseif( file_exists($env_file.'.local') ){
-			$dotenv->load($env_file.'.local');
+			return $env_file.'.local';
 		}else{
+			return false;
+		}
+	}
+
+	public static function setEnv(){
+		$dotenv = new Dotenv();
+		$env_file = self::getEnvFile();
+
+		if( $env_file ){
+			$dotenv->load($env_file);
+		}
+		else{
 			echo "File .env or .env.local Not Found!";
 			exit; 
 		}
 	}
 
 
-	public function getEnv(){
+	public static function getEnv(){
 		$envs = [];	
 		if( count($_ENV) >= 1 ){
 			foreach( explode(',',$_ENV["SYMFONY_DOTENV_VARS"]) as  $name ){
-				$envs[strtolower($name)] = $_ENV[$name] ;
+				if(!is_null($_ENV[$name])) {
+					$envs[strtolower($name)] = $_ENV[$name] ;
+				}
 			}
 		}
 		return (object)	 $envs; 
@@ -101,7 +113,7 @@ class App
 		}else{
 
 			$text = '<div  style="color:#9e7700 !important; height:100vh; width: 100wh; display:flex; flex-direction:column; justify-content: center; align-content: center; align-items:center;">'.
-			'<h1 style="color:#696969;">Erro: {{code}}</h1><p>{{msg}}</p></div>';
+			'<h1 style="color:#696969;">Erro: {{http.code}}</h1><p>{{http.msg}}</p></div>';
 
 			$file =  $this->config->views."/http/".$this->response->getCode().".html";
 			
@@ -327,7 +339,7 @@ class App
 
 
 	public function auth(){
-		return new Auth($this);
+		return new Auth();
 	}
 
 

@@ -5,17 +5,15 @@
 namespace App\Auth;
 use App\App;
 use App\Auth\Token;
-use App\Auth\Rules;
 use App\Models\User;
 
 
-class Auth  {
+class Auth {
 
-	public $app, $token;
+	public  $token;
 
-	public function __construct(App &$app){
-		$this->app = $app;
-		$this->token = new Token($app);
+	public function __construct(){
+		$this->token = new Token();
 	}
 
 
@@ -84,7 +82,7 @@ class Auth  {
 					'last_name' => $user->getLastName(),
 					'username' => $user->getUsername(),
 					'email' => $user->getEmail(),
-					'img' => ($user->getImg()) ? $user->getImg() : '/img/default/avatar.png',
+					'img' => ($user->getImg()) ? $user->getImg() : '/assets/img/avatar.png',
 					'guard' => $user->getGuard(),
 				];
 			}		 

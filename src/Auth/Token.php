@@ -17,8 +17,8 @@ class Token
 	* @param App\App $app   A Object of App Class
 	* @return  
 	*/
-	public function __construct(App $app){
-		$this->app = $app;
+	public function __construct(){
+		App::setEnv();
 	}
 
 
@@ -33,7 +33,7 @@ class Token
 	public function create(User $user, $data=null){
 
 		$token = array(
-		    "iss" => $this->app->getEnv()->app_description,
+		    "iss" => App::getEnv()->app_description,
 		    "iat" =>(int) date( 'mdHis' , strtotime('now')),
 		    "nbf" => (int) date( 'mdHis' , strtotime('now +30 min') ),
 		    "usr" => [
@@ -57,16 +57,14 @@ class Token
 	* @param string $token - Token Encoded
 	* @return boolean  
 	*/
-	public function check(string $token){
-			
+	public function check(string $token){	
 		$token_decode = $this->decode($token);
 
 		if ( $token_decode ) {
 			return ( $token_decode->nbf > $token_decode->iat ) ? true : false;
 		} 
-
+		
 		return false;
-
 	}
 
 
@@ -79,7 +77,6 @@ class Token
 	public function renew(string $token, $data=null){
 
 		if ( $this->check($token) ) {
-			
 			$token_decode =  $this->decode( $token ) ;
 
 			if ($token_decode) {
@@ -87,9 +84,7 @@ class Token
 				$token_decode->iat = (int) date( 'mdHis' , strtotime('now'));
 				$token_decode->nbf =  (int) date( 'mdHis' , strtotime("+1 day"));
 
-				if ( !is_null($data) ){
-					$token_decode->dat = $data;
-				}
+				if(!is_null($data)) $token_decode->dat = $data;
 
 				return $this->encode((array) $token_decode) ;
 			} 
@@ -98,9 +93,6 @@ class Token
 		}
 
 		return false;
-		
-			
-
 	}
 
 	/** 
@@ -112,11 +104,13 @@ class Token
 	* @return string $token_encoded  
 	*/
 	public function encode(array $token){
+
 		if ( isset( $token )  && is_array( $token ) ) {
-			return JWT::encode( $token ,  $this->getKey() ); 
+			return JWT::encode( $token ,  App::getEnv()->app_key ); 
 		}else{
 			return false;
 		}
+
 	}
 
 	/** 
@@ -129,67 +123,13 @@ class Token
 	* 
 	*/
 	public function decode(string $token){
+
 		if ( isset($token) &&  ( count( explode('.', $token) ) == 3  )  ) {
-			return  JWT::decode($token, $this->getKey() , array('HS256'));
+			return  JWT::decode($token,  App::getEnv()->app_key , array('HS256'));
 		}else{
 			return false;
 		}
 
-	}
-
-
-	/** 
-	* Method generateKey
-	*
-	* @param 
-	* @return String $randstring
-	* 
-	*/
-	public function generateKey()
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $randstring = '';
-        for ($i = 0; $i <= 100; $i++) {
-            $randstring .= $characters[rand(0, 65)];
-        }
-        return $randstring;
-	}
-
-
-	/** 
-	* Method setKey
-	*
-	* @param 
-	* @return String $key
-	* 
-	*/
-	private function setKey(){
-		
-		if( !file_exists( $this->app->config->path->root.'config/key.php')  ){
-			$maker = new Maker($this->app);
-			$maker->file('config:key', [ ['{your_key_here}'], [$this->generateKey()]] );
-		}
-		include  $this->app->config->path->root.'config/key.php'; //Load key
-		return $key;
-	}
-	
-
-	/** 
-	* Method getKey
-	*
-	* @param 
-	* @return String $key
-	* 
-	*/
-	private function getKey(){
-		
-		if( file_exists( $this->app->config->path->root.'config/key.php')  ){
-			include $this->app->config->path->root.'config/key.php'; //Load key
-		}else{
-			$key = $this->setKey()();
-		}
-
-		return $key;
 	}
 
 

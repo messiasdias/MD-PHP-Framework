@@ -1,8 +1,9 @@
 <?php
 
 namespace App\ORM;
-use \Doctrine\ORM\Tools\Setup;
-use \Doctrine\ORM\EntityManager;
+use App\App;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
 
 /**
  *   DB Class
@@ -10,46 +11,28 @@ use \Doctrine\ORM\EntityManager;
 
 class DB {
 
-    private $config = [], $host, $port, $database, $user, $pass, $driver, $path;
+    private $orm , $db;
 
-    public function __construct($entityPath = null, $configFile = null, $isDevMode = true){
+    public function __construct($entityPath = null){
         
-        if( is_null($configFile) ){
-            $configFile = getcwd()."/../config/db.php";
-        }
+        if(is_null($entityPath)) $entityPath = getcwd()."/../src/Models/";
 
-        if( is_null($entityPath) ){
-            $entityPath = getcwd()."/../src/Models/";
-        }
+        App::setEnv();
+        $this->orm = Setup::createAnnotationMetadataConfiguration([$entityPath, getcwd()."/../src/"], (App::getEnv()->app_env == "dev") , null,null,false);
         
-        $this->config['orm'] = Setup::createAnnotationMetadataConfiguration(array($entityPath ?? __DIR__."/src"),$isDevMode, null,null, false);
-
-        if( !is_null( $configFile ) && file_exists($configFile)  ){
-            //Load DBConfigs
-            include  $configFile;  
-
-            $this->config['db'] = array(
-                'driver' => $this->driver ?? "pdo_mysql",
-                'host' => $this->host ?? 'localhost',
-                'port' => $this->port ?? 3306,
-                'user'     => $this->user ?? "root",
-                'password' => $this->pass ?? "" ,
-                'dbname'   => $this->database,
-            );
-
-            if( strtolower($this->config['db']['driver']) == 'sqlite' ){
-                $this->config['db']['path'] = $this->path;
-            }
-
-        }else{
-            echo "File config/db.php not Found!";
-            exit; 
-        }         
+        $this->db = array(
+                'driver' => App::getEnv()->db_driver ?? "pdo_mysql",
+                'host' => App::getEnv()->db_host ?? 'localhost',
+                'port' => App::getEnv()->db_port ?? 3306,
+                'user'     => App::getEnv()->db_user ?? "root",
+                'password' => App::getEnv()->db_pass ?? "" ,
+                'dbname'   => App::getEnv()->db_name,
+        );         
     }
 
 
     public function getManager() {
-        return EntityManager::create( $this->config['db'],  $this->config['orm']);
+        return EntityManager::create( $this->db, $this->orm);
     }
 
 
