@@ -33,12 +33,12 @@ class Token
 	public function create(User $user, $data=null){
 
 		$token = array(
-		    "iss" => $this->app->config->description,
+		    "iss" => $this->app->getEnv()->app_description,
 		    "iat" =>(int) date( 'mdHis' , strtotime('now')),
 		    "nbf" => (int) date( 'mdHis' , strtotime('now +30 min') ),
 		    "usr" => [
 		    "id"=> $user->getId(),
-		    "rol" => $user->getRol()
+		    "rol" => $user->getGuard()
 			]
 		); 
 

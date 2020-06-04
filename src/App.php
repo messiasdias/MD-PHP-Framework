@@ -31,13 +31,15 @@ class App
 
 
 
-	function __construct($config=null)
+	function __construct()
 	{		
 		@session_start();
 		$this->set_paths();
+		$this->setEnv();
 		$this->request = new Request();
 		$this->response = new Response($this);
-		$this->set_config($config);
+		$this->config->views = $this->config->path->root.'src/Views/templates/';
+		date_default_timezone_set($this->getEnv()->app_timezone);
 		return $this;
 	}
 
@@ -49,56 +51,31 @@ class App
 		];
 	}
 
-	public function env(){
+
+	private function setEnv(){
 		$dotenv = new Dotenv();
 		$env_file = $this->config->path->root.'.env';
-		return $dotenv->load($env_file, $env_file.'.local');
-	}
 
-	private function set_config($config=null)
-	{	
-		$this->config->mode = 'app';
-		$this->config->api = true;
-		$this->config->debug = true;
-		$this->config->timezone = "America/Recife";
-		$this->config->views = $this->config->path->root.'src/Views/templates/';
-		$config_array =  ( !is_null($config) && is_array($config) ) ? $config : $this->config;
-		
-		foreach($config_array as $key => $value ){
-			if($key !== 'debug' ) $this->config->$key = $value;
+		if( file_exists($env_file) ){
+			$dotenv->load($env_file);
 		}
-
-		if( file_exists( $this->config->path->root.'config/app.php' ) ){
-			include $this->config->path->root.'config/app.php'; //Load AppConfigs
+		elseif( file_exists($env_file.'.local') ){
+			$dotenv->load($env_file.'.local');
 		}else{
-			$this->response->setLog((object)[ 
-					  'msg' => "File /config/app.php Not Found!",
-					  'status' => false
-					], 'error'); 
+			echo "File .env or .env.local Not Found!";
+			exit; 
 		}
-		
-		date_default_timezone_set($this->config->timezone);
-		$this->load_assets();  //Creting Sym link for ../assetes/public
 	}
-	
-	
 
-	private function load_assets(){
-		if (!file_exists($this->config->path->root.'public/assets')) {
-			$this->response->setLog((object)[ 
-				'msg' => "Shortcut 'assets/' not found in /public/ !",
-				'status' => false
-			  ], 'error'); 
 
-			@symlink ($this->config->path->root.'assets/public', $this->config->path->root.'public/assets' );
-			
-			if (file_exists($this->config->path->root.'public/assets')){
-				$this->response->setLog((object)[ 
-					'msg' => "Shortcut 'assets/' in /public/ created successfully!",
-					'status' => false
-				  ], 'success'); 
+	public function getEnv(){
+		$envs = [];	
+		if( count($_ENV) >= 1 ){
+			foreach( explode(',',$_ENV["SYMFONY_DOTENV_VARS"]) as  $name ){
+				$envs[strtolower($name)] = $_ENV[$name] ;
 			}
 		}
+		return (object)	 $envs; 
 	}
 
 
@@ -288,7 +265,7 @@ class App
 
 	private function load_routes(App &$app){
 		//load routes app or api
-		switch ( strtolower($this->config->mode) ) {
+		switch ( strtolower($this->getEnv()->app_mode) ) {
 			case 'api':
 				$mode = $this->config->path->root.'src/Routes/api/*.php';
 			break;
@@ -307,7 +284,7 @@ class App
 		}
 
 		//Maker Routes
-		if ( $this->config->debug && file_exists($this->config->path->vendor.'/Maker/Routes.php') ){
+		if ( ($this->getEnv()->app_env == 'dev') && file_exists($this->config->path->vendor.'/Maker/Routes.php') ){
 			include $this->config->path->vendor.'/Maker/Routes.php';
 		}
 	}	
@@ -315,8 +292,8 @@ class App
 
 	public function routing(string $url=null, string $method=null){
 
-		if( $this->config->api && explode('/', $this->request->url )[1] == 'api'  ){
-			$this->config->mode = 'api';
+		if( $this->getEnv()->app_api && explode('/', $this->request->url )[1] == 'api'  ){
+			$this->getEnv()->app_mode = 'api';
 			$this->request->url = str_replace('/api/' , '/', $this->request->url );
 		}
 
@@ -422,52 +399,23 @@ class App
 
 
 
-	private function view_get_data()
-	{	
-		$data = [
-			'description' => (  $this->config &&  $this->config->description) ? 
-			 $this->config->description : '',
-			'url'  => $this->request->url,
-			'referer'  => $this->request->referer,
-			'host'  => $this->request->host,
-			'scheme'  => $this->request->scheme,
-			'request'  => $this->request,
-			'response'  => $this->response,
-			'user' => $this->user($this->request->access_token),
-			'access_token' => ($this->request->access_token) ? $this->request->access_token : false,
-			'input' => ($this->inputs()) ? $this->inputs() : false ,
-			'assets' => '/assets/',
-			'log' => isset($this->response) ? (array) $this->response->getLog() : false,
-			'errors' => isset( $this->response->getLog()->errors) ? (array) $this->response->getLog()->errors : false,
-			'debug' => isset($this->config) ? $this->config->debug: true,
-			'session' =>  ($_SESSION) ? ( (object) $_SESSION ) : false,
-			'cookies' =>  ($this->request->cookies) ? ( (object) $this->request->cookies) : false,
-		]; 
-
-		$data =  array_merge($data, $this->response ?  (array) $this->response->getData() : [] );
-		$data = (object) array_merge($data, [ 'view_data' => json_encode($data) ] ) ;
-		return (object) $data;
-	}
-
-
-	public function write(String $data , $type = 'html', $code=200, $msg = 'OK!')
+	public function write(String $data , $type = 'html', $code=200, $msg = 'OK, Working as expected.')
 	{	
 		$this->response->write($data,$type,$code,$msg);
 		return $this;
 	}
 
-	//view
+
+
 	public function view(string $name, array $data=null, string $path=null)
 	{	
-		$data = ((!is_null($data))) ? array_merge($data, (array) $this->view_get_data()) : (array) $this->view_get_data();
-		$path = is_null($path) ? $this->config->views : $path;
-		$view = new View($this, $path, $name, $data );
+		$view = new View($this, is_null($path) ? $this->config->views : $path , $name, $data );
 		$this->response->write( $view->show(), 'html' );
 		return $this;
 	}
 
 
-	public function json($data, $code=200, $msg = 'Success!')
+	public function json($data, $code=200, $msg = 'OK, Working as expected.')
 	{	
 		$this->response->json($data,$code,$msg);
 		return $this;
@@ -476,9 +424,9 @@ class App
 
 
 	public function mode_trigger($app,$api,$data=null){
-		if( $this->config->mode === 'app' ){
+		if( $this->getEnv()->app_mode === 'app' ){
 			return $app($this, $this->args, $data);
-		}elseif( $this->config->mode === 'api' ){
+		}elseif( $this->getEnv()->app_mode === 'api' ){
 			return $api($this, $this->args,$data);	
 		}
 	}

@@ -31,19 +31,23 @@ $defaults = [
         return is_object($obj);
     },
     
-    'convert_object' => function($item){
+    'arrayToObject' => function(array $item){
       return is_array($item) ? (object) $item : $item ;
     },
     
-    'convert_array' => function($item){
+    'objectToArray' => function($item){
         return is_object($item) ? (array) $item : $item ;
+    },
+
+    'view', 'view_data', 'viewData' => function($arr) {
+        return (object) $this->data;
     },
 ];
 
 
 
 
-foreach ( glob( $path.'../filters/*.php' )  as $filterfile ) {
+foreach ( glob( $this->path.'../filters/*.php' )  as $filterfile ) {
     include_once $filterfile ; 
     $defaults = array_merge($defaults, $filters);
 }

@@ -1,6 +1,8 @@
 <?php
 namespace App\View;
 use App\App;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 /**
  * View Class 
@@ -12,11 +14,13 @@ class View
 
 	function __construct(App &$app, string $path, string $name, $data=[] )
 	{
-		$this->app = $app;	
-		$template = $this->extractTemplate($name, $path, $data);
-		$view = new  \Twig\Environment(new \Twig\Loader\FilesystemLoader($path));
-		$this->path = $path;	
-		$this->setFilters($path, $view);
+		$this->app = $app;
+		$this->path = $path;		
+		
+		$template = $this->extractTemplate($name, $this->path, $data);
+		$view = new Environment(new FilesystemLoader($this->path));
+		$this->setFilters($view);
+		$this->setData($data);
 
 		if( file_exists($path.$template) ){
 			$this->view = $view->render($template , $data);
@@ -85,7 +89,7 @@ class View
 
 		if(  isset($template) && !file_exists($path.$template) ){
 			$this->app->response->setCode(500);
-			$data = ['title' =>'Template Not Found!','subtitle' => "Template File <b>$template</b> no exists in <u>$path</u> !"];
+			$data = ['title' => 'Template Not Found!','subtitle' => "Template File <b>$template</b> no exists in <u>$path</u> !"];
 			$path = $this->app->config->views;
 			$template = 'layout/msg.html';
 		}
@@ -96,7 +100,7 @@ class View
 	
 
 
-	private function setFilters(string &$path, &$view ){
+	private function setFilters(&$view){
 		
 		if( file_exists(__DIR__.'/Filters.php') ){
 			include __DIR__.'/Filters.php'; 
@@ -111,6 +115,16 @@ class View
 	}
 
 
+	private function setData(array &$data){
+		$default_data = [];
+		$file = __DIR__.'/Data.php';
+		if( file_exists ($file) ) include $file;
+		$data = array_merge($default_data, $this->app->response->getData());
+		$data = array_merge($data, [ 'View' => json_encode($data) ] ) ;
+		$this->data = $data;
+	}
+
+	
 	public function show(){
 		return $this->view; 
 	}

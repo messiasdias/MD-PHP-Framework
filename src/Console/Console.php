@@ -29,13 +29,13 @@ class Console extends App {
         $this->config = (object) [];
         $this->config->path = getcwd().'/';
         $this->config->vendor_path   =  __DIR__.'/../';
-        $this->config->mode = 'console';
+        $this->getEnv()->app_mode = 'console';
 
         if( file_exists( $this->config->path.'/config/app.php' ) ){
 			include $this->config->path.'/config/app.php'; //Load AppConfigs
 		}else{
-            $this->config->timezone = 'America/Recife';
-            $this->config->debug = true;
+            $this->getEnv()->app_timezone = 'America/Recife';
+            $this->getEnv()->app_debug = true;
             $this->config->debug_msg = false;
         }
 

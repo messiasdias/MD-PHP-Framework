@@ -11,8 +11,8 @@
 
  */
  
-$this->config->api = true; 
-$this->config->debug = true;
-$this->config->timezone = 'America/Recife';
+$this->getEnv()->app_api = true; 
+$this->getEnv()->app_debug = true;
+$this->getEnv()->app_timezone = 'America/Recife';
 $this->config->description = 'PHP Framework';
 $this->config->views = '../assets/private/views/';
