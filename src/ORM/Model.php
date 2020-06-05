@@ -1,6 +1,7 @@
 <?php
 namespace App\ORM;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use App\ORM\ModelInteface;
 use App\ORM\DB;
 
@@ -106,14 +107,25 @@ abstract class  Model implements ModelInterface {
 
     public function save(){
 
+      $return = false;  
+      if( !isset($this->created) ){
+        $this->setCreated();
+      }
+
+      $this->setUpdated();
       $manager = self::getManager();
       $manager->persist($this);
 
       try {  
         $manager->flush();
-      }catch(Exception $e){
-        throw new Exception('Duplicate entry!');
-      }
+        $return =  (object) [ 'status'=> true , 'msg' => 'Done!' ];
+      }catch (UniqueConstraintViolationException $error ) {
+          $return =  (object) [ 'status'=> false , 'msg' =>  json_decode($error->getMessage()) ];
+          $return =  (object) [ 'status'=> false , 'msg' => ''];
+        }
+
+      return  $return;
+
     }
 
 
@@ -128,21 +140,26 @@ abstract class  Model implements ModelInterface {
       }
     }
 
+
     public abstract function extract();
+
 
     public static function findBy(array $findBy= []){
       return self::getManager()->getRepository(get_called_class())->findBy($findBy);
     }
+
 
     public static function findOneBy(array $findOneBy = [], $extract =false){
       $model =  self::getManager()->getRepository(get_called_class())->findOneBy($findOneBy);
       return $extract ? $model->extract() : $model ;
     }
 
+
     public static function find(int $id, $extract =false ){
       $model = self::getManager()->find(get_called_class(), $id);
       return $extract ? $model->extract() : $model ;
     }
+
 
     public static function all($extract=false){
       $all = self::getManager()->getRepository(get_called_class())->findAll();
