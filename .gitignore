@@ -3,3 +3,6 @@ vendor/
 _bkp/
 index.php
 log/
+.env.*
+!.env.example
+log/

@@ -2,7 +2,7 @@
 namespace App\Others;
 use App\App;
 /**
- * File2 Class
+ * File Class
  */
 class File
 {

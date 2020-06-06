@@ -6,7 +6,7 @@ use App\Outhers\Log;
 
 final class LogTest extends TestCase
 {
-    public function testLogin(){
+    public function testLog(){
         $log = new Log('Test Log');
         $this->assertInstanceOf( $log, Log::class );
     }   
