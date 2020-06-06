@@ -3,3 +3,5 @@ vendor/
 .vscode
 index.php
 .htaccess
+.env*
+!.env.example
