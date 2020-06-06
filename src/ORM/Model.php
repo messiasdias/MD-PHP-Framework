@@ -121,8 +121,7 @@ abstract class  Model implements ModelInterface {
         $return =  (object) [ 'status'=> true , 'msg' => 'Done!' ];
       }catch (UniqueConstraintViolationException $error ) {
           $return =  (object) [ 'status'=> false , 'msg' =>  json_decode($error->getMessage()) ];
-          $return =  (object) [ 'status'=> false , 'msg' => ''];
-        }
+      }
 
       return  $return;
 

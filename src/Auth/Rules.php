@@ -8,10 +8,10 @@ use App\Models\User;
  **/
 class Rules
 {
-    public  $guest = 0;
-    public  $admin = 1;
-    public  $manager = 2;
-    public  $user = 3;
+    public $guest = 0;
+    public $admin = 1;
+    public $manager = 2;
+    public $user = 3;
 
     public static function getById(int $id){
         $rules = new Rules();
